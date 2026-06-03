@@ -281,57 +281,32 @@
        SEZIONE 2 — CHI SIAMO (TIMELINE ORIZZONTALE ANIMATA)
   ===================================================== -->
   <section class="timeline-section" id="chi-siamo">
-    <!-- Horizontal Scroll Interceptor -->
-    <div class="timeline-scroll-container">
-      <div class="timeline-scroll-content"></div>
-    </div>
-
-    <div class="timeline-sticky">
-      <!-- Background Layers -->
-      <div class="timeline-bg timeline-bg--0" aria-hidden="true"></div>
-      <div class="timeline-bg timeline-bg--1" style="background-image: url('assets/images/timeline/krea-1999.jpg');" aria-hidden="true"></div>
-      <div class="timeline-bg timeline-bg--2" style="background-image: url('assets/images/timeline/krea-2006.jpg');" aria-hidden="true"></div>
-      <div class="timeline-bg timeline-bg--3" style="background-image: url('assets/images/timeline/krea-2015.jpg');" aria-hidden="true"></div>
-      <div class="timeline-bg timeline-bg--4" style="background-image: url('assets/images/timeline/krea-2026.jpg');" aria-hidden="true"></div>
-
+    <div class="timeline-sticky" id="timelineSticky">
       <!-- Grain texture overlay -->
       <div class="grain" aria-hidden="true"></div>
 
       <!-- Content Track (contains the content panels for each state) -->
-      <div class="timeline-track">
+      <div class="timeline-track" id="timelineTrack">
         
         <!-- STATE 0: Intro Panel -->
-        <div class="timeline-panel panel-intro" data-state="0">
-          <div class="panel-intro__left">
-            <h2 class="panel-intro__title">Trent’anni a fianco di chi apre.</h2>
-            <div class="panel-intro__stats">
-              <div class="intro-stat">
-                <span class="intro-stat__num">30+</span>
-                <span class="intro-stat__lbl">anni di attività</span>
-              </div>
-              <div class="intro-stat">
-                <span class="intro-stat__num">850+</span>
-                <span class="intro-stat__lbl">locali attrezzati</span>
-              </div>
-              <div class="intro-stat">
-                <span class="intro-stat__num">500+</span>
-                <span class="intro-stat__lbl">brand professionali</span>
-              </div>
+        <div class="timeline-panel" id="panel-intro" data-state="0">
+          <div class="panel-intro-left">
+            <h2>Trent'anni a fianco<br>di chi apre.</h2>
+            <div class="panel-intro-stats">
+              <div class="stat"><span class="stat-num">30+</span><span class="stat-label">anni di attività</span></div>
+              <div class="stat"><span class="stat-num">850+</span><span class="stat-label">locali attrezzati</span></div>
+              <div class="stat"><span class="stat-num">500+</span><span class="stat-label">brand professionali</span></div>
             </div>
-            <div class="scroll-hint">
-              <span class="scroll-hint__text">&rarr; Scorri la storia</span>
-            </div>
+            <a class="panel-intro-cta">→ Scorri la storia</a>
           </div>
-          
-          <div class="panel-intro__right">
-            <div class="founder-card">
-              <img src="assets/images/founder.jpg" alt="Vincenzo Caruso" class="founder-card__img" />
-            </div>
+          <div class="panel-intro-right">
+            <img src="assets/images/timeline/timeline-intro.jpg?v=3" alt="Fondatore Krea">
           </div>
         </div>
 
         <!-- STATE 1: 1999 Panel -->
         <div class="timeline-panel panel-story panel-story--1" data-state="1">
+          <div class="timeline-bg" style="background-image: url('assets/images/timeline/timeline-1999.jpg');" aria-hidden="true"></div>
           <div class="story-content">
             <div class="story-year">1999</div>
             <h3 class="story-title">La prima pietra</h3>
@@ -341,6 +316,7 @@
 
         <!-- STATE 2: 2006 Panel -->
         <div class="timeline-panel panel-story panel-story--2" data-state="2">
+          <div class="timeline-bg" style="background-image: url('assets/images/timeline/timeline-2006.jpg');" aria-hidden="true"></div>
           <div class="story-content">
             <div class="story-year">2006</div>
             <h3 class="story-title">Catania ci conosce</h3>
@@ -348,17 +324,9 @@
           </div>
         </div>
 
-        <!-- STATE 3: 2015 Panel -->
+        <!-- STATE 3: 2026 Panel -->
         <div class="timeline-panel panel-story panel-story--3" data-state="3">
-          <div class="story-content">
-            <div class="story-year">2015</div>
-            <h3 class="story-title">Tutta la Sicilia</h3>
-            <p class="story-body">Da Palermo a Messina. Krea diventa il punto di riferimento per l'intera isola.</p>
-          </div>
-        </div>
-
-        <!-- STATE 4: 2026 Panel -->
-        <div class="timeline-panel panel-story panel-story--4" data-state="4">
+          <div class="timeline-bg" style="background-image: url('assets/images/timeline/timeline-2026.jpg');" aria-hidden="true"></div>
           <div class="story-content">
             <div class="story-year">2026</div>
             <h3 class="story-title italic">L'era digitale</h3>
@@ -374,13 +342,20 @@
         <div class="peek-text-container">
           <span class="peek-text peek-text--1999 active">1999</span>
           <span class="peek-text peek-text--2006">2006</span>
-          <span class="peek-text peek-text--2015">2015</span>
           <span class="peek-text peek-text--2026">2026</span>
         </div>
       </div>
 
+      <!-- Timeline Navigation Arrows -->
+      <button class="timeline-arrow timeline-arrow--prev" id="timelinePrev" aria-label="Panel precedente">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <button class="timeline-arrow timeline-arrow--next" id="timelineNext" aria-label="Panel successivo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+
       <!-- Timeline Navigation Bar (Always Visible at 2/3 Height) -->
-      <div class="timeline-nav-bar">
+      <div class="timeline-nav-bar dark-mode">
         <div class="timeline-line-bg"></div>
         <div class="timeline-line-progress" id="timelineProgressLine"></div>
         
@@ -388,6 +363,10 @@
         <div class="timeline-active-dot" id="timelineActiveDot"></div>
 
         <div class="timeline-dots-wrapper">
+          <div class="timeline-dot-item" data-state="0" id="dotItemIntro">
+            <div class="dot-node"></div>
+            <span class="dot-label">Intro</span>
+          </div>
           <div class="timeline-dot-item" data-state="1" id="dotItem1999">
             <div class="dot-node"></div>
             <span class="dot-label">1999</span>
@@ -396,11 +375,7 @@
             <div class="dot-node"></div>
             <span class="dot-label">2006</span>
           </div>
-          <div class="timeline-dot-item" data-state="3" id="dotItem2015">
-            <div class="dot-node"></div>
-            <span class="dot-label">2015</span>
-          </div>
-          <div class="timeline-dot-item" data-state="4" id="dotItem2026">
+          <div class="timeline-dot-item" data-state="3" id="dotItem2026">
             <div class="dot-node"></div>
             <span class="dot-label">2026</span>
           </div>

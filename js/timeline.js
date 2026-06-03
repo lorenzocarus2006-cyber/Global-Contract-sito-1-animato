@@ -4,145 +4,215 @@
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Register ScrollTrigger
-  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
-    console.error("GSAP or ScrollTrigger not loaded. Skipping timeline initialization.");
-    return;
-  }
-  
-  gsap.registerPlugin(ScrollTrigger);
-
-  const sticky = document.querySelector(".timeline-sticky");
+  const sticky = document.getElementById("timelineSticky");
+  const track = document.getElementById("timelineTrack");
+  const prevBtn = document.getElementById("timelinePrev");
+  const nextBtn = document.getElementById("timelineNext");
+  const progressLine = document.getElementById("timelineProgressLine");
+  const activeDot = document.getElementById("timelineActiveDot");
+  const dotItems = document.querySelectorAll(".timeline-dot-item");
+  const peekSliver = document.getElementById("peekSliver");
+  const peekTexts = document.querySelectorAll(".peek-text");
+  const panels = document.querySelectorAll(".timeline-panel");
   const navBar = document.querySelector(".timeline-nav-bar");
-  const scrollContainer = document.querySelector(".timeline-scroll-container");
   
-  if (!sticky || !navBar || !scrollContainer) return;
+  if (!sticky || !track) return;
 
-  // Create a paused timeline that we manually scrub using horizontal scroll progress
-  const tl = gsap.timeline({
-    paused: true
-  });
+  let currentPanel = 0;
+  const totalPanels = 4;
+  let isAnimating = false;
 
-  // Set initial states
-  gsap.set(".timeline-bg:not(.timeline-bg--0)", { opacity: 0 });
-  gsap.set(".panel-story", { opacity: 0 });
-  gsap.set(".panel-story .story-content", { opacity: 0, y: 50 });
-  gsap.set("#timelineActiveDot", { scale: 0, left: "0%" });
-  gsap.set("#timelineProgressLine", { width: "0%" });
-  gsap.set(".peek-text--1999", { opacity: 0.75 });
+  function updateTimelineUI(index) {
+    // Update track position
+    track.style.transform = `translateX(-${index * 25}%)`;
 
-  // 1. STATE 0 -> STATE 1 (Scroll range: 0 to 1)
-  tl.to(".panel-intro", { opacity: 0, y: -30, pointerEvents: "none", duration: 0.4 }, 0)
-    .to(".timeline-bg--0", { opacity: 0, duration: 0.4 }, 0)
-    .to(".timeline-bg--1", { opacity: 1, duration: 0.4 }, 0.2)
-    // Scale active dot up at 1999 position
-    .to("#timelineActiveDot", { scale: 1, left: "0%", duration: 0.3 }, 0.4)
-    // Show State 1 panel
-    .to(".panel-story--1", { opacity: 1, pointerEvents: "auto", duration: 0.1 }, 0.4)
-    .to(".panel-story--1 .story-content", { opacity: 1, y: 0, duration: 0.4 }, 0.4)
-    // Highlight label 1999
-    .to("#dotItem1999 .dot-label", { color: "#ffffff", fontWeight: "700", duration: 0.3 }, 0.4)
-    // Crossfade peek text
-    .to(".peek-text--1999", { opacity: 0, duration: 0.2 }, 0.2)
-    .to(".peek-text--2006", { opacity: 0.75, duration: 0.2 }, 0.5);
-
-  // 2. STATE 1 -> STATE 2 (Scroll range: 1 to 2)
-  tl.to(".panel-story--1 .story-content", { opacity: 0, y: -30, duration: 0.3 }, 1.0)
-    .to(".panel-story--1", { pointerEvents: "none", duration: 0.1 }, 1.3)
-    .to(".timeline-bg--1", { opacity: 0, duration: 0.4 }, 1.0)
-    .to(".timeline-bg--2", { opacity: 1, duration: 0.4 }, 1.3)
-    // Active dot moves to 2006
-    .to("#timelineActiveDot", { left: "33.333%", duration: 0.6 }, 1.1)
-    .to("#timelineProgressLine", { width: "33.333%", duration: 0.6 }, 1.1)
-    // 1999 node becomes past dot
-    .to("#dotItem1999 .dot-node", { width: 8, height: 8, backgroundColor: "#4A2C6B", borderColor: "#4A2C6B", duration: 0.3 }, 1.0)
-    .to("#dotItem1999 .dot-label", { color: "rgba(255, 255, 255, 0.5)", fontWeight: "600", duration: 0.3 }, 1.0)
-    // Show State 2 panel
-    .to(".panel-story--2", { opacity: 1, pointerEvents: "auto", duration: 0.1 }, 1.4)
-    .to(".panel-story--2 .story-content", { opacity: 1, y: 0, duration: 0.4 }, 1.4)
-    // Highlight label 2006
-    .to("#dotItem2006 .dot-label", { color: "#ffffff", fontWeight: "700", duration: 0.3 }, 1.4)
-    // Crossfade peek text
-    .to(".peek-text--2006", { opacity: 0, duration: 0.2 }, 1.1)
-    .to(".peek-text--2015", { opacity: 0.75, duration: 0.2 }, 1.4);
-
-  // 3. STATE 2 -> STATE 3 (Scroll range: 2 to 3)
-  tl.to(".panel-story--2 .story-content", { opacity: 0, y: -30, duration: 0.3 }, 2.0)
-    .to(".panel-story--2", { pointerEvents: "none", duration: 0.1 }, 2.3)
-    .to(".timeline-bg--2", { opacity: 0, duration: 0.4 }, 2.0)
-    .to(".timeline-bg--3", { opacity: 1, duration: 0.4 }, 2.3)
-    // Active dot moves to 2015
-    .to("#timelineActiveDot", { left: "66.667%", duration: 0.6 }, 2.1)
-    .to("#timelineProgressLine", { width: "66.667%", duration: 0.6 }, 2.1)
-    // 2006 node becomes past dot
-    .to("#dotItem2006 .dot-node", { width: 8, height: 8, backgroundColor: "#4A2C6B", borderColor: "#4A2C6B", duration: 0.3 }, 2.0)
-    .to("#dotItem2006 .dot-label", { color: "rgba(255, 255, 255, 0.5)", fontWeight: "600", duration: 0.3 }, 2.0)
-    // Show State 3 panel
-    .to(".panel-story--3", { opacity: 1, pointerEvents: "auto", duration: 0.1 }, 2.4)
-    .to(".panel-story--3 .story-content", { opacity: 1, y: 0, duration: 0.4 }, 2.4)
-    // Highlight label 2015
-    .to("#dotItem2015 .dot-label", { color: "#ffffff", fontWeight: "700", duration: 0.3 }, 2.4)
-    // Crossfade peek text
-    .to(".peek-text--2015", { opacity: 0, duration: 0.2 }, 2.1)
-    .to(".peek-text--2026", { opacity: 0.75, duration: 0.2 }, 2.4);
-
-  // 4. STATE 3 -> STATE 4 (Scroll range: 3 to 4)
-  tl.to(".panel-story--3 .story-content", { opacity: 0, y: -30, duration: 0.3 }, 3.0)
-    .to(".panel-story--3", { pointerEvents: "none", duration: 0.1 }, 3.3)
-    .to(".timeline-bg--3", { opacity: 0, duration: 0.4 }, 3.0)
-    .to(".timeline-bg--4", { opacity: 1, duration: 0.4 }, 3.3)
-    // Active dot moves to 2026
-    .to("#timelineActiveDot", { left: "100%", duration: 0.6 }, 3.1)
-    .to("#timelineProgressLine", { width: "100%", duration: 0.6 }, 3.1)
-    // 2015 node becomes past dot
-    .to("#dotItem2015 .dot-node", { width: 8, height: 8, backgroundColor: "#4A2C6B", borderColor: "#4A2C6B", duration: 0.3 }, 3.0)
-    .to("#dotItem2015 .dot-label", { color: "rgba(255, 255, 255, 0.5)", fontWeight: "600", duration: 0.3 }, 3.0)
-    // Show State 4 panel
-    .to(".panel-story--4", { opacity: 1, pointerEvents: "auto", duration: 0.1 }, 3.4)
-    .to(".panel-story--4 .story-content", { opacity: 1, y: 0, duration: 0.4 }, 3.4)
-    // Highlight label 2026
-    .to("#dotItem2026 .dot-label", { color: "#ffffff", fontWeight: "700", duration: 0.3 }, 3.4)
-    .to("#peekSliver", { opacity: 0, scale: 0.8, pointerEvents: "none", duration: 0.3 }, 3.0);
-
-  // Horizontal scroll scrubbing logic
-  scrollContainer.addEventListener("scroll", () => {
-    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-    if (maxScroll <= 0) return;
-    const progress = scrollContainer.scrollLeft / maxScroll;
-
-    // Smoothly animate the timeline's progress
-    gsap.to(tl, {
-      progress: progress,
-      duration: 0.45,
-      ease: "power2.out",
-      overwrite: "auto"
+    // Update active panel class for scale animation
+    panels.forEach((panel, i) => {
+      if (i === index) {
+        panel.classList.add("active-panel");
+      } else {
+        panel.classList.remove("active-panel");
+      }
     });
 
-    // Toggle dark mode class on navBar based on horizontal progress
-    if (progress > 0.08) {
-      navBar.classList.add("dark-mode");
-    } else {
-      navBar.classList.remove("dark-mode");
+    // Update nav bar dark mode
+    if (navBar) {
+      if (index === 0) {
+        navBar.classList.remove("dark-mode");
+      } else {
+        navBar.classList.add("dark-mode");
+      }
     }
-  });
 
-  // Click handler to scroll to specific stages horizontally
-  const dotItems = document.querySelectorAll(".timeline-dot-item");
+    // Update progress line and active dot
+    const progressPercent = (index / (totalPanels - 1)) * 100;
+    if (progressLine) progressLine.style.width = `${progressPercent}%`;
+    if (activeDot) activeDot.style.left = `${progressPercent}%`;
+
+    // Update dot labels and nodes
+    dotItems.forEach((item, i) => {
+      const label = item.querySelector(".dot-label");
+      const node = item.querySelector(".dot-node");
+      if (i === index) {
+        if (label) {
+          label.style.color = "#ffffff";
+          label.style.fontWeight = "700";
+        }
+        if (node) {
+          node.style.width = "12px";
+          node.style.height = "12px";
+          node.style.backgroundColor = "var(--color-bg-warm)";
+          node.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        }
+      } else if (i < index) {
+        if (label) {
+          label.style.color = "rgba(255, 255, 255, 0.5)";
+          label.style.fontWeight = "600";
+        }
+        if (node) {
+          node.style.width = "8px";
+          node.style.height = "8px";
+          node.style.backgroundColor = "#4A2C6B";
+          node.style.borderColor = "#4A2C6B";
+        }
+      } else {
+        if (label) {
+          label.style.color = "rgba(255, 255, 255, 0.7)";
+          label.style.fontWeight = "600";
+        }
+        if (node) {
+          node.style.width = "12px";
+          node.style.height = "12px";
+          node.style.backgroundColor = "var(--color-bg-warm)";
+          node.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        }
+      }
+    });
+
+    // Update Arrows
+    if (prevBtn) {
+      if (index === 0) {
+        prevBtn.style.opacity = "0";
+        prevBtn.style.pointerEvents = "none";
+      } else {
+        prevBtn.style.opacity = "1";
+        prevBtn.style.pointerEvents = "auto";
+      }
+    }
+    
+    if (nextBtn) {
+      if (index === totalPanels - 1) {
+        nextBtn.style.opacity = "0";
+        nextBtn.style.pointerEvents = "none";
+      } else {
+        nextBtn.style.opacity = "1";
+        nextBtn.style.pointerEvents = "auto";
+      }
+    }
+
+    // Update Peek Sliver
+    if (peekSliver) {
+      if (index === totalPanels - 1) {
+        peekSliver.style.opacity = "0";
+        peekSliver.style.pointerEvents = "none";
+      } else {
+        peekSliver.style.opacity = "1";
+        peekSliver.style.pointerEvents = "auto";
+        
+        // Update peek text
+        peekTexts.forEach(text => {
+          text.style.opacity = "0";
+          text.classList.remove("active");
+        });
+        
+        let targetPeekClass = "";
+        if (index === 0) targetPeekClass = ".peek-text--1999";
+        else if (index === 1) targetPeekClass = ".peek-text--2006";
+        else if (index === 2) targetPeekClass = ".peek-text--2026";
+        
+        if (targetPeekClass) {
+          const activePeek = document.querySelector(targetPeekClass);
+          if (activePeek) {
+            activePeek.style.opacity = "0.75";
+            activePeek.classList.add("active");
+          }
+        }
+      }
+    }
+  }
+
+  function goToPanel(index) {
+    if (isAnimating || index < 0 || index >= totalPanels || index === currentPanel) return;
+    
+    isAnimating = true;
+    currentPanel = index;
+    updateTimelineUI(currentPanel);
+    
+    // Unlock animation after transition duration matches CSS (0.6s)
+    setTimeout(() => {
+      isAnimating = false;
+    }, 600);
+  }
+
+  // Initial UI Setup
+  updateTimelineUI(currentPanel);
+
+  // Wheel Event for Swipe
+  sticky.addEventListener("wheel", (e) => {
+    // Prevent default only if we are swiping horizontally
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      
+      if (!isAnimating) {
+        if (e.deltaX > 30) {
+          goToPanel(currentPanel + 1);
+        } else if (e.deltaX < -30) {
+          goToPanel(currentPanel - 1);
+        }
+      }
+    }
+  }, { passive: false });
+
+  // Touch Events for Swipe
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  sticky.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  sticky.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    
+    const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
+    
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 50) {
+        goToPanel(currentPanel + 1); // Swipe left -> next
+      } else if (diffX < -50) {
+        goToPanel(currentPanel - 1); // Swipe right -> prev
+      }
+    }
+  }, { passive: true });
+
+  // Click Handlers for Arrows
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => goToPanel(currentPanel - 1));
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => goToPanel(currentPanel + 1));
+  }
+
+  // Click Handlers for Dots
   dotItems.forEach(item => {
     item.addEventListener("click", () => {
       const targetState = parseInt(item.getAttribute("data-state"), 10);
-      
-      let targetProgress = 0;
-      if (targetState === 1) targetProgress = 0.25;
-      else if (targetState === 2) targetProgress = 0.50;
-      else if (targetState === 3) targetProgress = 0.75;
-      else if (targetState === 4) targetProgress = 1.0;
-      
-      const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-      scrollContainer.scrollTo({
-        left: maxScroll * targetProgress,
-        behavior: "smooth"
-      });
+      goToPanel(targetState);
     });
   });
 });
