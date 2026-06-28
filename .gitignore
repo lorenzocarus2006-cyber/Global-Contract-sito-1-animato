@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+.claude/
+*.pyc
+__pycache__/
+Screenshot*
+IMG_*.JPG
+Untitled
