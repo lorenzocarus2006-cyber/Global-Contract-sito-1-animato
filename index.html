@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Contract — Da un'idea ad un'attività</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader__loader">
+    <div class="preloader__bar"><span class="preloader__bar-fill" id="preloaderBar"></span></div>
+    <div class="preloader__meta">
+      <span class="preloader__label">Loading</span>
+      <span class="preloader__count"><span id="preloaderCount">0</span> / 100</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero-pin" id="heroPin">
+  <div class="hero-stage" id="heroStage">
+
+    <div class="hero-scene" id="heroScene">
+
+      <!-- v5.2: a flat vertical poster, exactly like vaulk.com's
+           grass->roots scroll — no video, no camera, no 3D travel.
+           Top panel (.descent-stack__surface) is the resting café shot
+           with its real alpha-cutout elements (counter, table, chair)
+           popped in at entrance. Below it, in normal flow, a flat photo
+           continuation of the SAME shot (floor cut open -> foundation ->
+           pipes -> white), cropped straight out of the cross-section
+           still so the floor line matches pixel-for-pixel. Scrolling
+           just translates this whole stack upward inside the pinned
+           viewport "window" (#heroStage, overflow:hidden) — a poster
+           being panned, never a fly-through. -->
+      <div class="descent-stack" id="descentStack">
+        <div class="descent-stack__surface">
+          <div class="hero-depth" id="heroDepth">
+            <img src="assets/hero/clean_plate.jpg" alt="Interno di un locale HoReCa progettato da Global Contract: banco pasticceria illuminato, parete vini retroilluminata, sedute in velluto" class="hero-depth-layer hero-depth-layer--base" data-depth-layer="base">
+            <!-- v8 FIX1: the base photo stays permanently visible/locked
+                 (no more crossfade to a whole-frame video — that video's
+                 baked-in camera drift was sliding the counter and zooming
+                 the framing). The only motion at rest now is this steam
+                 layer: a full-frame video that is pixel-identical to
+                 clean_plate.jpg everywhere except one small region (above
+                 the pastry case) where a generated steam wisp rises. Built
+                 by compositing a tiny isolated Kling steam clip onto a
+                 static copy of this same photo at its exact original
+                 offset, feather-masked so the patch has no visible edge.
+                 A forward+reverse "boomerang" loop makes the native <video>
+                 loop attribute seamless with zero currentTime scrubbing. -->
+            <video class="hero-steam" id="heroSteam" muted loop playsinline preload="auto" poster="assets/hero/clean_plate.jpg">
+              <source src="assets/hero/steam_loop.mp4" type="video/mp4">
+            </video>
+            <img src="assets/hero/layer_table.png" alt="" class="hero-depth-layer hero-depth-layer--table" data-depth-layer="table">
+            <img src="assets/hero/layer_chair.png" alt="" class="hero-depth-layer hero-depth-layer--chair" data-depth-layer="chair">
+            <img src="assets/hero/layer_counter.png" alt="" class="hero-depth-layer hero-depth-layer--counter" data-depth-layer="counter">
+          </div>
+          <!-- Barely-perceptible CSS-only "life" at rest: a soft light
+               shimmer over the glossy surfaces already in the photo.
+               Zero cost, zero camera movement. -->
+          <div class="hero-shimmer" id="heroShimmer"><div class="hero-shimmer__glow"></div></div>
+        </div>
+        <img class="descent-stack__underground" id="descentUnderground" src="assets/hero/underground.jpg" alt="">
+      </div>
+
+      <div class="hero-scrim"></div>
+      <!-- v8 FIX2: fixed to the viewport (sibling of .descent-stack, does
+           NOT scroll with it) — dissolves to solid var(--gc-white) over
+           the tail of the descent, so the pin-release handoff into
+           #landingWhite is already pure white and seamless before it
+           happens, instead of relying on the pipes image's own (slightly
+           grey, slightly mismatched-white) fade alone. -->
+      <div class="hero-descent-whiteout" id="heroDescentWhiteout"></div>
+
+      <div class="hero-layer hero-layer--logo" data-depth="60">
+        <img src="assets/brand/logo.png" alt="Global Contract" class="gc-mark gc-mark--hero">
+      </div>
+
+      <div class="hero-layer hero-layer--eyebrow" data-depth="40">
+        <p class="hero-eyebrow">Global Contract — Progettazione &amp; Realizzazione HoReCa</p>
+      </div>
+
+      <div class="hero-layer hero-layer--headline" data-depth="80">
+        <h1 class="hero-headline">DA UN'IDEA<br>AD UN'ATTIVITÀ.</h1>
+      </div>
+
+      <div class="hero-layer hero-layer--cta" data-depth="30">
+        <a href="#" class="hero-cta" tabindex="-1" aria-disabled="true">
+          <span>Scopri</span>
+          <svg viewBox="0 0 24 24" class="hero-cta__icon"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <div class="hero-scroll-cue" id="heroScrollCue">
+        <span>Scroll</span>
+        <i></i>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ LANDING (placeholder arrival point) ============ -->
+<section class="landing-white" id="landingWhite">
+  <span class="landing-white__mark">GLOBAL CONTRACT</span>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
