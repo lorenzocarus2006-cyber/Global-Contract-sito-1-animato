@@ -5,6 +5,9 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   
+  // Register GSAP ScrollTrigger
+  gsap.registerPlugin(ScrollTrigger);
+
   /* -----------------------------------------
      1. INITIALIZE LENIS SMOOTH SCROLL
      ----------------------------------------- */
@@ -122,62 +125,46 @@ document.addEventListener("DOMContentLoaded", () => {
       onComplete: () => {
         // Start smooth scroll once intro is fully loaded
         lenis.start();
+        // Remove loader from DOM to ensure absolute cleanliness
+        const loader = document.getElementById("loader");
+        if (loader) {
+          loader.remove();
+        }
       }
     });
 
-    // Fade out and slide loader upwards
-    tl.to("#loader", {
-      yPercent: -100,
-      duration: 1.2,
-      ease: "power4.inOut"
+    // Fade out loader content
+    tl.to(".loader-content", {
+      opacity: 0,
+      duration: 0.4,
+      ease: "power2.out"
     });
 
-    // Bring in Nav Logo & Menu
-    tl.from("#nav-logo", {
-      y: -30,
-      opacity: 0,
-      duration: 1.0,
-      ease: "power3.out"
-    }, "-=0.6");
+    // Show the hairline seam
+    tl.to(".curtain-seam", {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out"
+    }, "-=0.2");
 
-    tl.from(".nav-item", {
-      y: -20,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.08,
-      ease: "power3.out"
-    }, "-=0.8");
-
-    tl.from("#nav-actions", {
-      x: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out"
-    }, "-=0.8");
-
-    // Reveal Headline Title
-    tl.from(".hero-title", {
-      y: 40,
-      opacity: 0,
+    // Split the curtains
+    tl.to(".curtain-left", {
+      xPercent: -100,
       duration: 1.2,
-      ease: "power4.out"
-    }, "-=0.8");
+      ease: "power3.inOut"
+    }, "+=0.1");
 
-    // Reveal Subtitle
-    tl.from(".hero-subtitle", {
-      y: 30,
-      opacity: 0,
-      duration: 1.0,
-      ease: "power3.out"
-    }, "-=1.0");
+    tl.to(".curtain-right", {
+      xPercent: 100,
+      duration: 1.2,
+      ease: "power3.inOut"
+    }, "<");
 
-    // Reveal Mouse Scroll indicator
-    tl.from(".scroll-explore", {
-      y: 20,
+    tl.to(".curtain-seam", {
       opacity: 0,
-      duration: 0.8,
-      ease: "power3.out"
-    }, "-=0.8");
+      duration: 0.3,
+      ease: "power3.inOut"
+    }, "<");
   }
 
 
@@ -187,38 +174,195 @@ document.addEventListener("DOMContentLoaded", () => {
   const gallery = document.getElementById('gallery-container');
   const panels = gsap.utils.toArray('.sector-panel');
   
-  // Detect touch device
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isMobileQuery = window.matchMedia('(max-width: 768px)');
   
-  // Set initial sizes: all 7 panels EQUAL width on-load
-  panels.forEach((panel) => {
-    gsap.set(panel, {
-      flexGrow: 1,
-      flexBasis: 0
-    });
-    
-    const body = panel.querySelector('.panel-body');
-    panel.classList.remove('active');
-    gsap.set(body, { opacity: 0, y: 20 });
-  });
-
   let hoverTimeout = null;
   let activeIndex = null;
+  let activeMobileIndex = -1;
+  let mobileScrollListener = null;
 
-  // Master expansion function
+  function initGallery() {
+    // Clear any previous state or event listeners
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    if (mobileScrollListener) {
+      window.removeEventListener('scroll', mobileScrollListener);
+      mobileScrollListener = null;
+    }
+    
+    // Reset panels state
+    panels.forEach((panel) => {
+      panel.classList.remove('active');
+      const body = panel.querySelector('.panel-body');
+      const desc = panel.querySelector('.panel-description');
+      const cta = panel.querySelector('.panel-cta');
+      
+      gsap.killTweensOf(panel);
+      if (body) gsap.killTweensOf(body);
+      if (desc) gsap.killTweensOf(desc);
+      if (cta) gsap.killTweensOf(cta);
+
+      // Clean inline styles
+      gsap.set(panel, { flexGrow: 1, flexBasis: 0 });
+      if (body) gsap.set(body, { clearProps: "all" });
+      if (desc) gsap.set(desc, { clearProps: "all" });
+      if (cta) gsap.set(cta, { clearProps: "all" });
+    });
+
+    if (isMobileQuery.matches) {
+      // MOBILE SCROLL-DRIVEN ACCORDION
+      activeMobileIndex = -1;
+      
+      // Initial call to set active panel on load
+      updateMobileActivePanel();
+      
+      mobileScrollListener = updateMobileActivePanel;
+      window.addEventListener('scroll', mobileScrollListener);
+    } else {
+      // DESKTOP HOVER ACCORDION
+      activeIndex = null;
+      
+      // Set initial desktop state
+      panels.forEach((panel) => {
+        const body = panel.querySelector('.panel-body');
+        gsap.set(body, { opacity: 0, y: 20 });
+      });
+
+      // Register interactions based on touch/mouse
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      if (!isTouchDevice) {
+        // Desktop: Hover with Intent
+        panels.forEach((panel, idx) => {
+          const enterHandler = () => {
+            if (window.scrollY > 5) return; // Ignore hover if scrolled down
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+            hoverTimeout = setTimeout(() => {
+              if (activeIndex !== idx) {
+                animateAccordionState(idx);
+              }
+            }, 100);
+          };
+          panel._enterHandler = enterHandler;
+          panel.addEventListener('mouseenter', enterHandler);
+          
+          const focusHandler = () => {
+            if (window.scrollY > 5) return; // Ignore focus if scrolled down
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+            animateAccordionState(idx);
+          };
+          panel._focusHandler = focusHandler;
+          panel.addEventListener('focus', focusHandler);
+        });
+
+        // Reset when mouse leaves the entire gallery area
+        const leaveHandler = () => {
+          if (hoverTimeout) clearTimeout(hoverTimeout);
+          animateAccordionState(null);
+        };
+        gallery._leaveHandler = leaveHandler;
+        gallery.addEventListener('mouseleave', leaveHandler);
+      } else {
+        // Tablet / Fallback (Touch but not phone <768px): Tap-to-expand
+        panels.forEach((panel, idx) => {
+          const clickHandler = (e) => {
+            if (panel.classList.contains('active')) {
+              return;
+            }
+            e.preventDefault();
+            animateAccordionState(idx);
+          };
+          panel._clickHandler = clickHandler;
+          panel.addEventListener('click', clickHandler);
+        });
+      }
+    }
+  }
+
+  function updateMobileActivePanel() {
+    const scrollY = window.scrollY || window.pageYOffset;
+    
+    // Force first panel active when scrolled to the top area
+    if (scrollY < 120) {
+      if (activeMobileIndex !== 0) {
+        activeMobileIndex = 0;
+        animateMobileAccordionState(0);
+      }
+      return;
+    }
+    
+    // Force last panel active when scrolled to the bottom area
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollY > maxScroll - 120) {
+      const lastIndex = panels.length - 1;
+      if (activeMobileIndex !== lastIndex) {
+        activeMobileIndex = lastIndex;
+        animateMobileAccordionState(lastIndex);
+      }
+      return;
+    }
+
+    const viewportCenter = window.innerHeight / 2;
+    let closestIndex = 0;
+    let minDistance = Infinity;
+
+    panels.forEach((panel, idx) => {
+      const rect = panel.getBoundingClientRect();
+      const panelCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(panelCenter - viewportCenter);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = idx;
+      }
+    });
+
+    if (closestIndex !== activeMobileIndex) {
+      activeMobileIndex = closestIndex;
+      animateMobileAccordionState(closestIndex);
+    }
+  }
+
+  function animateMobileAccordionState(targetIndex) {
+    panels.forEach((panel, idx) => {
+      const isActive = idx === targetIndex;
+      const targetGrow = isActive ? 5.8 : 1.0;
+      
+      gsap.to(panel, {
+        flexGrow: targetGrow,
+        duration: 0.6,
+        ease: "power2.out",
+        overwrite: "auto"
+      });
+
+      const desc = panel.querySelector('.panel-description');
+      const cta = panel.querySelector('.panel-cta');
+
+      if (isActive) {
+        panel.classList.add('active');
+        if (desc && cta) {
+          gsap.fromTo([desc, cta], 
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", overwrite: "auto", delay: 0.1 }
+          );
+        }
+      } else {
+        panel.classList.remove('active');
+        if (desc && cta) {
+          gsap.set([desc, cta], { opacity: 0, y: 10 });
+        }
+      }
+    });
+  }
+
   function animateAccordionState(targetIndex) {
     activeIndex = targetIndex;
     
     panels.forEach((panel, idx) => {
       const isActive = idx === targetIndex;
       const isGalleryReset = targetIndex === null;
-      
-      // If targetIndex is null, all panels go to 1.
-      // If a panel is active, it goes to 4.6. Others go to 0.4.
       const targetGrow = isGalleryReset ? 1 : (isActive ? 4.6 : 0.4);
       const body = panel.querySelector('.panel-body');
       
-      // Animate Flex-Grow with slower architectural ease (0.8s, power2.inOut)
       gsap.to(panel, {
         flexGrow: targetGrow,
         duration: 0.8,
@@ -249,50 +393,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Register interactions based on device capabilities
-  if (!isTouchDevice) {
-    // Desktop: Hover with Intent
-    panels.forEach((panel, idx) => {
-      panel.addEventListener('mouseenter', () => {
-        // Clear any pending transition
-        if (hoverTimeout) clearTimeout(hoverTimeout);
-        
-        // Wait 100ms before initiating the hover expansion
-        hoverTimeout = setTimeout(() => {
-          if (activeIndex !== idx) {
-            animateAccordionState(idx);
-          }
-        }, 100);
-      });
-      
-      // Keyboard focus support
-      panel.addEventListener('focus', () => {
-        if (hoverTimeout) clearTimeout(hoverTimeout);
-        animateAccordionState(idx);
-      });
-    });
+  // Initial initialization
+  initGallery();
 
-    // Reset when mouse leaves the entire gallery area
-    gallery.addEventListener('mouseleave', () => {
-      if (hoverTimeout) clearTimeout(hoverTimeout);
-      animateAccordionState(null);
+  // Watch for breakpoint transitions to prevent event listener conflicts
+  isMobileQuery.addEventListener('change', () => {
+    // Remove listeners before re-initializing
+    panels.forEach(panel => {
+      if (panel._enterHandler) panel.removeEventListener('mouseenter', panel._enterHandler);
+      if (panel._focusHandler) panel.removeEventListener('focus', panel._focusHandler);
+      if (panel._clickHandler) panel.removeEventListener('click', panel._clickHandler);
     });
-  } else {
-    // Mobile/Touch: Tap-to-expand Fallback
-    panels.forEach((panel, idx) => {
-      panel.addEventListener('click', (e) => {
-        // If panel is already active, let the link click go through
-        if (panel.classList.contains('active')) {
-          return;
-        }
-        
-        e.preventDefault();
-        animateAccordionState(idx);
-      });
-    });
-  }
+    if (gallery._leaveHandler) gallery.removeEventListener('mouseleave', gallery._leaveHandler);
+    
+    initGallery();
+  });
 
-  // Make the entire panel clickable to navigate
+  // Make the entire panel clickable to navigate (applies to both desktop & mobile when active)
   panels.forEach((panel) => {
     panel.addEventListener('click', (e) => {
       if (panel.classList.contains('active')) {
@@ -301,5 +418,177 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+
+  /* -----------------------------------------
+     5. DESKTOP-ONLY PINNED SCROLL & FORCED ASCENT
+     ----------------------------------------- */
+  let heroScrollTrigger = null;
+  let heroExitTL = null;
+  let transitionDone = sessionStorage.getItem("gc_hero_transition_done") === "true";
+  let isTweening = false;
+  let touchStartY = 0;
+
+  const mm = gsap.matchMedia();
+
+  mm.add("(min-width: 769px)", () => {
+    // 1. Initialize Pinned Timeline & ScrollTrigger
+    heroExitTL = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".hero-section",
+        start: "top top",
+        end: () => `+=${window.innerHeight * 0.25}`, // 25% of viewport height
+        scrub: true,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    // Staggered panel exits
+    const staggerDelay = 0.06;
+    panels.forEach((panel, index) => {
+      // Parallax: Panels exit upward. Speed difference by varying travel distance.
+      heroExitTL.to(panel, {
+        y: () => -window.innerHeight - 200 - (index * 50),
+        ease: "power2.in"
+      }, index * staggerDelay);
+    });
+
+    // Headline and scroll indicator exits
+    heroExitTL.to(".hero-text-block", {
+      y: () => -window.innerHeight * 0.8,
+      opacity: 0,
+      ease: "power2.in"
+    }, 0);
+
+    heroExitTL.to(".hero-bottom-block", {
+      y: () => -window.innerHeight * 0.8,
+      opacity: 0,
+      ease: "power2.in"
+    }, 0);
+
+    // Empty space for 0.85 -> 1.0 (black stretch)
+    // 6 * 0.06 + 1.0 = 1.36s. Total duration = 1.36 / 0.85 = 1.6s.
+    // Remaining time = 0.24s.
+    heroExitTL.to({}, { duration: 0.24 });
+
+    heroScrollTrigger = heroExitTL.scrollTrigger;
+
+    // Reset accordion if scroll starts
+    ScrollTrigger.create({
+      trigger: ".hero-section",
+      start: "top top",
+      end: () => `+=${window.innerHeight * 0.25}`,
+      onUpdate: (self) => {
+        if (self.progress > 0.01) {
+          if (activeIndex !== null) {
+            animateAccordionState(null);
+          }
+        }
+      }
+    });
+
+    return () => {
+      if (heroExitTL) heroExitTL.kill();
+      heroScrollTrigger = null;
+      heroExitTL = null;
+      // Reset any transforms on elements
+      panels.forEach(panel => gsap.set(panel, { y: 0 }));
+      gsap.set(".hero-text-block", { y: 0, opacity: 1 });
+      gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
+    };
+  });
+
+  // Track touchstart for mobile/touch devices
+  window.addEventListener('touchstart', (e) => {
+    if (isMobileQuery.matches) return;
+    if (transitionDone) return;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  // Hijack first scroll downward
+  function handleForcedScroll(e) {
+    if (isMobileQuery.matches) return;
+    if (transitionDone) return;
+
+    // Only trigger if we are at the very top (scrollY <= 5)
+    const isAtTop = window.scrollY <= 5;
+    if (!isAtTop) return;
+
+    let isDownward = false;
+
+    if (e.type === 'wheel') {
+      if (e.deltaY > 0) {
+        isDownward = true;
+      }
+    } else if (e.type === 'touchmove') {
+      const touchEndY = e.touches[0].clientY;
+      if (touchEndY < touchStartY) { // Finger moved up -> scrolls page down
+        isDownward = true;
+      }
+    } else if (e.type === 'keydown') {
+      const keys = ['ArrowDown', 'PageDown', ' ', 'Spacebar'];
+      if (keys.includes(e.key)) {
+        isDownward = true;
+      }
+    }
+
+    if (isDownward) {
+      e.preventDefault();
+      runForcedScrollTween();
+    }
+  }
+
+  function runForcedScrollTween() {
+    if (isTweening || transitionDone) return;
+    
+    isTweening = true;
+    lenis.stop();
+
+    // Determine target position
+    const targetScroll = heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * 0.25;
+
+    const scrollObj = { y: window.scrollY };
+    
+    gsap.to(scrollObj, {
+      y: targetScroll,
+      duration: 2.2,
+      ease: "power3.inOut",
+      onUpdate: () => {
+        window.scrollTo(0, scrollObj.y);
+        lenis.scrollTo(scrollObj.y, { immediate: true });
+        ScrollTrigger.update();
+      },
+      onComplete: () => {
+        isTweening = false;
+        transitionDone = true;
+        sessionStorage.setItem("gc_hero_transition_done", "true");
+        lenis.start();
+      }
+    });
+  }
+
+  // Register listeners with passive: false so we can preventDefault
+  window.addEventListener('wheel', handleForcedScroll, { passive: false });
+  window.addEventListener('touchmove', handleForcedScroll, { passive: false });
+  window.addEventListener('keydown', handleForcedScroll, { passive: false });
+
+  // Block inputs during tweening
+  function blockInput(e) {
+    if (isTweening) {
+      e.preventDefault();
+    }
+  }
+  window.addEventListener('wheel', blockInput, { passive: false });
+  window.addEventListener('touchmove', blockInput, { passive: false });
+  window.addEventListener('keydown', (e) => {
+    if (isTweening) {
+      const keys = ['ArrowDown', 'PageDown', 'ArrowUp', 'PageUp', ' ', 'Spacebar', 'Home', 'End'];
+      if (keys.includes(e.key)) {
+        e.preventDefault();
+      }
+    }
+  }, { passive: false });
 
 });
