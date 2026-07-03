@@ -38,27 +38,78 @@ document.addEventListener("DOMContentLoaded", () => {
   let isTweening = false;
   let unlockTimeout = null;
 
-  // Revisit state handling on load. We never write video.currentTime (forbidden
-  // in this phase) - the video simply stays unplayed and shows its `poster`
-  // attribute (the extracted final frame), which is visually identical to the
-  // real freeze frame reached after a first-time playthrough.
-  const whiteStage = document.getElementById("white-stage");
-  const stageVideo = document.getElementById("stage-video");
-  const heroRevealBg = document.getElementById("hero-reveal-bg");
+  // Revisit state handling on load.
+  const buildStage = document.getElementById("build-stage");
+  const buildCanvas = document.getElementById("build-canvas");
+  const buildCtx = buildCanvas ? buildCanvas.getContext("2d") : null;
 
-  // Preload behind the curtain: kick off buffering immediately so the video
-  // is ready to play instantly once the forced descent settles.
-  if (stageVideo && !transitionDone) {
-    stageVideo.load();
+  /* -----------------------------------------
+     FRAME SEQUENCE PRELOAD (behind the curtain)
+     ----------------------------------------- */
+  const SEQ_FRAME_COUNT = 76;
+  const SEQ_DURATION = 5.0; // seconds, matches the retimed source clip
+  const seqFrames = [];
+  let seqLoadedCount = 0;
+  let seqReady = false;
+
+  function seqFramePath(i) {
+    const n = String(i + 1).padStart(4, "0");
+    return `./assets/hero/build_seq/frame_${n}.webp`;
+  }
+
+  // Guaranteed-loadable failsafe: a single small JPG of the final frame,
+  // shown if the full sequence isn't ready in time.
+  const posterImg = new Image();
+  posterImg.src = "./assets/hero/build_final_poster.jpg";
+
+  if (buildCtx) {
+    for (let i = 0; i < SEQ_FRAME_COUNT; i++) {
+      const img = new Image();
+      img.onload = () => {
+        seqLoadedCount++;
+        if (seqLoadedCount >= SEQ_FRAME_COUNT) {
+          seqReady = true;
+        }
+      };
+      img.onerror = () => {
+        seqLoadedCount++;
+        if (seqLoadedCount >= SEQ_FRAME_COUNT) {
+          seqReady = true;
+        }
+      };
+      img.src = seqFramePath(i);
+      seqFrames.push(img);
+    }
+  }
+
+  function drawSeqFrame(index) {
+    if (!buildCtx) return;
+    const clamped = Math.max(0, Math.min(SEQ_FRAME_COUNT - 1, index));
+    const img = seqFrames[clamped];
+    buildCtx.clearRect(0, 0, buildCanvas.width, buildCanvas.height);
+    if (img && img.complete && img.naturalWidth > 0) {
+      buildCtx.drawImage(img, 0, 0, buildCanvas.width, buildCanvas.height);
+    } else if (posterImg.complete && posterImg.naturalWidth > 0) {
+      buildCtx.drawImage(posterImg, 0, 0, buildCanvas.width, buildCanvas.height);
+    }
   }
 
   if (transitionDone) {
-    if (whiteStage) {
-      whiteStage.classList.add("transition-done");
+    if (buildStage) {
+      buildStage.classList.add("transition-done");
     }
-    // heroRevealBg color is left dark here on purpose: on reload scrollY is
-    // always 0, so the hero must render pixel-identical to baseline until the
-    // pinned ScrollTrigger's onUpdate (below) swaps it as the user scrolls in.
+    // Draw the final frame once frames are available - no animation, no lock.
+    // Falls back to the poster after a short wait if the sequence never
+    // loads, so a revisit is never left blank.
+    const revisitDeadline = Date.now() + 4000;
+    const drawFinalWhenReady = () => {
+      if (seqReady || Date.now() > revisitDeadline) {
+        drawSeqFrame(SEQ_FRAME_COUNT - 1);
+      } else {
+        requestAnimationFrame(drawFinalWhenReady);
+      }
+    };
+    drawFinalWhenReady();
   }
 
   if (scrollExploreBtn) {
@@ -66,9 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Mark transition done to prevent scroll locks
       sessionStorage.setItem("gc_hero_transition_done", "true");
       transitionDone = true;
-      if (whiteStage) {
-        whiteStage.classList.add("transition-done");
+      if (buildStage) {
+        buildStage.classList.add("transition-done");
       }
+      drawSeqFrame(SEQ_FRAME_COUNT - 1);
       isStageLocked = false;
       isTweening = false;
       clearTimeout(unlockTimeout);
@@ -467,6 +519,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const mm = gsap.matchMedia();
 
+  // Pin range is SHORT (~30vh of scroll travel) - the build stage lives
+  // inside this same pinned box, so no extra scroll distance is needed to
+  // reach it; the forced tween below rides this exact range.
+  const PIN_VH_FRACTION = 0.3;
+
   mm.add("(min-width: 769px)", () => {
     // 1. Initialize Pinned Timeline & ScrollTrigger
     heroExitTL = gsap.timeline({
@@ -474,27 +531,23 @@ document.addEventListener("DOMContentLoaded", () => {
       scrollTrigger: {
         trigger: ".hero-section",
         start: "top top",
-        end: () => `+=${window.innerHeight * 0.25}`, // 25% of viewport height
+        end: () => `+=${window.innerHeight * PIN_VH_FRACTION}`,
         scrub: true,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // Reset accordion if scroll starts + swap the reveal layer to the
-        // unified stage color the instant descent begins (instant, no
-        // transition, so the swap is invisible behind the still-covering
-        // panels). Lives on this trigger (not a separate one) because a
-        // second ScrollTrigger sharing the same trigger/start/end never
-        // receives onUpdate once this one has pinned the section.
+        // Reset the hover accordion once descent actually starts, and make
+        // the gallery container's own background transparent so it stops
+        // blocking the build stage sitting behind it at a lower z-index
+        // (the container's box never moves, only its child panels do).
         onUpdate: (self) => {
           if (self.progress > 0.001) {
             if (activeIndex !== null) {
               animateAccordionState(null);
             }
-            if (heroRevealBg) heroRevealBg.classList.add("revealed");
             if (gallery) gallery.classList.add("revealed");
-          } else {
-            if (heroRevealBg) heroRevealBg.classList.remove("revealed");
-            if (gallery) gallery.classList.remove("revealed");
+          } else if (gallery) {
+            gallery.classList.remove("revealed");
           }
         }
       }
@@ -521,7 +574,8 @@ document.addEventListener("DOMContentLoaded", () => {
       opacity: 0,
     }, 0);
 
-    // Landing stretch: dwell in the unified stage color once panels are clear
+    // Landing stretch: brief dwell once panels are clear, still inside the
+    // same dark pinned box, before the pin range ends
     heroExitTL.to({}, { duration: 0.6 });
 
     heroScrollTrigger = heroExitTL.scrollTrigger;
@@ -534,7 +588,6 @@ document.addEventListener("DOMContentLoaded", () => {
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
       gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
-      if (heroRevealBg) heroRevealBg.classList.remove("revealed");
       if (gallery) gallery.classList.remove("revealed");
     };
   });
@@ -581,19 +634,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function runForcedScrollTween() {
     if (isTweening || transitionDone) return;
-    
+
     isTweening = true;
     isStageLocked = true;
     lenis.stop();
 
-    // Target the white stage itself (not just the end of the pin range) so
-    // it fully fills the viewport once settled - the pin's scrub timeline
-    // reaches progress 1 well before we get there, so panels are already
-    // fully exited and the unified color is already showing for the rest
-    // of the ride.
-    const targetScroll = whiteStage
-      ? whiteStage.getBoundingClientRect().top + window.scrollY
-      : (heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * 0.25);
+    // Target the (short) end of the pin range - the build stage lives inside
+    // this same pinned box, so settling here already fills the viewport with
+    // it. No extra scroll distance needed.
+    const targetScroll = heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * PIN_VH_FRACTION;
 
     const scrollObj = { y: window.scrollY };
 
@@ -614,38 +663,50 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Sequential labels synced to the video's ACTUAL playback time (reading
-  // currentTime only - writing it is forbidden in this phase). Reference:
-  // vaulk.com hero, each line pops in exactly when that part of the object
-  // takes shape.
-  const LABEL_TIMINGS = { headline: 1.3, sub: 2.8 };
+  // Sequential labels synced to the sequence's ACTUAL elapsed playback time
+  // (a plain rAF-driven canvas player, no video element, so there is no
+  // currentTime to read or write). Reference: vaulk.com hero, each line pops
+  // in exactly when that part of the object takes shape.
+  const LABEL_TIMINGS = { headline: 1.6, sub: 3.4 };
   let headlineShown = false;
   let subShown = false;
+  let seqRafId = null;
+  let seqStartTime = null;
 
   function showHeadline() {
     if (headlineShown) return;
     headlineShown = true;
-    gsap.to(".stage-headline", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+    gsap.to(".build-headline", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
   }
 
   function showSub() {
     if (subShown) return;
     subShown = true;
-    gsap.to(".stage-sub", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+    gsap.to(".build-sub", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
   }
 
-  function handleLabelSync() {
-    if (stageVideo.currentTime >= LABEL_TIMINGS.headline) showHeadline();
-    if (stageVideo.currentTime >= LABEL_TIMINGS.sub) showSub();
-    if (stageVideo.duration && stageVideo.currentTime >= stageVideo.duration - 0.05) {
-      freezeVideoAndUnlock();
+  function seqTick(now) {
+    if (seqStartTime === null) seqStartTime = now;
+    const elapsed = (now - seqStartTime) / 1000;
+
+    if (elapsed >= LABEL_TIMINGS.headline) showHeadline();
+    if (elapsed >= LABEL_TIMINGS.sub) showSub();
+
+    if (elapsed >= SEQ_DURATION) {
+      drawSeqFrame(SEQ_FRAME_COUNT - 1);
+      finishBuildSequence();
+      return;
     }
+
+    const frameIndex = Math.floor((elapsed / SEQ_DURATION) * SEQ_FRAME_COUNT);
+    drawSeqFrame(frameIndex);
+    seqRafId = requestAnimationFrame(seqTick);
   }
 
   function startBuildSequence() {
-    // Video enters from off-screen right and starts building immediately -
-    // no dead frozen frame before playback.
-    gsap.to(".stage-video-container", {
+    // Canvas object enters from off-screen right and starts building
+    // immediately - no dead frozen frame before playback.
+    gsap.to(".build-canvas-container", {
       opacity: 1,
       x: 0,
       duration: 1.0,
@@ -653,33 +714,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // t=0.0 - bare floor slab visible
-    gsap.to(".stage-eyebrow", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+    gsap.to(".build-eyebrow", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
 
-    if (stageVideo) {
-      stageVideo.addEventListener('ended', freezeVideoAndUnlock);
-      stageVideo.addEventListener('timeupdate', handleLabelSync);
-      stageVideo.play().catch(err => {
-        console.warn("Autoplay block or loading error:", err);
-      });
-    }
+    seqStartTime = null;
+    if (seqRafId) cancelAnimationFrame(seqRafId);
+    seqRafId = requestAnimationFrame(seqTick);
 
-    // Hard safety cap: never leave the user locked if the video fails to
-    // load/play (~5s max lock)
+    // Hard safety cap: never leave the user locked if the sequence isn't
+    // ready/decoded in time (~6s max lock)
     unlockTimeout = setTimeout(() => {
       if (isStageLocked) {
-        console.warn("Video lock safety fallback timeout fired.");
-        freezeVideoAndUnlock();
+        console.warn("Build sequence lock safety fallback timeout fired.");
+        drawSeqFrame(SEQ_FRAME_COUNT - 1);
+        finishBuildSequence();
       }
-    }, 5000);
+    }, 6000);
   }
 
-  function freezeVideoAndUnlock() {
-    if (stageVideo) {
-      stageVideo.removeEventListener('ended', freezeVideoAndUnlock);
-      stageVideo.removeEventListener('timeupdate', handleLabelSync);
-      stageVideo.pause();
+  function finishBuildSequence() {
+    if (seqRafId) {
+      cancelAnimationFrame(seqRafId);
+      seqRafId = null;
     }
-    // Failsafe: if the video never played far enough to trigger a label,
+    // Failsafe: if the sequence ended before reaching a label's timing,
     // reveal it anyway so the copy is never left missing.
     showHeadline();
     showSub();
@@ -691,13 +748,13 @@ document.addEventListener("DOMContentLoaded", () => {
     isStageLocked = false;
     isTweening = false;
     clearTimeout(unlockTimeout);
-    
+
     lenis.start();
     transitionDone = true;
     sessionStorage.setItem("gc_hero_transition_done", "true");
 
-    if (whiteStage) {
-      whiteStage.classList.add("transition-done");
+    if (buildStage) {
+      buildStage.classList.add("transition-done");
     }
     console.log("Stage building complete. Page unlocked.");
   }

@@ -22,7 +22,6 @@
   <link rel="preload" href="./assets/pharmacy.png" as="image">
   <link rel="preload" href="./assets/tobacco.png" as="image">
   <link rel="preload" href="./assets/retail.png" as="image">
-  <link rel="preload" href="./assets/animazione-scroll-4s.mp4" as="video" type="video/mp4">
 </head>
 <body>
 
@@ -72,11 +71,6 @@
 
     <!-- Main Hero Viewport (fits all elements in 100vh) -->
     <section class="hero-section" id="home">
-
-      <!-- Reveal layer: dark at rest (pixel-identical to baseline), swapped to
-           unified stage color the instant descent begins so panels lift off
-           into the same color space as the white stage beneath -->
-      <div class="hero-reveal-bg" id="hero-reveal-bg"></div>
 
       <!-- Hero Top Text Block (Compact - ~22vh) -->
       <div class="hero-text-block">
@@ -385,22 +379,25 @@
         </div>
       </div>
 
-    </section>
-
-    <!-- White Stage Section (Phase 2 - Desktop Only) -->
-    <section class="white-stage" id="white-stage">
-      <div class="stage-content">
-        <div class="stage-copy">
-          <span class="stage-eyebrow">GLOBAL CONTRACT</span>
-          <h2 class="stage-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
-          <p class="stage-sub">Spazi progettati e realizzati chiavi in mano.</p>
-        </div>
-        <div class="stage-video-container">
-          <video class="stage-video" id="stage-video" muted playsinline preload="auto" poster="./assets/animazione-scroll-4s-poster.jpg">
-            <source src="./assets/animazione-scroll-4s.mp4" type="video/mp4">
-          </video>
+      <!-- Build Stage (Phase 2 redo - Desktop Only): lives INSIDE the pinned
+           hero box itself (short ~30vh pin range, not a separate section) so
+           the object appears the instant panels clear, in the same
+           continuous dark space - no extra scroll distance needed. Sits
+           below the panels/text in z-order so they occlude it again on
+           scroll-back, matching the frozen hero at rest. -->
+      <div class="build-stage" id="build-stage">
+        <div class="build-stage-content">
+          <div class="build-copy">
+            <span class="build-eyebrow">GLOBAL CONTRACT</span>
+            <h2 class="build-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
+            <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
+          </div>
+          <div class="build-canvas-container">
+            <canvas id="build-canvas" width="1280" height="714"></canvas>
+          </div>
         </div>
       </div>
+
     </section>
 
     <!-- Details Section below the fold to demonstrate smooth scrolling -->

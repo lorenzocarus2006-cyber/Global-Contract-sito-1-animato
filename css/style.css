@@ -16,7 +16,6 @@
   --color-offwhite: #F5F5F7;
   --color-gray-text: #A1A1A6;
   --color-gray-dark: #2C2C2E;
-  --color-stage-bg: #EFEFE8;             /* Sampled from build video background - unified descent color */
   
   /* Fonts */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -394,22 +393,6 @@ html.lenis, html.lenis body {
   background-color: var(--color-bg-dark);
 }
 
-/* Reveal layer behind the panels/text (tuning point #2): dark at rest so the
-   hero stays pixel-identical to baseline; swapped instantly (no transition)
-   to the stage color the moment descent starts, so panels lift off into the
-   same flat color that fills the landing stretch and the video stage. */
-.hero-reveal-bg {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-bg);
-  background-color: var(--color-bg-dark);
-  pointer-events: none;
-}
-
-.hero-reveal-bg.revealed {
-  background-color: var(--color-stage-bg);
-}
-
 /* Compact Typography Block (~22vh) */
 .hero-text-block {
   display: flex;
@@ -466,12 +449,13 @@ html.lenis, html.lenis body {
   z-index: var(--z-content);
 }
 
-/* Tuning point #2: the panels are in normal flex flow (only translated via
-   transform), so this container's own background is what's revealed as they
-   exit upward - it must join the same unified color as the rest of the
-   descent, swapped instantly alongside .hero-reveal-bg. */
+/* Once the panels have exited, this container's own opaque background (its
+   box never moves - only the child panels translate) would otherwise keep
+   blocking the build stage sitting behind it at a lower z-index. Turning it
+   transparent lets the (already dark) build stage show through - no color
+   change, still the exact same dark space. */
 .gallery-container.revealed {
-  background-color: var(--color-stage-bg);
+  background-color: transparent;
 }
 
 /* Sector Panel */
@@ -1110,27 +1094,26 @@ html.lenis, html.lenis body {
 }
 
 /* -----------------------------------------
-   12. WHITE STAGE (PHASE 2 - DESKTOP ONLY)
+   12. BUILD STAGE (PHASE 2 REDO - DESKTOP ONLY)
+   Lives INSIDE the hero's own pinned box (same continuous dark space, no
+   separate section) - see tuning notes in main.js for the z-order logic.
    ----------------------------------------- */
-.white-stage {
+.build-stage {
   display: none;
 }
 
 @media (min-width: 769px) {
-  .white-stage {
+  .build-stage {
     display: flex;
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    min-height: 650px;
-    background-color: var(--color-stage-bg);
+    position: absolute;
+    inset: 0;
     align-items: center;
     justify-content: center;
-    z-index: 10;
-    overflow: hidden;
+    z-index: 3;
+    pointer-events: none;
   }
 
-  .stage-content {
+  .build-stage-content {
     width: 100%;
     max-width: 1440px;
     height: 100%;
@@ -1141,34 +1124,33 @@ html.lenis, html.lenis body {
     position: relative;
   }
 
-  .stage-copy {
+  .build-copy {
     flex: 0 0 45%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    color: var(--color-bg-dark);
-    z-index: 4;
+    color: var(--color-offwhite);
   }
 
-  .stage-eyebrow {
+  .build-eyebrow {
     font-family: var(--font-sans);
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.2em;
-    color: var(--color-magenta-deep);
+    color: var(--color-magenta-glow);
     margin-bottom: 0.85rem;
     opacity: 0;
     transform: translateX(-40px);
     will-change: transform, opacity;
   }
 
-  .stage-headline {
+  .build-headline {
     font-family: var(--font-serif);
     font-size: clamp(2.5rem, 6vh, 4.2rem);
     font-weight: 300;
     line-height: 1.15;
-    color: #060608;
+    color: var(--color-offwhite);
     margin-bottom: 1.5rem;
     text-transform: uppercase;
     opacity: 0;
@@ -1176,11 +1158,11 @@ html.lenis, html.lenis body {
     will-change: transform, opacity;
   }
 
-  .stage-sub {
+  .build-sub {
     font-family: var(--font-sans);
     font-size: clamp(0.95rem, 1.8vh, 1.15rem);
     font-weight: 300;
-    color: #515154;
+    color: var(--color-gray-text);
     line-height: 1.5;
     max-width: 420px;
     opacity: 0;
@@ -1188,33 +1170,37 @@ html.lenis, html.lenis body {
     will-change: transform, opacity;
   }
 
-  .stage-video-container {
+  .build-canvas-container {
     flex: 0 0 50%;
-    height: 70vh;
+    max-height: 70vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    z-index: 3;
+    overflow: hidden;
     opacity: 0;
     transform: translateX(80px);
     will-change: transform, opacity;
   }
 
-  .stage-video {
+  #build-canvas {
+    /* Match the canvas's own intrinsic aspect ratio exactly so it always
+       fills its box with no letterboxing. Scaled up a hair past its
+       container (clipped by overflow:hidden above) because the GPU's
+       texture-edge sampling at the canvas's exact last row/column can blend
+       with the opposite edge and leave a faint 1px seam - pushing that seam
+       just outside the visible box removes it. */
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-    mask-image: radial-gradient(ellipse 92% 92% at center, black 85%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 92% 92% at center, black 85%, transparent 100%);
+    max-height: 70vh;
+    aspect-ratio: 1280 / 714;
+    transform: scale(1.02);
   }
 
   /* Transition done states (for revisit/manual scroll back and forth) */
-  .white-stage.transition-done .stage-eyebrow,
-  .white-stage.transition-done .stage-headline,
-  .white-stage.transition-done .stage-sub,
-  .white-stage.transition-done .stage-video-container {
+  .build-stage.transition-done .build-eyebrow,
+  .build-stage.transition-done .build-headline,
+  .build-stage.transition-done .build-sub,
+  .build-stage.transition-done .build-canvas-container {
     opacity: 1;
     transform: none;
   }
