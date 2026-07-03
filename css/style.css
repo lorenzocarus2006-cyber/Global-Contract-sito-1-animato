@@ -16,6 +16,7 @@
   --color-offwhite: #F5F5F7;
   --color-gray-text: #A1A1A6;
   --color-gray-dark: #2C2C2E;
+  --color-stage-bg: #EFEFE8;             /* Sampled from build video background - unified descent color */
   
   /* Fonts */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -393,6 +394,22 @@ html.lenis, html.lenis body {
   background-color: var(--color-bg-dark);
 }
 
+/* Reveal layer behind the panels/text (tuning point #2): dark at rest so the
+   hero stays pixel-identical to baseline; swapped instantly (no transition)
+   to the stage color the moment descent starts, so panels lift off into the
+   same flat color that fills the landing stretch and the video stage. */
+.hero-reveal-bg {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-bg);
+  background-color: var(--color-bg-dark);
+  pointer-events: none;
+}
+
+.hero-reveal-bg.revealed {
+  background-color: var(--color-stage-bg);
+}
+
 /* Compact Typography Block (~22vh) */
 .hero-text-block {
   display: flex;
@@ -447,6 +464,14 @@ html.lenis, html.lenis body {
   background-color: #000;
   position: relative;
   z-index: var(--z-content);
+}
+
+/* Tuning point #2: the panels are in normal flex flow (only translated via
+   transform), so this container's own background is what's revealed as they
+   exit upward - it must join the same unified color as the rest of the
+   descent, swapped instantly alongside .hero-reveal-bg. */
+.gallery-container.revealed {
+  background-color: var(--color-stage-bg);
 }
 
 /* Sector Panel */
@@ -1098,7 +1123,7 @@ html.lenis, html.lenis body {
     width: 100%;
     height: 100vh;
     min-height: 650px;
-    background-color: #ffffff;
+    background-color: var(--color-stage-bg);
     align-items: center;
     justify-content: center;
     z-index: 10;

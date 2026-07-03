@@ -22,6 +22,7 @@
   <link rel="preload" href="./assets/pharmacy.png" as="image">
   <link rel="preload" href="./assets/tobacco.png" as="image">
   <link rel="preload" href="./assets/retail.png" as="image">
+  <link rel="preload" href="./assets/animazione-scroll-4s.mp4" as="video" type="video/mp4">
 </head>
 <body>
 
@@ -71,7 +72,12 @@
 
     <!-- Main Hero Viewport (fits all elements in 100vh) -->
     <section class="hero-section" id="home">
-      
+
+      <!-- Reveal layer: dark at rest (pixel-identical to baseline), swapped to
+           unified stage color the instant descent begins so panels lift off
+           into the same color space as the white stage beneath -->
+      <div class="hero-reveal-bg" id="hero-reveal-bg"></div>
+
       <!-- Hero Top Text Block (Compact - ~22vh) -->
       <div class="hero-text-block">
         <h1 class="hero-title">
@@ -390,8 +396,8 @@
           <p class="stage-sub">Spazi progettati e realizzati chiavi in mano.</p>
         </div>
         <div class="stage-video-container">
-          <video class="stage-video" id="stage-video" muted playsinline preload="auto">
-            <source src="./assets/animazione%20scroll%200.mp4" type="video/mp4">
+          <video class="stage-video" id="stage-video" muted playsinline preload="auto" poster="./assets/animazione-scroll-4s-poster.jpg">
+            <source src="./assets/animazione-scroll-4s.mp4" type="video/mp4">
           </video>
         </div>
       </div>

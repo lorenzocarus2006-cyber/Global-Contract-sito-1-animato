@@ -38,23 +38,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let isTweening = false;
   let unlockTimeout = null;
 
-  // Revisit state handling on load
+  // Revisit state handling on load. We never write video.currentTime (forbidden
+  // in this phase) - the video simply stays unplayed and shows its `poster`
+  // attribute (the extracted final frame), which is visually identical to the
+  // real freeze frame reached after a first-time playthrough.
   const whiteStage = document.getElementById("white-stage");
   const stageVideo = document.getElementById("stage-video");
+  const heroRevealBg = document.getElementById("hero-reveal-bg");
+
+  // Preload behind the curtain: kick off buffering immediately so the video
+  // is ready to play instantly once the forced descent settles.
+  if (stageVideo && !transitionDone) {
+    stageVideo.load();
+  }
 
   if (transitionDone) {
     if (whiteStage) {
       whiteStage.classList.add("transition-done");
     }
-    if (stageVideo) {
-      stageVideo.playbackRate = 1.4;
-      stageVideo.addEventListener('loadedmetadata', () => {
-        stageVideo.currentTime = stageVideo.duration - 0.01;
-      });
-      if (stageVideo.readyState >= 1) {
-        stageVideo.currentTime = stageVideo.duration - 0.01;
-      }
-    }
+    // heroRevealBg color is left dark here on purpose: on reload scrollY is
+    // always 0, so the hero must render pixel-identical to baseline until the
+    // pinned ScrollTrigger's onUpdate (below) swaps it as the user scrolls in.
   }
 
   if (scrollExploreBtn) {
@@ -64,10 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
       transitionDone = true;
       if (whiteStage) {
         whiteStage.classList.add("transition-done");
-      }
-      if (stageVideo) {
-        stageVideo.playbackRate = 1.4;
-        stageVideo.currentTime = stageVideo.duration - 0.01;
       }
       isStageLocked = false;
       isTweening = false;
@@ -470,6 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mm.add("(min-width: 769px)", () => {
     // 1. Initialize Pinned Timeline & ScrollTrigger
     heroExitTL = gsap.timeline({
+      defaults: { duration: 1, ease: "power2.inOut" },
       scrollTrigger: {
         trigger: ".hero-section",
         start: "top top",
@@ -478,16 +479,34 @@ document.addEventListener("DOMContentLoaded", () => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        // Reset accordion if scroll starts + swap the reveal layer to the
+        // unified stage color the instant descent begins (instant, no
+        // transition, so the swap is invisible behind the still-covering
+        // panels). Lives on this trigger (not a separate one) because a
+        // second ScrollTrigger sharing the same trigger/start/end never
+        // receives onUpdate once this one has pinned the section.
+        onUpdate: (self) => {
+          if (self.progress > 0.001) {
+            if (activeIndex !== null) {
+              animateAccordionState(null);
+            }
+            if (heroRevealBg) heroRevealBg.classList.add("revealed");
+            if (gallery) gallery.classList.add("revealed");
+          } else {
+            if (heroRevealBg) heroRevealBg.classList.remove("revealed");
+            if (gallery) gallery.classList.remove("revealed");
+          }
+        }
       }
     });
 
-    // Staggered panel exits
-    const staggerDelay = 0.06;
+    // Staggered panel exits - wide stagger + long soft travel for a majestic,
+    // weighty ascent (tuning point #1)
+    const staggerDelay = 0.13;
     panels.forEach((panel, index) => {
       // Parallax: Panels exit upward. Speed difference by varying travel distance.
       heroExitTL.to(panel, {
-        y: () => -window.innerHeight - 200 - (index * 50),
-        ease: "power2.in"
+        y: () => -window.innerHeight - 320 - (index * 70),
       }, index * staggerDelay);
     });
 
@@ -495,35 +514,17 @@ document.addEventListener("DOMContentLoaded", () => {
     heroExitTL.to(".hero-text-block", {
       y: () => -window.innerHeight * 0.8,
       opacity: 0,
-      ease: "power2.in"
     }, 0);
 
     heroExitTL.to(".hero-bottom-block", {
       y: () => -window.innerHeight * 0.8,
       opacity: 0,
-      ease: "power2.in"
     }, 0);
 
-    // Empty space for 0.85 -> 1.0 (black stretch)
-    // 6 * 0.06 + 1.0 = 1.36s. Total duration = 1.36 / 0.85 = 1.6s.
-    // Remaining time = 0.24s.
-    heroExitTL.to({}, { duration: 0.24 });
+    // Landing stretch: dwell in the unified stage color once panels are clear
+    heroExitTL.to({}, { duration: 0.6 });
 
     heroScrollTrigger = heroExitTL.scrollTrigger;
-
-    // Reset accordion if scroll starts
-    ScrollTrigger.create({
-      trigger: ".hero-section",
-      start: "top top",
-      end: () => `+=${window.innerHeight * 0.25}`,
-      onUpdate: (self) => {
-        if (self.progress > 0.01) {
-          if (activeIndex !== null) {
-            animateAccordionState(null);
-          }
-        }
-      }
-    });
 
     return () => {
       if (heroExitTL) heroExitTL.kill();
@@ -533,6 +534,8 @@ document.addEventListener("DOMContentLoaded", () => {
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
       gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
+      if (heroRevealBg) heroRevealBg.classList.remove("revealed");
+      if (gallery) gallery.classList.remove("revealed");
     };
   });
 
@@ -583,15 +586,21 @@ document.addEventListener("DOMContentLoaded", () => {
     isStageLocked = true;
     lenis.stop();
 
-    // Determine target position
-    const targetScroll = heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * 0.25;
+    // Target the white stage itself (not just the end of the pin range) so
+    // it fully fills the viewport once settled - the pin's scrub timeline
+    // reaches progress 1 well before we get there, so panels are already
+    // fully exited and the unified color is already showing for the rest
+    // of the ride.
+    const targetScroll = whiteStage
+      ? whiteStage.getBoundingClientRect().top + window.scrollY
+      : (heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * 0.25);
 
     const scrollObj = { y: window.scrollY };
-    
-    // Forced tween over ~3.2-3.8s (3.5s total)
+
+    // Majestic descent: ~4.2s total, power3.inOut (tuning point #1)
     gsap.to(scrollObj, {
       y: targetScroll,
-      duration: 3.5,
+      duration: 4.2,
       ease: "power3.inOut",
       onUpdate: () => {
         window.scrollTo(0, scrollObj.y);
@@ -600,65 +609,80 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       onComplete: () => {
         isTweening = false;
-
-        // Play the building interior video at 1.4x playback rate
-        if (stageVideo) {
-          stageVideo.playbackRate = 1.4;
-          stageVideo.play().catch(err => {
-            console.warn("Autoplay block or loading error:", err);
-          });
-
-          // Setup freeze frame event listeners
-          // 1. Ended event
-          stageVideo.addEventListener('ended', freezeVideoAndUnlock);
-
-          // 2. Timeupdate safety
-          stageVideo.addEventListener('timeupdate', checkVideoTimeUpdate);
-        }
-
-        // Slide in video from off-screen right
-        gsap.to(".stage-video-container", {
-          opacity: 1,
-          x: 0,
-          duration: 1.1,
-          ease: "power3.out"
-        });
-
-        // Staggered slide in copy block from left
-        gsap.to([".stage-eyebrow", ".stage-headline", ".stage-sub"], {
-          opacity: 1,
-          x: 0,
-          duration: 1.1,
-          stagger: 0.12,
-          ease: "power3.out"
-        });
-
-        // Set hard safety timeout to unlock scroll if video fails/blocks (5.5s max lock)
-        unlockTimeout = setTimeout(() => {
-          if (isStageLocked) {
-            console.warn("Autoplay safety fallback timeout fired.");
-            freezeVideoAndUnlock();
-          }
-        }, 5500);
+        startBuildSequence();
       }
     });
   }
 
-  function checkVideoTimeUpdate() {
-    if (stageVideo && stageVideo.duration && stageVideo.currentTime >= stageVideo.duration - 0.05) {
+  // Sequential labels synced to the video's ACTUAL playback time (reading
+  // currentTime only - writing it is forbidden in this phase). Reference:
+  // vaulk.com hero, each line pops in exactly when that part of the object
+  // takes shape.
+  const LABEL_TIMINGS = { headline: 1.3, sub: 2.8 };
+  let headlineShown = false;
+  let subShown = false;
+
+  function showHeadline() {
+    if (headlineShown) return;
+    headlineShown = true;
+    gsap.to(".stage-headline", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+  }
+
+  function showSub() {
+    if (subShown) return;
+    subShown = true;
+    gsap.to(".stage-sub", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+  }
+
+  function handleLabelSync() {
+    if (stageVideo.currentTime >= LABEL_TIMINGS.headline) showHeadline();
+    if (stageVideo.currentTime >= LABEL_TIMINGS.sub) showSub();
+    if (stageVideo.duration && stageVideo.currentTime >= stageVideo.duration - 0.05) {
       freezeVideoAndUnlock();
     }
+  }
+
+  function startBuildSequence() {
+    // Video enters from off-screen right and starts building immediately -
+    // no dead frozen frame before playback.
+    gsap.to(".stage-video-container", {
+      opacity: 1,
+      x: 0,
+      duration: 1.0,
+      ease: "power3.out"
+    });
+
+    // t=0.0 - bare floor slab visible
+    gsap.to(".stage-eyebrow", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+
+    if (stageVideo) {
+      stageVideo.addEventListener('ended', freezeVideoAndUnlock);
+      stageVideo.addEventListener('timeupdate', handleLabelSync);
+      stageVideo.play().catch(err => {
+        console.warn("Autoplay block or loading error:", err);
+      });
+    }
+
+    // Hard safety cap: never leave the user locked if the video fails to
+    // load/play (~5s max lock)
+    unlockTimeout = setTimeout(() => {
+      if (isStageLocked) {
+        console.warn("Video lock safety fallback timeout fired.");
+        freezeVideoAndUnlock();
+      }
+    }, 5000);
   }
 
   function freezeVideoAndUnlock() {
     if (stageVideo) {
       stageVideo.removeEventListener('ended', freezeVideoAndUnlock);
-      stageVideo.removeEventListener('timeupdate', checkVideoTimeUpdate);
+      stageVideo.removeEventListener('timeupdate', handleLabelSync);
       stageVideo.pause();
-      if (stageVideo.duration) {
-        stageVideo.currentTime = stageVideo.duration - 0.01;
-      }
     }
+    // Failsafe: if the video never played far enough to trigger a label,
+    // reveal it anyway so the copy is never left missing.
+    showHeadline();
+    showSub();
     unlockStage();
   }
 
