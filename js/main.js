@@ -33,8 +33,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Scroll explore button interaction
   const scrollExploreBtn = document.getElementById('scroll-explore');
+  let transitionDone = sessionStorage.getItem("gc_hero_transition_done") === "true";
+  let isStageLocked = false;
+  let isTweening = false;
+  let unlockTimeout = null;
+
+  // Revisit state handling on load
+  const whiteStage = document.getElementById("white-stage");
+  const stageVideo = document.getElementById("stage-video");
+
+  if (transitionDone) {
+    if (whiteStage) {
+      whiteStage.classList.add("transition-done");
+    }
+    if (stageVideo) {
+      stageVideo.playbackRate = 1.4;
+      stageVideo.addEventListener('loadedmetadata', () => {
+        stageVideo.currentTime = stageVideo.duration - 0.01;
+      });
+      if (stageVideo.readyState >= 1) {
+        stageVideo.currentTime = stageVideo.duration - 0.01;
+      }
+    }
+  }
+
   if (scrollExploreBtn) {
     scrollExploreBtn.addEventListener('click', () => {
+      // Mark transition done to prevent scroll locks
+      sessionStorage.setItem("gc_hero_transition_done", "true");
+      transitionDone = true;
+      if (whiteStage) {
+        whiteStage.classList.add("transition-done");
+      }
+      if (stageVideo) {
+        stageVideo.playbackRate = 1.4;
+        stageVideo.currentTime = stageVideo.duration - 0.01;
+      }
+      isStageLocked = false;
+      isTweening = false;
+      clearTimeout(unlockTimeout);
+      lenis.start();
       lenis.scrollTo('#dettagli', {
         duration: 1.4,
         ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
@@ -425,8 +463,6 @@ document.addEventListener("DOMContentLoaded", () => {
      ----------------------------------------- */
   let heroScrollTrigger = null;
   let heroExitTL = null;
-  let transitionDone = sessionStorage.getItem("gc_hero_transition_done") === "true";
-  let isTweening = false;
   let touchStartY = 0;
 
   const mm = gsap.matchMedia();
@@ -544,6 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isTweening || transitionDone) return;
     
     isTweening = true;
+    isStageLocked = true;
     lenis.stop();
 
     // Determine target position
@@ -551,9 +588,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const scrollObj = { y: window.scrollY };
     
+    // Forced tween over ~3.2-3.8s (3.5s total)
     gsap.to(scrollObj, {
       y: targetScroll,
-      duration: 2.2,
+      duration: 3.5,
       ease: "power3.inOut",
       onUpdate: () => {
         window.scrollTo(0, scrollObj.y);
@@ -562,11 +600,82 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       onComplete: () => {
         isTweening = false;
-        transitionDone = true;
-        sessionStorage.setItem("gc_hero_transition_done", "true");
-        lenis.start();
+
+        // Play the building interior video at 1.4x playback rate
+        if (stageVideo) {
+          stageVideo.playbackRate = 1.4;
+          stageVideo.play().catch(err => {
+            console.warn("Autoplay block or loading error:", err);
+          });
+
+          // Setup freeze frame event listeners
+          // 1. Ended event
+          stageVideo.addEventListener('ended', freezeVideoAndUnlock);
+
+          // 2. Timeupdate safety
+          stageVideo.addEventListener('timeupdate', checkVideoTimeUpdate);
+        }
+
+        // Slide in video from off-screen right
+        gsap.to(".stage-video-container", {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          ease: "power3.out"
+        });
+
+        // Staggered slide in copy block from left
+        gsap.to([".stage-eyebrow", ".stage-headline", ".stage-sub"], {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          stagger: 0.12,
+          ease: "power3.out"
+        });
+
+        // Set hard safety timeout to unlock scroll if video fails/blocks (5.5s max lock)
+        unlockTimeout = setTimeout(() => {
+          if (isStageLocked) {
+            console.warn("Autoplay safety fallback timeout fired.");
+            freezeVideoAndUnlock();
+          }
+        }, 5500);
       }
     });
+  }
+
+  function checkVideoTimeUpdate() {
+    if (stageVideo && stageVideo.duration && stageVideo.currentTime >= stageVideo.duration - 0.05) {
+      freezeVideoAndUnlock();
+    }
+  }
+
+  function freezeVideoAndUnlock() {
+    if (stageVideo) {
+      stageVideo.removeEventListener('ended', freezeVideoAndUnlock);
+      stageVideo.removeEventListener('timeupdate', checkVideoTimeUpdate);
+      stageVideo.pause();
+      if (stageVideo.duration) {
+        stageVideo.currentTime = stageVideo.duration - 0.01;
+      }
+    }
+    unlockStage();
+  }
+
+  function unlockStage() {
+    if (!isStageLocked) return;
+    isStageLocked = false;
+    isTweening = false;
+    clearTimeout(unlockTimeout);
+    
+    lenis.start();
+    transitionDone = true;
+    sessionStorage.setItem("gc_hero_transition_done", "true");
+
+    if (whiteStage) {
+      whiteStage.classList.add("transition-done");
+    }
+    console.log("Stage building complete. Page unlocked.");
   }
 
   // Register listeners with passive: false so we can preventDefault
@@ -574,16 +683,16 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('touchmove', handleForcedScroll, { passive: false });
   window.addEventListener('keydown', handleForcedScroll, { passive: false });
 
-  // Block inputs during tweening
+  // Block inputs during tweening and stage lock
   function blockInput(e) {
-    if (isTweening) {
+    if (isTweening || isStageLocked) {
       e.preventDefault();
     }
   }
   window.addEventListener('wheel', blockInput, { passive: false });
   window.addEventListener('touchmove', blockInput, { passive: false });
   window.addEventListener('keydown', (e) => {
-    if (isTweening) {
+    if (isTweening || isStageLocked) {
       const keys = ['ArrowDown', 'PageDown', 'ArrowUp', 'PageUp', ' ', 'Spacebar', 'Home', 'End'];
       if (keys.includes(e.key)) {
         e.preventDefault();
