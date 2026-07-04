@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* -----------------------------------------
      FRAME SEQUENCE PRELOAD (behind the curtain)
      ----------------------------------------- */
-  const SEQ_FRAME_COUNT = 76;
+  const SEQ_FRAME_COUNT = 121;
   const SEQ_DURATION = 5.0; // seconds, matches the retimed source clip
   const seqFrames = [];
   let seqLoadedCount = 0;
@@ -554,12 +554,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Staggered panel exits - wide stagger + long soft travel for a majestic,
-    // weighty ascent (tuning point #1)
-    const staggerDelay = 0.13;
+    // weighty ascent (tuning point #1). The timeline is authored in units
+    // that match the forced scroll tween's real seconds (~4.2s, see
+    // runForcedScrollTween) so the scrub progress maps ~1:1 to wall-clock
+    // time - the ascent must consume nearly the whole forced run, not
+    // finish early and leave a dead black gap before the build stage.
+    const staggerDelay = 0.12;
+    const panelTravelDuration = 3.4;
     panels.forEach((panel, index) => {
       // Parallax: Panels exit upward. Speed difference by varying travel distance.
       heroExitTL.to(panel, {
         y: () => -window.innerHeight - 320 - (index * 70),
+        duration: panelTravelDuration,
       }, index * staggerDelay);
     });
 
@@ -574,9 +580,12 @@ document.addEventListener("DOMContentLoaded", () => {
       opacity: 0,
     }, 0);
 
-    // Landing stretch: brief dwell once panels are clear, still inside the
-    // same dark pinned box, before the pin range ends
-    heroExitTL.to({}, { duration: 0.6 });
+    // Landing stretch: brief dwell once the last panel clears, right before
+    // the pin range ends (positioned explicitly so it lands after the last
+    // panel's travel instead of GSAP's implicit "end of previous add" which
+    // undercounted the staggered panels).
+    const lastPanelEnd = (panels.length - 1) * staggerDelay + panelTravelDuration;
+    heroExitTL.to({}, { duration: 0.08 }, lastPanelEnd);
 
     heroScrollTrigger = heroExitTL.scrollTrigger;
 

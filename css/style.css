@@ -388,7 +388,13 @@ html.lenis, html.lenis body {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow: hidden;
+  /* overflow-x: hidden here would force the browser to auto-compute
+     overflow-y: auto (CSS overflow interop rule: one axis non-visible +
+     other visible => visible axis becomes auto), turning this pinned,
+     height:100vh box into its own internal scroll-clipped container that
+     traps the panels mid-ascent. overflow-x: clip has no such side effect. */
+  overflow-x: clip;
+  overflow-y: visible;
   padding-top: 80px; /* Space for the header */
   background-color: var(--color-bg-dark);
 }
@@ -404,7 +410,7 @@ html.lenis, html.lenis body {
   padding: 0.5rem 2rem;
   height: 22vh;
   min-height: 120px;
-  z-index: var(--z-content);
+  z-index: 150; /* Above .main-header during ascent, see .gallery-container */
   will-change: transform, opacity;
 }
 
@@ -443,10 +449,13 @@ html.lenis, html.lenis body {
   width: 100%;
   height: 58vh;
   min-height: 350px;
-  overflow: hidden;
+  /* No overflow clip here either - panels are the topmost moving layer
+     during ascent and must clear the header, not die at this box's edge. */
   background-color: #000;
   position: relative;
-  z-index: var(--z-content);
+  z-index: 150; /* Above .main-header (100) for the ascent pass-through;
+                   at rest the header's own padding-top offset keeps them
+                   visually non-overlapping, so this is safe unconditionally. */
 }
 
 /* Once the panels have exited, this container's own opaque background (its
@@ -711,7 +720,7 @@ html.lenis, html.lenis body {
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: var(--z-content);
+  z-index: 150; /* Above .main-header during ascent, see .gallery-container */
   will-change: transform, opacity;
 }
 
