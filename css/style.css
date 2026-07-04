@@ -458,15 +458,6 @@ html.lenis, html.lenis body {
                    visually non-overlapping, so this is safe unconditionally. */
 }
 
-/* Once the panels have exited, this container's own opaque background (its
-   box never moves - only the child panels translate) would otherwise keep
-   blocking the build stage sitting behind it at a lower z-index. Turning it
-   transparent lets the (already dark) build stage show through - no color
-   change, still the exact same dark space. */
-.gallery-container.revealed {
-  background-color: transparent;
-}
-
 /* Sector Panel */
 .sector-panel {
   position: relative;
@@ -1103,9 +1094,10 @@ html.lenis, html.lenis body {
 }
 
 /* -----------------------------------------
-   12. BUILD STAGE (PHASE 2 REDO - DESKTOP ONLY)
-   Lives INSIDE the hero's own pinned box (same continuous dark space, no
-   separate section) - see tuning notes in main.js for the z-order logic.
+   12. BUILD STAGE (DESKTOP ONLY)
+   A real 100vh section in normal document flow, further down the page
+   after the hero. The forced descent scrolls the actual page to it; it is
+   not overlaid/absolute inside the hero anymore.
    ----------------------------------------- */
 .build-stage {
   display: none;
@@ -1114,12 +1106,13 @@ html.lenis, html.lenis body {
 @media (min-width: 769px) {
   .build-stage {
     display: flex;
-    position: absolute;
-    inset: 0;
+    height: 100vh;
+    width: 100%;
     align-items: center;
     justify-content: center;
-    z-index: 3;
-    pointer-events: none;
+    position: relative;
+    background-color: var(--color-bg-dark);
+    z-index: var(--z-content);
   }
 
   .build-stage-content {

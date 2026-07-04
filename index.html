@@ -379,25 +379,22 @@
         </div>
       </div>
 
-      <!-- Build Stage (Phase 2 redo - Desktop Only): lives INSIDE the pinned
-           hero box itself (short ~30vh pin range, not a separate section) so
-           the object appears the instant panels clear, in the same
-           continuous dark space - no extra scroll distance needed. Sits
-           below the panels/text in z-order so they occlude it again on
-           scroll-back, matching the frozen hero at rest. -->
-      <div class="build-stage" id="build-stage">
-        <div class="build-stage-content">
-          <div class="build-copy">
-            <span class="build-eyebrow">GLOBAL CONTRACT</span>
-            <h2 class="build-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
-            <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
-          </div>
-          <div class="build-canvas-container">
-            <canvas id="build-canvas" width="1280" height="714"></canvas>
-          </div>
+    </section>
+
+    <!-- Build Stage (Desktop Only): a real section further down the page,
+         in normal document flow. The forced descent scrolls the actual
+         page here; nothing in it plays until the tween's onComplete. -->
+    <section class="build-stage" id="build-stage">
+      <div class="build-stage-content">
+        <div class="build-copy">
+          <span class="build-eyebrow">GLOBAL CONTRACT</span>
+          <h2 class="build-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
+          <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
+        </div>
+        <div class="build-canvas-container">
+          <canvas id="build-canvas" width="1280" height="714"></canvas>
         </div>
       </div>
-
     </section>
 
     <!-- Details Section below the fold to demonstrate smooth scrolling -->

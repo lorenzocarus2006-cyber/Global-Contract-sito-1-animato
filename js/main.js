@@ -513,16 +513,16 @@ document.addEventListener("DOMContentLoaded", () => {
   /* -----------------------------------------
      5. DESKTOP-ONLY PINNED SCROLL & FORCED ASCENT
      ----------------------------------------- */
-  let heroScrollTrigger = null;
   let heroExitTL = null;
   let touchStartY = 0;
 
   const mm = gsap.matchMedia();
 
-  // Pin range is SHORT (~30vh of scroll travel) - the build stage lives
-  // inside this same pinned box, so no extra scroll distance is needed to
-  // reach it; the forced tween below rides this exact range.
-  const PIN_VH_FRACTION = 0.3;
+  // Pin range is a full viewport height of scroll travel: the hero is
+  // pinned for exactly one more screen's worth of scroll, so when it
+  // unpins the build-stage section (next in document flow, also 100vh)
+  // is sitting right at the top of the viewport - no gap, no overlap.
+  const PIN_VH_FRACTION = 1.0;
 
   mm.add("(min-width: 769px)", () => {
     // 1. Initialize Pinned Timeline & ScrollTrigger
@@ -536,18 +536,12 @@ document.addEventListener("DOMContentLoaded", () => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // Reset the hover accordion once descent actually starts, and make
-        // the gallery container's own background transparent so it stops
-        // blocking the build stage sitting behind it at a lower z-index
-        // (the container's box never moves, only its child panels do).
+        // Reset the hover accordion once descent actually starts.
         onUpdate: (self) => {
           if (self.progress > 0.001) {
             if (activeIndex !== null) {
               animateAccordionState(null);
             }
-            if (gallery) gallery.classList.add("revealed");
-          } else if (gallery) {
-            gallery.classList.remove("revealed");
           }
         }
       }
@@ -587,17 +581,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const lastPanelEnd = (panels.length - 1) * staggerDelay + panelTravelDuration;
     heroExitTL.to({}, { duration: 0.08 }, lastPanelEnd);
 
-    heroScrollTrigger = heroExitTL.scrollTrigger;
-
     return () => {
       if (heroExitTL) heroExitTL.kill();
-      heroScrollTrigger = null;
       heroExitTL = null;
       // Reset any transforms on elements
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
       gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
-      if (gallery) gallery.classList.remove("revealed");
     };
   });
 
@@ -648,17 +638,21 @@ document.addEventListener("DOMContentLoaded", () => {
     isStageLocked = true;
     lenis.stop();
 
-    // Target the (short) end of the pin range - the build stage lives inside
-    // this same pinned box, so settling here already fills the viewport with
-    // it. No extra scroll distance needed.
-    const targetScroll = heroScrollTrigger ? heroScrollTrigger.end : window.innerHeight * PIN_VH_FRACTION;
+    // Target the build-stage section's actual document position. Note this
+    // is NOT the same as the pin's own scrollTrigger.end: that point is
+    // merely where the hero (still filling the viewport) finishes its exit
+    // animation and unpins - the stage section (next in flow, one more
+    // full viewport below) only reaches the top of the screen after that.
+    const targetScroll = buildStage
+      ? buildStage.getBoundingClientRect().top + window.scrollY
+      : window.innerHeight * (1 + PIN_VH_FRACTION);
 
     const scrollObj = { y: window.scrollY };
 
-    // Majestic descent: ~4.2s total, power3.inOut (tuning point #1)
+    // Majestic descent: ~4.5s total, power3.inOut (tuning point #1)
     gsap.to(scrollObj, {
       y: targetScroll,
-      duration: 4.2,
+      duration: 4.5,
       ease: "power3.inOut",
       onUpdate: () => {
         window.scrollTo(0, scrollObj.y);
