@@ -627,6 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isDownward) {
       e.preventDefault();
+      e.stopPropagation();
       runForcedScrollTween();
     }
   }
@@ -636,29 +637,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     isTweening = true;
     isStageLocked = true;
-    lenis.stop();
+    // NOTE: no lenis.stop() here. The .lenis-stopped class sets
+    // overflow:hidden on <html>, which makes the page unscrollable and
+    // silently kills the descent. We let Lenis itself drive the scroll
+    // (lock:true blocks user input for the whole animation).
 
-    // Target the build-stage section's actual document position. Note this
-    // is NOT the same as the pin's own scrollTrigger.end: that point is
-    // merely where the hero (still filling the viewport) finishes its exit
-    // animation and unpins - the stage section (next in flow, one more
-    // full viewport below) only reaches the top of the screen after that.
     const targetScroll = buildStage
       ? buildStage.getBoundingClientRect().top + window.scrollY
       : window.innerHeight * (1 + PIN_VH_FRACTION);
 
-    const scrollObj = { y: window.scrollY };
-
-    // Majestic descent: ~4.5s total, power3.inOut (tuning point #1)
-    gsap.to(scrollObj, {
-      y: targetScroll,
+    lenis.scrollTo(targetScroll, {
       duration: 4.5,
-      ease: "power3.inOut",
-      onUpdate: () => {
-        window.scrollTo(0, scrollObj.y);
-        lenis.scrollTo(scrollObj.y, { immediate: true });
-        ScrollTrigger.update();
-      },
+      // power3.inOut
+      easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+      lock: true,
       onComplete: () => {
         isTweening = false;
         startBuildSequence();
@@ -762,26 +754,29 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Stage building complete. Page unlocked.");
   }
 
-  // Register listeners with passive: false so we can preventDefault
-  window.addEventListener('wheel', handleForcedScroll, { passive: false });
-  window.addEventListener('touchmove', handleForcedScroll, { passive: false });
-  window.addEventListener('keydown', handleForcedScroll, { passive: false });
+  // Capture phase: these fire BEFORE Lenis's own wheel/touch handlers,
+  // so stopPropagation() genuinely blocks Lenis from scrolling too.
+  window.addEventListener('wheel', handleForcedScroll, { passive: false, capture: true });
+  window.addEventListener('touchmove', handleForcedScroll, { passive: false, capture: true });
+  window.addEventListener('keydown', handleForcedScroll, { passive: false, capture: true });
 
-  // Block inputs during tweening and stage lock
+  // Hard input block during the forced descent AND the build sequence.
   function blockInput(e) {
     if (isTweening || isStageLocked) {
       e.preventDefault();
+      e.stopPropagation();
     }
   }
-  window.addEventListener('wheel', blockInput, { passive: false });
-  window.addEventListener('touchmove', blockInput, { passive: false });
+  window.addEventListener('wheel', blockInput, { passive: false, capture: true });
+  window.addEventListener('touchmove', blockInput, { passive: false, capture: true });
   window.addEventListener('keydown', (e) => {
     if (isTweening || isStageLocked) {
       const keys = ['ArrowDown', 'PageDown', 'ArrowUp', 'PageUp', ' ', 'Spacebar', 'Home', 'End'];
       if (keys.includes(e.key)) {
         e.preventDefault();
+        e.stopPropagation();
       }
     }
-  }, { passive: false });
+  }, { passive: false, capture: true });
 
 });

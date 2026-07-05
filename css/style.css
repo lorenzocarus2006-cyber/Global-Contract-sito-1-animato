@@ -451,7 +451,7 @@ html.lenis, html.lenis body {
   min-height: 350px;
   /* No overflow clip here either - panels are the topmost moving layer
      during ascent and must clear the header, not die at this box's edge. */
-  background-color: #000;
+  background-color: transparent;
   position: relative;
   z-index: 150; /* Above .main-header (100) for the ascent pass-through;
                    at rest the header's own padding-top offset keeps them
