@@ -31,6 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   gsap.ticker.lagSmoothing(0);
 
+  // Dev reset: ?replay always clears the once-per-session flag before
+  // anything reads it, so the full experience can be replayed on demand.
+  if (location.search.includes("replay")) {
+    sessionStorage.removeItem("gc_hero_transition_done");
+  }
+
   // Scroll explore button interaction
   const scrollExploreBtn = document.getElementById('scroll-explore');
   let transitionDone = sessionStorage.getItem("gc_hero_transition_done") === "true";
@@ -716,17 +722,19 @@ document.addEventListener("DOMContentLoaded", () => {
     seqRafId = requestAnimationFrame(seqTick);
 
     // Hard safety cap: never leave the user locked if the sequence isn't
-    // ready/decoded in time (~6s max lock)
+    // ready/decoded in time (~6s max lock). This is a FAILED run - it
+    // unlocks the page but must not mark transitionDone, so the real
+    // movie is retryable instead of being permanently disabled.
     unlockTimeout = setTimeout(() => {
       if (isStageLocked) {
         console.warn("Build sequence lock safety fallback timeout fired.");
         drawSeqFrame(SEQ_FRAME_COUNT - 1);
-        finishBuildSequence();
+        finishBuildSequence(false);
       }
     }, 6000);
   }
 
-  function finishBuildSequence() {
+  function finishBuildSequence(markComplete = true) {
     if (seqRafId) {
       cancelAnimationFrame(seqRafId);
       seqRafId = null;
@@ -735,21 +743,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // reveal it anyway so the copy is never left missing.
     showHeadline();
     showSub();
-    unlockStage();
+    unlockStage(markComplete);
   }
 
-  function unlockStage() {
+  function unlockStage(markComplete = true) {
     if (!isStageLocked) return;
     isStageLocked = false;
     isTweening = false;
     clearTimeout(unlockTimeout);
 
     lenis.start();
-    transitionDone = true;
-    sessionStorage.setItem("gc_hero_transition_done", "true");
 
-    if (buildStage) {
-      buildStage.classList.add("transition-done");
+    // Only a genuinely completed sequence (or the explicit scroll-explore
+    // click) may mark the session done - a safety-timeout bailout must
+    // stay retryable on the next visit/reload.
+    if (markComplete) {
+      transitionDone = true;
+      sessionStorage.setItem("gc_hero_transition_done", "true");
+      if (buildStage) {
+        buildStage.classList.add("transition-done");
+      }
     }
     console.log("Stage building complete. Page unlocked.");
   }
