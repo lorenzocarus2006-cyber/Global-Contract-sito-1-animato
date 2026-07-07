@@ -31,15 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
   gsap.ticker.lagSmoothing(0);
 
-  // Dev reset: ?replay always clears the once-per-session flag before
-  // anything reads it, so the full experience can be replayed on demand.
-  if (location.search.includes("replay")) {
-    sessionStorage.removeItem("gc_hero_transition_done");
-  }
-
   // Scroll explore button interaction
   const scrollExploreBtn = document.getElementById('scroll-explore');
-  let transitionDone = sessionStorage.getItem("gc_hero_transition_done") === "true";
+  // In-memory only (no sessionStorage): every fresh page load/reload starts
+  // false, so the forced full-run always replays on refresh. It only stays
+  // true for the lifetime of this script execution, so scrolling back up
+  // and down again without reloading does not retrigger it.
+  let transitionDone = false;
   let isStageLocked = false;
   let isTweening = false;
   let unlockTimeout = null;
@@ -50,39 +48,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const buildCtx = buildCanvas ? buildCanvas.getContext("2d") : null;
 
   /* -----------------------------------------
-     FRAME SEQUENCE PRELOAD (behind the curtain)
+     SCROLL 0 - FRAME SEQUENCE PRELOAD
+     Pre-keyed transparent webp frames (background removed offline), so the
+     render floats directly on the site's black background: no rectangles,
+     no borders, no halos. All frames are preloaded up front; nothing is
+     fetched during the scroll itself.
      ----------------------------------------- */
-  const SEQ_FRAME_COUNT = 121;
-  const SEQ_DURATION = 5.0; // seconds, matches the retimed source clip
+  const SEQ_FRAME_COUNT = 198;
   const seqFrames = [];
   let seqLoadedCount = 0;
   let seqReady = false;
+  let lastDrawnFrame = -1;
+  let pendingFrame = null;
 
   function seqFramePath(i) {
-    const n = String(i + 1).padStart(4, "0");
-    return `./assets/hero/build_seq/frame_${n}.webp`;
+    const n = String(i).padStart(3, "0");
+    return `./assets/animations/scroll-0/webp/frame_${n}.webp`;
   }
-
-  // Guaranteed-loadable failsafe: a single small JPG of the final frame,
-  // shown if the full sequence isn't ready in time.
-  const posterImg = new Image();
-  posterImg.src = "./assets/hero/build_final_poster.jpg";
 
   if (buildCtx) {
     for (let i = 0; i < SEQ_FRAME_COUNT; i++) {
       const img = new Image();
-      img.onload = () => {
+      const onSettled = () => {
         seqLoadedCount++;
         if (seqLoadedCount >= SEQ_FRAME_COUNT) {
           seqReady = true;
         }
-      };
-      img.onerror = () => {
-        seqLoadedCount++;
-        if (seqLoadedCount >= SEQ_FRAME_COUNT) {
-          seqReady = true;
+        // If this frame was requested by the scrubber before it finished
+        // loading, draw it now so the canvas is never left stale/blank.
+        if (pendingFrame === i) {
+          drawSeqFrame(i);
         }
       };
+      img.onload = onSettled;
+      img.onerror = onSettled;
       img.src = seqFramePath(i);
       seqFrames.push(img);
     }
@@ -92,36 +91,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!buildCtx) return;
     const clamped = Math.max(0, Math.min(SEQ_FRAME_COUNT - 1, index));
     const img = seqFrames[clamped];
-    buildCtx.clearRect(0, 0, buildCanvas.width, buildCanvas.height);
     if (img && img.complete && img.naturalWidth > 0) {
+      // Only repaint when the frame actually changes - avoids useless
+      // clear/draw work (and flicker) on sub-frame scroll deltas.
+      if (clamped === lastDrawnFrame) return;
+      buildCtx.clearRect(0, 0, buildCanvas.width, buildCanvas.height);
       buildCtx.drawImage(img, 0, 0, buildCanvas.width, buildCanvas.height);
-    } else if (posterImg.complete && posterImg.naturalWidth > 0) {
-      buildCtx.drawImage(posterImg, 0, 0, buildCanvas.width, buildCanvas.height);
+      lastDrawnFrame = clamped;
+      pendingFrame = null;
+    } else {
+      // Keep showing the last painted frame; repaint as soon as it loads.
+      pendingFrame = clamped;
     }
-  }
-
-  if (transitionDone) {
-    if (buildStage) {
-      buildStage.classList.add("transition-done");
-    }
-    // Draw the final frame once frames are available - no animation, no lock.
-    // Falls back to the poster after a short wait if the sequence never
-    // loads, so a revisit is never left blank.
-    const revisitDeadline = Date.now() + 4000;
-    const drawFinalWhenReady = () => {
-      if (seqReady || Date.now() > revisitDeadline) {
-        drawSeqFrame(SEQ_FRAME_COUNT - 1);
-      } else {
-        requestAnimationFrame(drawFinalWhenReady);
-      }
-    };
-    drawFinalWhenReady();
   }
 
   if (scrollExploreBtn) {
     scrollExploreBtn.addEventListener('click', () => {
       // Mark transition done to prevent scroll locks
-      sessionStorage.setItem("gc_hero_transition_done", "true");
       transitionDone = true;
       if (buildStage) {
         buildStage.classList.add("transition-done");
@@ -638,6 +624,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Scroll 0 pin length as a fraction of the viewport height. Shared by
+  // the ScrollTrigger's end and the forced tween's target so the descent
+  // always lands exactly where the section unpins.
+  const SCROLL0_PIN_FRACTION = 1.5;
+
   function runForcedScrollTween() {
     if (isTweening || transitionDone) return;
 
@@ -648,102 +639,83 @@ document.addEventListener("DOMContentLoaded", () => {
     // silently kills the descent. We let Lenis itself drive the scroll
     // (lock:true blocks user input for the whole animation).
 
-    const targetScroll = buildStage
+    // Target: the END of the Scroll 0 pin. One scroll gesture from the
+    // hero rides through the hero exit AND the entire frame sequence
+    // (the scrubbed canvas follows the scroll position), unlocking only
+    // when the section unpins.
+    const stageTop = buildStage
       ? buildStage.getBoundingClientRect().top + window.scrollY
       : window.innerHeight * (1 + PIN_VH_FRACTION);
+    const targetScroll = stageTop + window.innerHeight * SCROLL0_PIN_FRACTION;
 
     lenis.scrollTo(targetScroll, {
-      duration: 4.5,
+      duration: 8,
       // power3.inOut
       easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
       lock: true,
       onComplete: () => {
         isTweening = false;
-        startBuildSequence();
+        // Scroll 0 fully played. Page unlocks here; scrolling back up
+        // replays the sequence in reverse, freely.
+        unlockStage(true);
       }
     });
   }
 
-  // Sequential labels synced to the sequence's ACTUAL elapsed playback time
-  // (a plain rAF-driven canvas player, no video element, so there is no
-  // currentTime to read or write). Reference: vaulk.com hero, each line pops
-  // in exactly when that part of the object takes shape.
-  const LABEL_TIMINGS = { headline: 1.6, sub: 3.4 };
-  let headlineShown = false;
-  let subShown = false;
-  let seqRafId = null;
-  let seqStartTime = null;
+  /* -----------------------------------------
+     SCROLL 0 - PINNED SCROLL-SCRUBBED SEQUENCE
+     The section pins for an extra 150% of viewport height (~250vh of page
+     travel in total). Scroll progress maps 1:1 onto the frame index, fully
+     bidirectional - down plays forward, up plays backward. No autoplay,
+     no time-based timelines. The copy fades in with a slight vertical
+     drift early in the pin and then stays fully visible - it must not
+     disappear before the section actually unpins into Scroll 1.
+     ----------------------------------------- */
+  if (buildStage && buildCtx) {
+    const scroll0Copy = [".build-eyebrow", ".build-headline", ".build-sub"];
 
-  function showHeadline() {
-    if (headlineShown) return;
-    headlineShown = true;
-    gsap.to(".build-headline", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
-  }
+    // Neutralize the CSS entrance offsets (they belonged to the old
+    // autoplay choreography): the canvas is always visible inside the
+    // pinned stage, the copy is driven purely by the scrubbed timeline.
+    gsap.set(".build-canvas-container", { opacity: 1, x: 0 });
+    gsap.set(scroll0Copy, { opacity: 0, x: 0, y: 36 });
 
-  function showSub() {
-    if (subShown) return;
-    subShown = true;
-    gsap.to(".build-sub", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
-  }
+    // Timeline authored on a 10-unit scale: positions map directly to
+    // fractions of the pin's scroll range (scrub does the time mapping).
+    const scroll0TL = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: "#build-stage",
+        start: "top top",
+        end: () => "+=" + (window.innerHeight * SCROLL0_PIN_FRACTION),
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          drawSeqFrame(Math.round(self.progress * (SEQ_FRAME_COUNT - 1)));
+        },
+        onRefresh: (self) => {
+          drawSeqFrame(Math.round(self.progress * (SEQ_FRAME_COUNT - 1)));
+        }
+      }
+    });
 
-  function seqTick(now) {
-    if (seqStartTime === null) seqStartTime = now;
-    const elapsed = (now - seqStartTime) / 1000;
-
-    if (elapsed >= LABEL_TIMINGS.headline) showHeadline();
-    if (elapsed >= LABEL_TIMINGS.sub) showSub();
-
-    if (elapsed >= SEQ_DURATION) {
-      drawSeqFrame(SEQ_FRAME_COUNT - 1);
-      finishBuildSequence();
-      return;
-    }
-
-    const frameIndex = Math.floor((elapsed / SEQ_DURATION) * SEQ_FRAME_COUNT);
-    drawSeqFrame(frameIndex);
-    seqRafId = requestAnimationFrame(seqTick);
-  }
-
-  function startBuildSequence() {
-    // Canvas object enters from off-screen right and starts building
-    // immediately - no dead frozen frame before playback.
-    gsap.to(".build-canvas-container", {
+    // Copy in: fade + upward drift over the first ~20% of the pin. No
+    // fade-out - it stays on screen for the rest of the pin and only
+    // leaves when the section unpins and the page moves on to Scroll 1.
+    scroll0TL.to(scroll0Copy, {
       opacity: 1,
-      x: 0,
-      duration: 1.0,
-      ease: "power3.out"
-    });
+      y: 0,
+      duration: 1.4,
+      stagger: 0.25
+    }, 0.4);
 
-    // t=0.0 - bare floor slab visible
-    gsap.to(".build-eyebrow", { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
-
-    seqStartTime = null;
-    if (seqRafId) cancelAnimationFrame(seqRafId);
-    seqRafId = requestAnimationFrame(seqTick);
-
-    // Hard safety cap: never leave the user locked if the sequence isn't
-    // ready/decoded in time (~6s max lock). This is a FAILED run - it
-    // unlocks the page but must not mark transitionDone, so the real
-    // movie is retryable instead of being permanently disabled.
-    unlockTimeout = setTimeout(() => {
-      if (isStageLocked) {
-        console.warn("Build sequence lock safety fallback timeout fired.");
-        drawSeqFrame(SEQ_FRAME_COUNT - 1);
-        finishBuildSequence(false);
-      }
-    }, 6000);
-  }
-
-  function finishBuildSequence(markComplete = true) {
-    if (seqRafId) {
-      cancelAnimationFrame(seqRafId);
-      seqRafId = null;
-    }
-    // Failsafe: if the sequence ended before reaching a label's timing,
-    // reveal it anyway so the copy is never left missing.
-    showHeadline();
-    showSub();
-    unlockStage(markComplete);
+    // Pad the timeline to the same 10-unit scale as before: keeps the
+    // fade-in fast and early (~20% of the pin) instead of the scrub
+    // stretching it across the whole reduced timeline now that the
+    // fade-out tween (which used to anchor the far end) is gone.
+    scroll0TL.to({}, { duration: 0.1 }, 9.9);
   }
 
   function unlockStage(markComplete = true) {
@@ -755,11 +727,10 @@ document.addEventListener("DOMContentLoaded", () => {
     lenis.start();
 
     // Only a genuinely completed sequence (or the explicit scroll-explore
-    // click) may mark the session done - a safety-timeout bailout must
-    // stay retryable on the next visit/reload.
+    // click) may mark it done - a safety-timeout bailout must stay
+    // retryable within the same page load.
     if (markComplete) {
       transitionDone = true;
-      sessionStorage.setItem("gc_hero_transition_done", "true");
       if (buildStage) {
         buildStage.classList.add("transition-done");
       }

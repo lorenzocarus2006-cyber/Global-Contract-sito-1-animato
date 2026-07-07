@@ -6,3 +6,7 @@ __pycache__/
 Screenshot*
 IMG_*.JPG
 Untitled
+
+# Raw scroll-0 source frames (133MB) - only the processed webp/ output ships
+assets/animations/scroll-0/*.jpg
+.cursor/

@@ -381,9 +381,10 @@
 
     </section>
 
-    <!-- Build Stage (Desktop Only): a real section further down the page,
-         in normal document flow. The forced descent scrolls the actual
-         page here; nothing in it plays until the tween's onComplete. -->
+    <!-- Scroll 0: first storytelling step, right below the hero.
+         Sticky (pinned) section: scroll position drives the canvas frame
+         sequence (assets/animations/scroll-0) bidirectionally. Copy on the
+         left, render on the right, same layout as the original draft. -->
     <section class="build-stage" id="build-stage">
       <div class="build-stage-content">
         <div class="build-copy">
@@ -392,7 +393,7 @@
           <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
         </div>
         <div class="build-canvas-container">
-          <canvas id="build-canvas" width="1280" height="714"></canvas>
+          <canvas id="build-canvas" width="1440" height="805"></canvas>
         </div>
       </div>
     </section>
