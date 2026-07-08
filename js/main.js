@@ -5,6 +5,12 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   
+  // Prevent browser scroll restoration and force page to top on reload
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  window.scrollTo(0, 0);
+  
   // Register GSAP ScrollTrigger
   gsap.registerPlugin(ScrollTrigger);
 
@@ -288,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initGallery() {
     // Clear any previous state or event listeners
+    gallery.classList.remove('has-active');
     if (hoverTimeout) clearTimeout(hoverTimeout);
     if (mobileScrollListener) {
       window.removeEventListener('scroll', mobileScrollListener);
@@ -324,13 +331,16 @@ document.addEventListener("DOMContentLoaded", () => {
       window.addEventListener('scroll', mobileScrollListener);
     } else {
       // DESKTOP HOVER ACCORDION
-      activeIndex = null;
+      activeIndex = 0;
       
       // Set initial desktop state
       panels.forEach((panel) => {
         const body = panel.querySelector('.panel-body');
         gsap.set(body, { opacity: 0, y: 20 });
       });
+
+      // Default focus: Bar & Restaurants active by default on load
+      animateAccordionState(0);
 
       // Register interactions based on touch/mouse
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -462,6 +472,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function animateAccordionState(targetIndex) {
     activeIndex = targetIndex;
     
+    // Toggle has-active class on gallery container to coordinate brightness dimming
+    if (targetIndex !== null) {
+      gallery.classList.add('has-active');
+    } else {
+      gallery.classList.remove('has-active');
+    }
+    
     panels.forEach((panel, idx) => {
       const isActive = idx === targetIndex;
       const isGalleryReset = targetIndex === null;
@@ -470,8 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       gsap.to(panel, {
         flexGrow: targetGrow,
-        duration: 0.8,
-        ease: "power2.inOut",
+        duration: 0.85, // Heavier, more deliberate feel
+        ease: "power4.out", // Premium decelerating ease
         overwrite: "auto"
       });
 
@@ -482,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
           y: 0,
           duration: 0.7,
           delay: 0.05,
-          ease: "power2.inOut",
+          ease: "power3.out",
           overwrite: "auto"
         });
       } else {
@@ -491,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
           opacity: 0,
           y: 20,
           duration: 0.5,
-          ease: "power2.inOut",
+          ease: "power3.out",
           overwrite: "auto"
         });
       }
