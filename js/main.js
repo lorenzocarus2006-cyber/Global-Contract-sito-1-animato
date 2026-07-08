@@ -134,8 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
         header.classList.remove('scrolled');
       }
     }
+  });  // Initial state setup for loader and nav header
+  gsap.set(".loader-logo-container", {
+    xPercent: -50,
+    yPercent: -50,
+    y: -45
   });
-
+  gsap.set(".main-header", { opacity: 0 });
 
   /* -----------------------------------------
      2. PRELOAD IMAGES & LOADER SYSTEM
@@ -153,25 +158,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let loadedCount = 0;
   const totalImages = images.length;
-  const progressBar = document.querySelector('.loader-progress-bar');
-  const percentageVal = document.querySelector('.loader-percentage');
+  const progressBar = document.querySelector('.loader-progress-bar-large');
 
   function updateProgress() {
     loadedCount++;
     const progress = Math.round((loadedCount / totalImages) * 100);
     
-    // Animate progress bar and text smoothly
-    gsap.to(progressBar, {
-      width: `${progress}%`,
-      duration: 0.4,
-      ease: "power2.out"
-    });
-    
-    percentageVal.textContent = `${progress}%`;
+    // Animate progress bar smoothly
+    if (progressBar) {
+      gsap.to(progressBar, {
+        width: `${progress}%`,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    }
 
     if (loadedCount >= totalImages) {
       // Small buffer delay for visual polish
-      setTimeout(runEntranceAnimations, 600);
+      setTimeout(runEntranceAnimations, 300);
     }
   }
 
@@ -215,38 +219,57 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Fade out loader content
-    tl.to(".loader-content", {
+    // 1. Fade out the progress container completely before transition starts
+    tl.to(".loader-progress-wrapper-large", {
       opacity: 0,
-      duration: 0.4,
+      duration: 0.3,
       ease: "power2.out"
     });
 
-    // Show the hairline seam
-    tl.to(".curtain-seam", {
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.out"
-    }, "-=0.2");
-
-    // Split the curtains
-    tl.to(".curtain-left", {
-      xPercent: -100,
-      duration: 1.2,
+    // 2. Stop the pulsing animation of the logo and smoothly center it
+    tl.set(".loader-logo-large", { animation: "none" });
+    tl.to(".loader-logo-container", {
+      y: 0,
+      duration: 0.6,
       ease: "power3.inOut"
-    }, "+=0.1");
+    }, "-=0.15");
 
-    tl.to(".curtain-right", {
-      xPercent: 100,
-      duration: 1.2,
-      ease: "power3.inOut"
-    }, "<");
-
-    tl.to(".curtain-seam", {
+    // 3. Dissolve the black background, revealing the hero beneath
+    tl.to(".loader-bg", {
       opacity: 0,
-      duration: 0.3,
-      ease: "power3.inOut"
+      duration: 0.9,
+      ease: "power2.inOut"
+    });
+
+    // Fade in the navbar at the same time
+    tl.to(".main-header", {
+      opacity: 1,
+      duration: 0.6,
+      ease: "power2.out"
     }, "<");
+
+    // 4. Move logo from screen center to the navbar left slot
+    // Starts 0.15s after centering, during the background dissolve for fluid continuity
+    tl.to(".loader-logo-container", {
+      x: () => {
+        const targetRect = document.querySelector('.nav-logo-img').getBoundingClientRect();
+        return targetRect.left + targetRect.width / 2 - window.innerWidth / 2;
+      },
+      y: () => {
+        const targetRect = document.querySelector('.nav-logo-img').getBoundingClientRect();
+        return targetRect.top + targetRect.height / 2 - window.innerHeight / 2;
+      },
+      scale: () => {
+        const targetRect = document.querySelector('.nav-logo-img').getBoundingClientRect();
+        return targetRect.width / 150; // container base size is 150px
+      },
+      duration: 1.15, // Confident, refined flight time
+      ease: "power3.inOut"
+    }, "-=0.75");
+
+    // 5. Land the logo: make the actual navbar logo visible and hide the loader logo
+    tl.set(".nav-logo-img", { opacity: 1 });
+    tl.set(".loader-logo-container", { display: "none" });
   }
 
 
@@ -495,8 +518,21 @@ document.addEventListener("DOMContentLoaded", () => {
   panels.forEach((panel) => {
     panel.addEventListener('click', (e) => {
       if (panel.classList.contains('active')) {
-        const sectorName = panel.querySelector('.panel-label').innerText.replace(/\n/g, ' ');
-        console.log(`Navigating to sector: ${sectorName}`);
+        const sectorLabel = panel.querySelector('.panel-label');
+        if (!sectorLabel) return;
+        const sectorName = sectorLabel.innerText.replace(/\n/g, ' ').trim().toLowerCase();
+        let catParam = "";
+        if (sectorName.includes("bar")) catParam = "bar-restaurants";
+        else if (sectorName.includes("alberghiero") || sectorName.includes("hotel")) catParam = "hotels";
+        else if (sectorName.includes("gelaterie")) catParam = "gelaterie-pasticcerie";
+        else if (sectorName.includes("salumerie")) catParam = "salumerie-panifici";
+        else if (sectorName.includes("farmacie")) catParam = "farmacie-parafarmacie";
+        else if (sectorName.includes("tabacchi")) catParam = "tabacchi";
+        else if (sectorName.includes("commerciali") || sectorName.includes("commercial")) catParam = "commercial-spaces";
+        
+        if (catParam) {
+          window.location.href = `./projects.html?category=${catParam}`;
+        }
       }
     });
   });
@@ -510,11 +546,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const mm = gsap.matchMedia();
 
-  // Pin range is a full viewport height of scroll travel: the hero is
-  // pinned for exactly one more screen's worth of scroll, so when it
-  // unpins the build-stage section (next in document flow, also 100vh)
-  // is sitting right at the top of the viewport - no gap, no overlap.
-  const PIN_VH_FRACTION = 1.0;
+  // Pin range is reduced by 50% for a denser, more immediate transition: the hero is
+  // pinned for exactly 0.5 viewport heights of scroll travel.
+  const PIN_VH_FRACTION = 0.5;
 
   mm.add("(min-width: 769px)", () => {
     // 1. Initialize Pinned Timeline & ScrollTrigger
@@ -624,10 +658,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Scroll 0 pin length as a fraction of the viewport height. Shared by
-  // the ScrollTrigger's end and the forced tween's target so the descent
-  // always lands exactly where the section unpins.
-  const SCROLL0_PIN_FRACTION = 1.5;
+  // Scroll 0 pin length is reduced by 50% for a denser, faster canvas frame sequence.
+  const SCROLL0_PIN_FRACTION = 0.75;
 
   function runForcedScrollTween() {
     if (isTweening || transitionDone) return;
@@ -649,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetScroll = stageTop + window.innerHeight * SCROLL0_PIN_FRACTION;
 
     lenis.scrollTo(targetScroll, {
-      duration: 8,
+      duration: 4.2, // Proportionally reduced from 8s to match compressed scroll length
       // power3.inOut
       easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
       lock: true,

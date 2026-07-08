@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progetti — Global Contract</title>
+  
+  <meta name="description" content="Esplora le nostre realizzazioni chiavi in mano in tutta la Sicilia: bar, hotel, gelaterie, salumerie, farmacie, tabacchi e spazi commerciali.">
+  
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/projects.css">
+  
+  <!-- Preload images for current grid view -->
+  <link rel="preload" href="./assets/bar_parisi.jpg" as="image">
+  <link rel="preload" href="./assets/restaurant.png" as="image">
+  <link rel="preload" href="./assets/hotel.png" as="image">
+  <link rel="preload" href="./assets/office.png" as="image">
+</head>
+<body>
+
+  <!-- Fixed Symmetrical Navigation Header -->
+  <header class="main-header">
+    <div class="header-container">
+      <a href="./index.html" class="logo-link" id="nav-logo">
+        <img src="./logo.png" alt="Global Contract Monogramma" class="nav-logo-img">
+      </a>
+      
+      <nav class="nav-menu" id="nav-menu">
+        <a href="./index.html#dettagli" class="nav-item">Chi siamo</a>
+        <a href="./projects.html" class="nav-item active">Progetti</a>
+        <a href="./index.html#shop" class="nav-item">Shop</a>
+      </nav>
+      
+      <div class="header-actions" id="nav-actions">
+        <a href="./index.html#dettagli" class="btn btn-outline">Richiedi consulenza</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Smooth Scroll Layer -->
+  <div id="smooth-wrapper">
+    <main id="smooth-content">
+
+      <!-- Section 1: Editorial Hero -->
+      <section class="projects-hero">
+        <h1 class="projects-hero-title">Selected Works</h1>
+        <p class="projects-hero-desc">
+          Ogni spazio è un ecosistema di flussi, luce e materiali progettato su misura per ottimizzare il workflow operativo ed esprimere l'identità autentica del brand.
+        </p>
+      </section>
+
+      <!-- Section 2: Segmented Category Selector -->
+      <div class="projects-filter-container">
+        <nav class="projects-filter-nav">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="bar-restaurants">Bar & Restaurants</button>
+          <button class="filter-btn" data-filter="hotels">Hotels</button>
+          <button class="filter-btn" data-filter="gelaterie-pasticcerie">Gelaterie & Pasticcerie</button>
+          <button class="filter-btn" data-filter="salumerie-panifici">Salumerie & Panifici</button>
+          <button class="filter-btn" data-filter="farmacie-parafarmacie">Farmacie & Parafarmacie</button>
+          <button class="filter-btn" data-filter="tabacchi">Tabacchi</button>
+          <button class="filter-btn" data-filter="commercial-spaces">Commercial Spaces</button>
+        </nav>
+      </div>
+
+      <!-- Section 3: Editorial Masonry Grid -->
+      <section class="projects-grid">
+
+        <!-- Bar & Restaurants -->
+        <article class="project-card card-featured" data-category="bar-restaurants">
+          <div class="project-image-container">
+            <img src="./assets/bar_parisi.jpg" alt="Bar & Pasticceria Parisi" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Bar & Restaurants</span>
+            <span class="project-city">Messina</span>
+          </div>
+          <h3 class="project-title">Bar & Pasticceria Parisi</h3>
+          <p class="project-desc">Riqualificazione d'interni e layout operativo per uno storico caffè siciliano.</p>
+        </article>
+
+        <article class="project-card card-standard" data-category="bar-restaurants">
+          <div class="project-image-container">
+            <img src="./assets/restaurant.png" alt="Ristorante Zagara" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Bar & Restaurants</span>
+            <span class="project-city">Taormina</span>
+          </div>
+          <h3 class="project-title">Ristorante Zagara</h3>
+          <p class="project-desc">Design d'atmosfera per un ristorante gourmet nel cuore di Taormina.</p>
+        </article>
+
+        <!-- Hotels -->
+        <article class="project-card card-standard" data-category="hotels">
+          <div class="project-image-container">
+            <img src="./assets/hotel.png" alt="Palazzo Sant'Elia Hotel" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Hotels</span>
+            <span class="project-city">Palermo</span>
+          </div>
+          <h3 class="project-title">Palazzo Sant'Elia Hotel</h3>
+          <p class="project-desc">Interior design e arredi contract per un boutique hotel d'epoca.</p>
+        </article>
+
+        <article class="project-card card-featured" data-category="hotels">
+          <div class="project-image-container">
+            <img src="./assets/office.png" alt="Klaos Suite Resort" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Hotels</span>
+            <span class="project-city">Cefalù</span>
+          </div>
+          <h3 class="project-title">Klaos Suite Resort</h3>
+          <p class="project-desc">Spazi comuni e suite ad alta tecnologia integrati nel paesaggio costiero.</p>
+        </article>
+
+        <!-- Gelaterie & Pasticcerie -->
+        <article class="project-card card-standard" data-category="gelaterie-pasticcerie">
+          <div class="project-image-container">
+            <img src="./assets/gelato.png" alt="Nivarata Gelateria" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Gelaterie & Pasticcerie</span>
+            <span class="project-city">Acireale</span>
+          </div>
+          <h3 class="project-title">Nivarata Gelateria</h3>
+          <p class="project-desc">Concept retail e layout fluidi per una gelateria artigianale pluripremiata.</p>
+        </article>
+
+        <article class="project-card card-standard" data-category="gelaterie-pasticcerie">
+          <div class="project-image-container">
+            <img src="./assets/cafe.png" alt="Caffè del Duomo" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Gelaterie & Pasticcerie</span>
+            <span class="project-city">Siracusa</span>
+          </div>
+          <h3 class="project-title">Caffè del Duomo</h3>
+          <p class="project-desc">Arredi su misura e banchi refrigerati integrati in un palazzo del XVIII secolo.</p>
+        </article>
+
+        <!-- Salumerie & Panifici -->
+        <article class="project-card card-featured" data-category="salumerie-panifici">
+          <div class="project-image-container">
+            <img src="./assets/bakery.png" alt="Pane & Companatico" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Salumerie & Panifici</span>
+            <span class="project-city">Ragusa</span>
+          </div>
+          <h3 class="project-title">Pane & Companatico</h3>
+          <p class="project-desc">Concept store moderno dedicato all'arte bianca e all'eccellenza culinaria locale.</p>
+        </article>
+
+        <article class="project-card card-standard" data-category="salumerie-panifici">
+          <div class="project-image-container">
+            <img src="./assets/bar_parisi.jpg" alt="Antica Salumeria" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Salumerie & Panifici</span>
+            <span class="project-city">Catania</span>
+          </div>
+          <h3 class="project-title">Antica Salumeria</h3>
+          <p class="project-desc">Valorizzazione delle eccellenze enogastronomiche in un layout premium ed accogliente.</p>
+        </article>
+
+        <!-- Farmacie & Parafarmacie -->
+        <article class="project-card card-standard" data-category="farmacie-parafarmacie">
+          <div class="project-image-container">
+            <img src="./assets/pharmacy.png" alt="Farmacia della Salute" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Farmacie & Parafarmacie</span>
+            <span class="project-city">Palermo</span>
+          </div>
+          <h3 class="project-title">Farmacia della Salute</h3>
+          <p class="project-desc">Ottimizzazione del percorso cliente e arredi tecnici d'avanguardia.</p>
+        </article>
+
+        <article class="project-card card-featured" data-category="farmacie-parafarmacie">
+          <div class="project-image-container">
+            <img src="./assets/pharmacy.png" alt="Parafarmacia d'Arezzo" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Farmacie & Parafarmacie</span>
+            <span class="project-city">Modica</span>
+          </div>
+          <h3 class="project-title">Parafarmacia d'Arezzo</h3>
+          <p class="project-desc">Spazio wellness e consulenza caratterizzato da linee minimali e finiture in legno chiaro.</p>
+        </article>
+
+        <!-- Tabacchi -->
+        <article class="project-card card-standard" data-category="tabacchi">
+          <div class="project-image-container">
+            <img src="./assets/tobacco.png" alt="Tabaccheria Centenaria" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Tabacchi</span>
+            <span class="project-city">Catania</span>
+          </div>
+          <h3 class="project-title">Tabaccheria Centenaria</h3>
+          <p class="project-desc">Ristrutturazione funzionale ed elegante per un punto vendita multiservizi.</p>
+        </article>
+
+        <article class="project-card card-standard" data-category="tabacchi">
+          <div class="project-image-container">
+            <img src="./assets/tobacco.png" alt="Cigar Lounge & Tabacchi" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Tabacchi</span>
+            <span class="project-city">Agrigento</span>
+          </div>
+          <h3 class="project-title">Cigar Lounge & Tabacchi</h3>
+          <p class="project-desc">Spazio raffinato per appassionati con arredi umidificati su misura.</p>
+        </article>
+
+        <!-- Commercial Spaces -->
+        <article class="project-card card-featured" data-category="commercial-spaces">
+          <div class="project-image-container">
+            <img src="./assets/retail.png" alt="Nadir Concept Store" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Commercial Spaces</span>
+            <span class="project-city">Palermo</span>
+          </div>
+          <h3 class="project-title">Nadir Concept Store</h3>
+          <p class="project-desc">Showroom di abbigliamento d'alta moda con allestimenti flessibili e finiture grezze.</p>
+        </article>
+
+        <article class="project-card card-standard" data-category="commercial-spaces">
+          <div class="project-image-container">
+            <img src="./assets/retail.png" alt="Atelier Ottica" class="project-image">
+            <div class="project-overlay"></div>
+          </div>
+          <div class="project-meta">
+            <span class="project-sector">Commercial Spaces</span>
+            <span class="project-city">Trapani</span>
+          </div>
+          <h3 class="project-title">Atelier Ottica</h3>
+          <p class="project-desc">Design espositivo d'avanguardia con illuminazione lineare integrata.</p>
+        </article>
+
+      </section>
+
+      <!-- Footer Space -->
+      <footer class="main-footer">
+        <div class="footer-container">
+          <p>&copy; 2026 Krea S.r.l. — Global Contract. Tutti i diritti riservati.</p>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <span class="separator">·</span>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- GSAP & Lenis CDN Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  
+  <!-- Custom JS -->
+  <script src="./js/projects.js"></script>
+</body>
+</html>

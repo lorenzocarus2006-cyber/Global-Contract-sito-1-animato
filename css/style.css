@@ -134,92 +134,74 @@ html.lenis, html.lenis body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: transparent; /* Transparent wrapper so curtains reveal hero */
   z-index: var(--z-loader);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
-}
-
-.curtain-half {
-  position: absolute;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  background-color: var(--color-bg-dark); /* Rich luxury black */
-  z-index: 1;
-  will-change: transform;
-}
-
-.curtain-left {
-  left: 0;
-}
-
-.curtain-right {
-  right: 0;
-}
-
-.curtain-seam {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100%;
-  background-color: rgba(176, 30, 86, 0.4); /* Low-opacity magenta hairline */
-  z-index: 2;
-  transform: translateX(-50%);
-  opacity: 0;
   pointer-events: none;
 }
 
-.loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  max-width: 250px;
+.loader-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  position: relative;
-  z-index: 3; /* Sit above the curtains */
+  height: 100%;
+  background-color: var(--color-bg-dark);
+  z-index: 99;
 }
 
-.loader-logo {
-  height: 70px;
-  width: auto;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 15px rgba(176, 30, 86, 0.4));
+.loader-logo-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  z-index: 101;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  transform: translate(-50%, -50%) translateY(-45px); /* Offset upward during loading */
+}
+
+.loader-logo-large {
+  width: 100%;
+  height: auto;
+  opacity: 1; /* Fully opaque during the entire transition to prevent flashing */
   animation: logoPulse 2s infinite ease-in-out;
 }
 
-.loader-progress-container {
+.loader-progress-wrapper-large {
+  position: fixed;
+  top: calc(50% + 100px);
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
+  max-width: 320px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.loader-progress-bar {
+.loader-progress-container-large {
+  width: 100%;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loader-progress-bar-large {
   width: 0%;
   height: 100%;
   background-color: var(--color-magenta-deep);
-  box-shadow: 0 0 10px var(--color-magenta-glow);
+  box-shadow: 0 0 15px var(--color-magenta-glow);
   transition: width 0.1s ease-out;
 }
 
-.loader-percentage {
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  color: var(--color-gray-text);
-}
-
 @keyframes logoPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(176, 30, 86, 0.3)); }
-  50% { transform: scale(1.04); filter: drop-shadow(0 0 25px rgba(176, 30, 86, 0.7)); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 /* -----------------------------------------
@@ -227,44 +209,60 @@ html.lenis, html.lenis body {
    ----------------------------------------- */
 .main-header {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 800px;
   z-index: var(--z-header);
-  padding: 1.5rem 0;
-  background: linear-gradient(to bottom, rgba(6, 6, 8, 0.9) 0%, rgba(6, 6, 8, 0) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0);
-  transition: padding 0.4s ease, background-color 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease;
+  background: rgba(12, 12, 16, 0.75); /* Darker, softer, premium architectural translucent surface */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline border */
+  border-radius: 100px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); /* Understated soft shadow */
+  padding: 0.5rem 1.25rem; /* Clean symmetrical horizontal padding */
+  /* Specific transitions to prevent GSAP opacity animation conflicts */
+  transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s, box-shadow 0.4s, border-color 0.4s;
+  opacity: 0; /* Initially hidden for the preloader animation */
 }
 
 .main-header.scrolled {
-  padding: 0.85rem 0;
-  background-color: rgba(6, 6, 8, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  top: 1rem;
+  background-color: rgba(12, 12, 16, 0.85);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
-.header-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 4rem;
+.main-header .header-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Center the navigation menu */
   align-items: center;
+  position: relative;
+  height: 44px; /* Explicit height for perfect vertical centering of all elements */
 }
 
 .logo-link {
+  position: absolute;
+  left: 0.5rem; /* Align left inside header container padding */
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  justify-content: center;
+  height: 36px;
   text-decoration: none;
-  color: var(--color-white);
 }
 
 .nav-logo-img {
-  height: 38px;
+  height: 36px; /* Increased by ~12.5% for visual anchoring */
   width: auto;
-  filter: drop-shadow(0 0 5px rgba(176, 30, 86, 0.2));
+  display: block;
+  opacity: 0; /* Starts hidden for the preloader anim landing */
   transition: transform 0.4s ease;
 }
 
@@ -272,30 +270,29 @@ html.lenis, html.lenis body {
   transform: rotate(5deg) scale(1.05);
 }
 
-.logo-text {
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-}
-
 /* Nav Menu */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.2rem; /* Clean, refined spacing */
 }
 
 .nav-item {
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.08em;
+  color: var(--color-offwhite) !important; /* Premium offwhite text color */
   text-decoration: none;
   position: relative;
   padding: 0.4rem 0;
-  transition: var(--transition-fast);
+  transition: opacity 0.3s ease, color 0.3s ease;
+  opacity: 0.7;
+}
+
+.nav-item:hover, .nav-item.active {
+  color: var(--color-white) !important;
+  opacity: 1;
 }
 
 .nav-item::after {
@@ -304,29 +301,53 @@ html.lenis, html.lenis body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
-  background-color: var(--color-magenta-deep);
+  height: 1px; /* Subtle hairline indicator */
+  background-color: var(--color-white);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nav-item:hover {
-  color: var(--color-white);
-}
-
-.nav-item:hover::after {
+.nav-item:hover::after, .nav-item.active::after {
   transform: scaleX(1);
   transform-origin: left;
 }
 
-.nav-item.active {
-  color: var(--color-white);
+.header-actions {
+  position: absolute;
+  right: 0.25rem; /* Align right inside header container */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
 }
 
-.nav-item.active::after {
-  transform: scaleX(1);
-  background-color: var(--color-magenta-glow);
+.header-actions .btn-outline {
+  color: var(--color-bg-dark) !important; /* Dark text on white button */
+  background-color: var(--color-white) !important; /* Solid white background for Apple/Linear premium style */
+  border: none !important;
+  height: 34px !important; /* Explicit height for perfect vertical centering control */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 1.25rem !important; /* Symmetrical padding */
+  border-radius: 100px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease !important;
+}
+
+.header-actions .btn-outline::before {
+  display: none !important;
+}
+
+.header-actions .btn-outline:hover {
+  background-color: var(--color-magenta-glow) !important;
+  color: var(--color-white) !important;
+  box-shadow: 0 4px 15px rgba(230, 35, 106, 0.4) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Button UI */
@@ -406,8 +427,8 @@ html.lenis, html.lenis body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.5rem;
-  padding: 0.5rem 2rem;
+  gap: 1.25rem; /* Increased spacing to let typography breathe */
+  padding: 1rem 2rem;
   height: 22vh;
   min-height: 120px;
   z-index: 150; /* Above .main-header during ascent, see .gallery-container */
@@ -416,9 +437,9 @@ html.lenis, html.lenis body {
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: 2.85rem;
+  font-size: 3.25rem; /* Increased size for cleaner, more premium hierarchy */
   font-weight: 300;
-  line-height: 1.2;
+  line-height: 1.15;
   letter-spacing: -0.01em;
   color: var(--color-offwhite);
 }
@@ -426,19 +447,19 @@ html.lenis, html.lenis body {
 .highlight-magenta {
   color: var(--color-magenta-deep);
   font-style: italic;
-  font-weight: 400;
+  font-weight: 300; /* Lighter weight for understated, editorial elegance */
   position: relative;
   text-shadow: 0 0 30px rgba(176, 30, 86, 0.2);
 }
 
 .hero-subtitle {
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 0.88rem; /* Quieter, more refined size */
   font-weight: 300;
-  line-height: 1.5;
-  max-width: 600px;
+  line-height: 1.65; /* Increased line-height for airiness */
+  max-width: 560px; /* Editorial line wrapping */
   color: var(--color-gray-text);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.03em; /* Open letter-spacing for premium feel */
 }
 
 /* -----------------------------------------
@@ -447,15 +468,11 @@ html.lenis, html.lenis body {
 .gallery-container {
   display: flex;
   width: 100%;
-  height: 58vh;
-  min-height: 350px;
-  /* No overflow clip here either - panels are the topmost moving layer
-     during ascent and must clear the header, not die at this box's edge. */
+  height: 50vh; /* Reduced height by approximately 15% */
+  min-height: 300px;
   background-color: transparent;
   position: relative;
-  z-index: 150; /* Above .main-header (100) for the ascent pass-through;
-                   at rest the header's own padding-top offset keeps them
-                   visually non-overlapping, so this is safe unconditionally. */
+  z-index: 150; /* Above .main-header (100) for the ascent pass-through */
 }
 
 /* Sector Panel */
@@ -543,8 +560,8 @@ html.lenis, html.lenis body {
 }
 
 .panel-icon {
-  width: 42px;
-  height: 42px;
+  width: 36px; /* Reduced by ~14.3% (approx 15%) */
+  height: 36px;
   color: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
@@ -582,7 +599,7 @@ html.lenis, html.lenis body {
   transform: scale(1);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 2.5rem 0;
-  font-size: clamp(0.5rem, 1.25vh, 0.65rem);
+  font-size: clamp(0.58rem, 1.45vh, 0.75rem); /* Increased by ~15% for readability */
   letter-spacing: clamp(0.1em, 0.3vh, 0.16em);
 }
 
@@ -600,7 +617,7 @@ html.lenis, html.lenis body {
 
 .panel-label {
   font-family: var(--font-serif);
-  font-size: 1.85rem;
+  font-size: 2.12rem; /* Increased size by ~15% */
   font-weight: 400;
   line-height: 1.1;
   color: var(--color-white);
@@ -877,11 +894,13 @@ html.lenis, html.lenis body {
   }
 
   .hero-title {
-    font-size: 2.25rem;
+    font-size: 2.45rem;
+    line-height: 1.15;
   }
   
   .hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
   }
   
   .gallery-container {
@@ -961,6 +980,8 @@ html.lenis, html.lenis body {
   /* Make the gallery vertical */
   .gallery-container {
     flex-direction: column !important;
+    width: 100% !important; /* Full width on mobile */
+    margin: 0 !important;
     height: 120vh !important; /* Fixed height to prevent scroll jitter */
     min-height: 650px !important;
   }
@@ -1023,14 +1044,14 @@ html.lenis, html.lenis body {
   }
 
   .panel-icon {
-    width: 32px !important;
-    height: 32px !important;
+    width: 27px !important; /* Reduced by ~15% */
+    height: 27px !important;
     transition: width 0.6s ease, height 0.6s ease !important;
   }
 
   .sector-panel.active .panel-icon {
-    width: 40px !important;
-    height: 40px !important;
+    width: 34px !important; /* Reduced by ~15% */
+    height: 34px !important;
   }
 
   .panel-body {
@@ -1056,7 +1077,7 @@ html.lenis, html.lenis body {
     display: flex !important;
     flex-direction: row !important;
     gap: 0.35rem !important;
-    font-size: 1.1rem !important;
+    font-size: 1.27rem !important; /* Increased by ~15% */
     color: var(--color-white) !important;
     margin: 0 !important;
     line-height: 1.2 !important;
@@ -1069,7 +1090,7 @@ html.lenis, html.lenis body {
   .sector-panel.active .panel-label {
     flex-direction: column !important;
     gap: 0 !important;
-    font-size: 1.85rem !important;
+    font-size: 2.12rem !important; /* Increased by ~15% */
   }
 
   /* Description and CTA are hidden when collapsed, visible when active */
@@ -1111,7 +1132,7 @@ html.lenis, html.lenis body {
     align-items: center;
     justify-content: center;
     position: relative;
-    background-color: var(--color-bg-dark);
+    background: linear-gradient(to bottom, transparent 0%, var(--color-bg-dark) 25vh, var(--color-bg-dark) 100%);
     z-index: var(--z-content);
   }
 
@@ -1222,7 +1243,7 @@ html.lenis, html.lenis body {
     align-items: center;
     justify-content: center;
     position: relative;
-    background-color: var(--color-bg-dark);
+    background: linear-gradient(to bottom, transparent 0%, var(--color-bg-dark) 25vh, var(--color-bg-dark) 100%);
     z-index: var(--z-content);
   }
 
