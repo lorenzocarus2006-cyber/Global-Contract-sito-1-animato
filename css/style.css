@@ -52,7 +52,10 @@ html {
 body {
   overflow-x: hidden;
   position: relative;
-  background-color: var(--color-bg-dark);
+  background-color: #050505; /* Deeper black for architectural high contrast */
+  background-image: 
+    radial-gradient(circle at 90% 10%, rgba(230, 218, 202, 0.055) 0%, rgba(230, 35, 106, 0.015) 35%, transparent 70%); /* Ultra-subtle upper-right light cast with gentle magenta hints */
+  background-attachment: fixed;
 }
 
 /* Custom Scrollbar */
@@ -98,24 +101,24 @@ html.lenis, html.lenis body {
 }
 
 .glow-orb-1 {
-  width: 1100px;
-  height: 1100px;
-  top: -10%;
-  right: -25%;
-  background: radial-gradient(circle, rgba(230, 218, 202, 0.055) 0%, transparent 75%);
-  filter: blur(180px);
-  animation: floatOrb1 35s infinite alternate ease-in-out;
+  width: 1200px;
+  height: 1200px;
+  top: -15%;
+  right: -20%;
+  background: radial-gradient(circle, rgba(230, 218, 202, 0.03) 0%, rgba(230, 35, 106, 0.008) 50%, transparent 80%);
+  filter: blur(200px);
+  animation: floatOrb1 40s infinite alternate ease-in-out;
   mix-blend-mode: screen;
 }
 
 .glow-orb-2 {
-  width: 1300px;
-  height: 1300px;
-  bottom: -25%;
-  right: -15%;
-  background: radial-gradient(circle, rgba(215, 222, 235, 0.04) 0%, transparent 75%);
-  filter: blur(200px);
-  animation: floatOrb2 40s infinite alternate ease-in-out;
+  width: 1400px;
+  height: 1400px;
+  bottom: -30%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(215, 222, 235, 0.015) 0%, transparent 80%);
+  filter: blur(220px);
+  animation: floatOrb2 45s infinite alternate ease-in-out;
   mix-blend-mode: screen;
 }
 
@@ -225,7 +228,7 @@ html.lenis, html.lenis body {
   border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline border */
   border-radius: 100px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); /* Understated soft shadow */
-  padding: 0.5rem 1.25rem; /* Clean symmetrical horizontal padding */
+  padding: 0.3rem 1.25rem; /* Sleeker visual padding */
   /* Specific transitions to prevent GSAP opacity animation conflicts */
   transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s, box-shadow 0.4s, border-color 0.4s;
   opacity: 0; /* Initially hidden for the preloader animation */
@@ -247,7 +250,7 @@ html.lenis, html.lenis body {
   justify-content: center; /* Center the navigation menu */
   align-items: center;
   position: relative;
-  height: 44px; /* Explicit height for perfect vertical centering of all elements */
+  height: 34px; /* Sleeker explicit height for perfect vertical alignment */
 }
 
 .logo-link {
@@ -258,12 +261,12 @@ html.lenis, html.lenis body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: 26px;
   text-decoration: none;
 }
 
 .nav-logo-img {
-  height: 36px; /* Increased by ~12.5% for visual anchoring */
+  height: 26px; /* Sleeker height */
   width: auto;
   display: block;
   opacity: 0; /* Starts hidden for the preloader anim landing */
@@ -289,7 +292,7 @@ html.lenis, html.lenis body {
   color: var(--color-offwhite) !important; /* Premium offwhite text color */
   text-decoration: none;
   position: relative;
-  padding: 0.4rem 0;
+  padding: 0.2rem 0; /* Sleeker vertical height */
   transition: opacity 0.3s ease, color 0.3s ease;
   opacity: 0.75;
 }
@@ -330,15 +333,15 @@ html.lenis, html.lenis body {
   color: var(--color-bg-dark) !important; /* Dark text on white button */
   background-color: var(--color-white) !important; /* Solid white background for Apple/Linear premium style */
   border: none !important;
-  height: 32px !important; /* Sleeker height */
+  height: 26px !important; /* Sleeker vertical profile (26px height) */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0 1.2rem !important; /* Symmetrical padding */
+  padding: 0 1.0rem !important; /* Symmetrical padding */
   border-radius: 100px !important;
-  font-size: 0.7rem !important; /* Sleeker size */
+  font-size: 0.65rem !important; /* Precise, high-end display size */
   font-weight: 500 !important; /* Less chunky weight */
-  letter-spacing: 0.08em !important; /* Open tracking */
+  letter-spacing: 0.1em !important; /* Open luxury tracking */
   text-transform: uppercase !important;
   transition: all 0.3s ease !important;
 }
@@ -424,64 +427,203 @@ html.lenis, html.lenis body {
   background-color: var(--color-bg-dark);
 }
 
-/* Compact Typography Block (~22vh) */
+/* Compact Typography Block (~26vh) */
 .hero-text-block {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.75rem; /* Tighter gap for better vertical rhythm */
-  padding: 1.5rem 2rem 0.5rem;
+  gap: 2.0rem; /* Generous spacing between title and stats grid */
+  padding: 2.2rem 2rem 0.5rem;
   height: auto;
-  min-height: 24vh;
+  min-height: 26vh;
   z-index: 150; /* Above .main-header during ascent, see .gallery-container */
   will-change: transform, opacity;
 }
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: 3.5rem; /* Refined display serif size */
+  font-size: 2.9rem; /* Reduced by ~17% for high-end elegance */
   font-weight: 300;
-  line-height: 1.2; /* Breathable editorial line-height */
-  letter-spacing: -0.015em; /* Tighter letter-spacing for premium display */
+  line-height: 1.25; /* Editorial leading */
+  letter-spacing: -0.015em;
   color: var(--color-offwhite);
 }
 
-.hero-subtitle {
-  font-family: var(--font-sans);
-  font-size: 0.88rem; /* Quieter, more refined size */
-  font-weight: 300;
-  line-height: 1.7; /* Increased line-height for airiness */
-  max-width: 580px; /* Editorial line wrapping */
-  color: var(--color-gray-text);
-  letter-spacing: 0.04em; /* Open letter-spacing for premium feel */
-  opacity: 0.9;
-}
-
-.hero-trust-strip {
+/* Editorial Statistics Grid */
+.hero-stats-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex-wrap: wrap;
-  column-gap: 1.25rem;
-  row-gap: 0.5rem;
-  font-family: var(--font-sans);
-  font-size: 0.65rem; /* Elegant, small typography */
-  font-weight: 500;
-  text-transform: uppercase;
-  color: var(--color-gray-text);
-  letter-spacing: 0.12em; /* Wide, airy letter spacing */
-  margin-top: 0.5rem;
-  opacity: 0.75;
-  transition: opacity 0.3s ease;
+  gap: 4.5rem; /* Generous spacing Boffi/Molteni style */
+  max-width: 960px;
+  width: 100%;
 }
 
-.trust-dot {
-  color: var(--color-magenta-deep);
-  font-size: 0.8rem;
-  opacity: 0.6;
-  user-select: none;
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.stat-number {
+  font-family: var(--font-serif);
+  font-size: 1.85rem; /* Precise editorial size */
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--color-white);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.4rem;
+}
+
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.6rem; /* Quiet, precise uppercase description */
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-gray-text);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* -----------------------------------------
+   5. RESPONSIVE MOBILE NAVIGATION DRAWER
+   ----------------------------------------- */
+/* Hamburger Toggle Button */
+.mobile-menu-toggle {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 2100; /* Higher than header and overlay */
+  flex-direction: column;
+  gap: 6px;
+  width: 28px;
+  height: 24px;
+  justify-content: center;
+  align-items: flex-end;
+  margin-left: 0.5rem;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  background-color: var(--color-white);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.4s ease;
+}
+
+.mobile-menu-toggle span:last-child {
+  width: 14px;
+}
+
+/* Active hamburger state (X) */
+.mobile-menu-toggle.active span:first-child {
+  transform: translateY(4px) rotate(45deg);
+  width: 20px;
+}
+
+.mobile-menu-toggle.active span:last-child {
+  transform: translateY(-4px) rotate(-45deg);
+  width: 20px;
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(6, 6, 8, 0.96); /* Matches Deep Dark Canvas */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.2rem;
+}
+
+.mobile-nav-item {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-offwhite);
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-menu-overlay.active .mobile-nav-item {
+  opacity: 0.85;
+  transform: translateY(0);
+}
+
+.mobile-menu-overlay.active .mobile-nav-item:hover {
+  opacity: 1;
+  color: var(--color-white);
+}
+
+.mobile-cta-item {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.6rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.mobile-cta-item:hover {
+  background-color: var(--color-white);
+  color: var(--color-bg-dark) !important;
+  border-color: var(--color-white);
+}
+
+/* Staggered transition delays for menu items */
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(1) { transition-delay: 0.1s; }
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(2) { transition-delay: 0.2s; }
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(3) { transition-delay: 0.3s; }
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(4) { transition-delay: 0.4s; }
+
+/* Stacking context and style shift for mobile menu open state */
+body.menu-open .main-header {
+  z-index: 2200 !important; /* Above the overlay z-index: 2000 */
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body.menu-open .mobile-menu-toggle span {
+  background-color: var(--color-white) !important;
 }
 
 /* -----------------------------------------
@@ -722,13 +864,26 @@ html.lenis, html.lenis body {
 
 /* Subtle, smooth dimming (10-15%) of non-focused panels to enhance visual discovery */
 .gallery-container.has-active .sector-panel:not(.active) .panel-img {
-  filter: brightness(0.48) contrast(1.02) saturate(0.8);
+  filter: brightness(0.44) contrast(1.02) saturate(0.75); /* Slightly darker for discovery depth */
 }
 
+/* Delicate spotlight illumination on active card, and dark vignette overlay on inactive cards */
 .sector-panel.active .panel-overlay {
+  background: 
+    radial-gradient(circle at 50% 35%, rgba(230, 218, 202, 0.12) 0%, transparent 60%), /* Gentle warm lighting beam */
+    linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.55) 0%, 
+      rgba(0, 0, 0, 0.1) 30%, 
+      rgba(0, 0, 0, 0.1) 60%, 
+      rgba(0, 0, 0, 0.85) 100%
+    );
+}
+
+.gallery-container.has-active .sector-panel:not(.active) .panel-overlay {
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85); /* Delicate vignette around inactive cards */
   background: linear-gradient(to bottom, 
-    rgba(0, 0, 0, 0.6) 0%, 
-    rgba(0, 0, 0, 0.2) 30%, 
+    rgba(0, 0, 0, 0.65) 0%, 
+    rgba(0, 0, 0, 0.35) 45%, 
     rgba(0, 0, 0, 0.9) 100%
   );
 }
@@ -992,11 +1147,55 @@ html.lenis, html.lenis body {
 
 @media (max-width: 768px) {
   .nav-menu {
-    display: none; /* Premium minimal layout on small screens */
+    display: none; /* Hide desktop nav menu */
+  }
+  
+  .mobile-menu-toggle {
+    display: flex; /* Show custom hamburger on mobile */
+  }
+  
+  .header-actions {
+    gap: 0.4rem;
+  }
+  
+  .header-actions .btn-outline {
+    font-size: 0.62rem !important;
+    padding: 0 0.75rem !important;
+    height: 24px !important;
+    letter-spacing: 0.05em !important;
+  }
+  
+  .hero-text-block {
+    padding: 5.5rem 1.5rem 1.5rem;
+    gap: 1.5rem;
+    min-height: auto;
   }
   
   .hero-title {
-    font-size: 1.85rem;
+    font-size: 1.75rem; /* Sleeker title size on mobile */
+    line-height: 1.3;
+  }
+  
+  .hero-stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 layout on mobile */
+    gap: 1.25rem 1.5rem;
+    max-width: 100%;
+    margin-top: 0.75rem;
+  }
+  
+  .stat-block {
+    flex: none;
+  }
+  
+  .stat-number {
+    font-size: 1.45rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .stat-label {
+    font-size: 0.52rem;
+    line-height: 1.3;
   }
 
   /* Hide the vertical label on mobile */

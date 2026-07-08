@@ -369,10 +369,10 @@ document.addEventListener("DOMContentLoaded", () => {
           panel.addEventListener('focus', focusHandler);
         });
 
-        // Reset when mouse leaves the entire gallery area
+        // Reset when mouse leaves the entire gallery area to the default first category
         const leaveHandler = () => {
           if (hoverTimeout) clearTimeout(hoverTimeout);
-          animateAccordionState(null);
+          animateAccordionState(0);
         };
         gallery._leaveHandler = leaveHandler;
         gallery.addEventListener('mouseleave', leaveHandler);
@@ -487,8 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       gsap.to(panel, {
         flexGrow: targetGrow,
-        duration: 0.85, // Heavier, more deliberate feel
-        ease: "power4.out", // Premium decelerating ease
+        duration: 1.0, // Heavy, physically smooth deceleration glide
+        ease: "expo.out", // Premium Apple-style exponential ease
         overwrite: "auto"
       });
 
@@ -497,8 +497,8 @@ document.addEventListener("DOMContentLoaded", () => {
         gsap.to(body, {
           opacity: 1,
           y: 0,
-          duration: 0.7,
-          delay: 0.05,
+          duration: 0.85,
+          delay: 0.12, // Let the panel expand first, preventing text overlap jitter
           ease: "power3.out",
           overwrite: "auto"
         });
@@ -507,7 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gsap.to(body, {
           opacity: 0,
           y: 20,
-          duration: 0.5,
+          duration: 0.45,
           ease: "power3.out",
           overwrite: "auto"
         });
@@ -811,5 +811,33 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }, { passive: false, capture: true });
+
+  // Mobile menu toggle logic
+  const mobileToggle = document.querySelector('.mobile-menu-toggle');
+  const mobileOverlay = document.querySelector('.mobile-menu-overlay');
+  const mobileLinks = document.querySelectorAll('.mobile-nav-item');
+
+  if (mobileToggle && mobileOverlay) {
+    mobileToggle.addEventListener('click', () => {
+      const isActive = mobileToggle.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      document.body.classList.toggle('menu-open', isActive);
+      
+      if (isActive) {
+        lenis.stop(); // Stop scroll when menu is open
+      } else {
+        lenis.start();
+      }
+    });
+
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileToggle.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        lenis.start();
+      });
+    });
+  }
 
 });
