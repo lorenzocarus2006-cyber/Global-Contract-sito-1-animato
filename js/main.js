@@ -546,9 +546,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const mm = gsap.matchMedia();
 
-  // Pin range is reduced by 50% for a denser, more immediate transition: the hero is
-  // pinned for exactly 0.5 viewport heights of scroll travel.
-  const PIN_VH_FRACTION = 0.5;
+  // Pin range is reduced by approximately 65% for a denser, more immediate transition: the hero is
+  // pinned for exactly 0.35 viewport heights of scroll travel.
+  const PIN_VH_FRACTION = 0.35;
 
   mm.add("(min-width: 769px)", () => {
     // 1. Initialize Pinned Timeline & ScrollTrigger
@@ -658,8 +658,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Scroll 0 pin length is reduced by 50% for a denser, faster canvas frame sequence.
-  const SCROLL0_PIN_FRACTION = 0.75;
+  // Scroll 0 pin length is reduced by 65% for a denser, faster canvas frame sequence.
+  const SCROLL0_PIN_FRACTION = 0.525;
 
   function runForcedScrollTween() {
     if (isTweening || transitionDone) return;
@@ -681,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetScroll = stageTop + window.innerHeight * SCROLL0_PIN_FRACTION;
 
     lenis.scrollTo(targetScroll, {
-      duration: 4.2, // Proportionally reduced from 8s to match compressed scroll length
+      duration: 2.8, // Proportionally reduced from 8s to match compressed scroll length
       // power3.inOut
       easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
       lock: true,
