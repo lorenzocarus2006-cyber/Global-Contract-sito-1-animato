@@ -37,8 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   gsap.ticker.lagSmoothing(0);
 
-  // Scroll explore button interaction
-  const scrollExploreBtn = document.getElementById('scroll-explore');
+
   // In-memory only (no sessionStorage): every fresh page load/reload starts
   // false, so the forced full-run always replays on refresh. It only stays
   // true for the lifetime of this script execution, so scrolling back up
@@ -111,24 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (scrollExploreBtn) {
-    scrollExploreBtn.addEventListener('click', () => {
-      // Mark transition done to prevent scroll locks
-      transitionDone = true;
-      if (buildStage) {
-        buildStage.classList.add("transition-done");
-      }
-      drawSeqFrame(SEQ_FRAME_COUNT - 1);
-      isStageLocked = false;
-      isTweening = false;
-      clearTimeout(unlockTimeout);
-      lenis.start();
-      lenis.scrollTo('#dettagli', {
-        duration: 1.4,
-        ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-      });
-    });
-  }
+
 
   // Header state on scroll
   lenis.on('scroll', (e) => {
@@ -313,8 +295,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (desc) gsap.killTweensOf(desc);
       if (cta) gsap.killTweensOf(cta);
 
-      // Clean inline styles
-      gsap.set(panel, { flexGrow: 1, flexBasis: 0 });
+      // Clean inline styles - clearProps (not a hardcoded flexBasis:0) so the
+      // mobile height-tween isn't fought by a leftover inline flex-basis,
+      // which takes priority over height as the column flex main-axis size.
+      gsap.set(panel, { clearProps: "flexGrow,flexBasis,height" });
       if (body) gsap.set(body, { clearProps: "all" });
       if (desc) gsap.set(desc, { clearProps: "all" });
       if (cta) gsap.set(cta, { clearProps: "all" });
@@ -350,8 +334,10 @@ document.addEventListener("DOMContentLoaded", () => {
         panels.forEach((panel, idx) => {
           const enterHandler = () => {
             if (window.scrollY > 5) return; // Ignore hover if scrolled down
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             if (hoverTimeout) clearTimeout(hoverTimeout);
             hoverTimeout = setTimeout(() => {
+              if (isTweening || isStageLocked) return; // Re-check: forced-scroll may have started mid-debounce
               if (activeIndex !== idx) {
                 animateAccordionState(idx);
               }
@@ -359,9 +345,10 @@ document.addEventListener("DOMContentLoaded", () => {
           };
           panel._enterHandler = enterHandler;
           panel.addEventListener('mouseenter', enterHandler);
-          
+
           const focusHandler = () => {
             if (window.scrollY > 5) return; // Ignore focus if scrolled down
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             if (hoverTimeout) clearTimeout(hoverTimeout);
             animateAccordionState(idx);
           };
@@ -371,6 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Reset when mouse leaves the entire gallery area to the default first category
         const leaveHandler = () => {
+          if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
           if (hoverTimeout) clearTimeout(hoverTimeout);
           animateAccordionState(0);
         };
@@ -383,6 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (panel.classList.contains('active')) {
               return;
             }
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             e.preventDefault();
             animateAccordionState(idx);
           };
@@ -438,32 +427,52 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function animateMobileAccordionState(targetIndex) {
+    if (targetIndex !== -1 && targetIndex !== null) {
+      gallery.classList.add('has-active');
+    } else {
+      gallery.classList.remove('has-active');
+    }
+
     panels.forEach((panel, idx) => {
       const isActive = idx === targetIndex;
-      const targetGrow = isActive ? 5.8 : 1.0;
-      
-      gsap.to(panel, {
-        flexGrow: targetGrow,
-        duration: 0.6,
-        ease: "power2.out",
-        overwrite: "auto"
-      });
-
+      const targetHeight = isActive ? 380 : 240;
       const desc = panel.querySelector('.panel-description');
       const cta = panel.querySelector('.panel-cta');
+      // Fade only the description/cta - the label has no rotated collapsed
+      // stand-in on mobile (unlike desktop), so it must stay legible always.
+      const fadeTargets = [desc, cta].filter(Boolean);
+
+      // Stop running tweens to prevent overlapping visual state collisions
+      gsap.killTweensOf(panel);
+      if (fadeTargets.length) gsap.killTweensOf(fadeTargets);
+
+      // Animate height on mobile column layout instead of flex-grow
+      gsap.to(panel, {
+        height: targetHeight,
+        duration: 0.5,
+        ease: "power2.out"
+      });
 
       if (isActive) {
         panel.classList.add('active');
-        if (desc && cta) {
-          gsap.fromTo([desc, cta], 
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", overwrite: "auto", delay: 0.1 }
-          );
+        if (fadeTargets.length) {
+          gsap.to(fadeTargets, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            delay: 0.1,
+            ease: "power2.out"
+          });
         }
       } else {
         panel.classList.remove('active');
-        if (desc && cta) {
-          gsap.set([desc, cta], { opacity: 0, y: 10 });
+        if (fadeTargets.length) {
+          gsap.to(fadeTargets, {
+            opacity: 0,
+            y: 10,
+            duration: 0.22,
+            ease: "power2.out"
+          });
         }
       }
     });
@@ -484,13 +493,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const isGalleryReset = targetIndex === null;
       const targetGrow = isGalleryReset ? 1 : (isActive ? 4.6 : 0.4);
       const body = panel.querySelector('.panel-body');
-      
+
+      // overwrite:"auto" (not killTweensOf(panel)) - killTweensOf(panel) would
+      // also wipe this panel's unrelated heroExitTL y-exit tween whenever the
+      // scroll pin resets the accordion (onUpdate below), freezing the ascent
+      // dead. killTweensOf(body) is safe on its own: heroExitTL never targets
+      // .panel-body, only the panel itself and .hero-text-block. It's needed
+      // here on top of overwrite:"auto" because the active-state tween below
+      // carries a delay - under fast repeated hover switching, overwrite:auto
+      // can race with a still-delayed (not yet started) tween and leave the
+      // body's opacity/transform stuck rather than reset, a rare ghost-text
+      // state that only shows up under rapid input.
       gsap.to(panel, {
         flexGrow: targetGrow,
         duration: 1.0, // Heavy, physically smooth deceleration glide
         ease: "expo.out", // Premium Apple-style exponential ease
         overwrite: "auto"
       });
+
+      gsap.killTweensOf(body);
 
       if (isActive) {
         panel.classList.add('active');
@@ -499,8 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
           y: 0,
           duration: 0.85,
           delay: 0.12, // Let the panel expand first, preventing text overlap jitter
-          ease: "power3.out",
-          overwrite: "auto"
+          ease: "power3.out"
         });
       } else {
         panel.classList.remove('active');
@@ -508,8 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
           opacity: 0,
           y: 20,
           duration: 0.45,
-          ease: "power3.out",
-          overwrite: "auto"
+          ease: "power3.out"
         });
       }
     });
@@ -579,11 +598,15 @@ document.addEventListener("DOMContentLoaded", () => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // Reset the hover accordion once descent actually starts.
+        // Reset the hover accordion once descent starts, restore primary index 0 when scrolled back to 0.
         onUpdate: (self) => {
           if (self.progress > 0.001) {
             if (activeIndex !== null) {
               animateAccordionState(null);
+            }
+          } else {
+            if (activeIndex !== 0) {
+              animateAccordionState(0);
             }
           }
         }
@@ -596,23 +619,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // runForcedScrollTween) so the scrub progress maps ~1:1 to wall-clock
     // time - the ascent must consume nearly the whole forced run, not
     // finish early and leave a dead black gap before the build stage.
+    //
+    // Staggered by VISUAL (CSS `order`) position, not DOM/data-index - the
+    // gallery is reordered on screen so Bar & Ristoranti sits centered, and
+    // staggering by data-index would fire the centered card first instead of
+    // in its actual left-to-right screen position, breaking the staircase.
+    // Every panel travels the exact same distance so the rhythm comes purely
+    // from the stagger delay - a uniform step, not a widening spread.
     const staggerDelay = 0.12;
     const panelTravelDuration = 3.4;
-    panels.forEach((panel, index) => {
-      // Parallax: Panels exit upward. Speed difference by varying travel distance.
+    panels.forEach((panel) => {
+      const visualIndex = parseInt(getComputedStyle(panel).order, 10) || 0;
       heroExitTL.to(panel, {
-        y: () => -window.innerHeight - 320 - (index * 70),
+        y: () => -window.innerHeight - 320,
         duration: panelTravelDuration,
-      }, index * staggerDelay);
+      }, visualIndex * staggerDelay);
     });
+
+    // No opacity animation on .gallery-blend-overlay so it remains active and masks the seam throughout transition
 
     // Headline and scroll indicator exits
     heroExitTL.to(".hero-text-block", {
-      y: () => -window.innerHeight * 0.8,
-      opacity: 0,
-    }, 0);
-
-    heroExitTL.to(".hero-bottom-block", {
       y: () => -window.innerHeight * 0.8,
       opacity: 0,
     }, 0);
@@ -630,7 +657,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // Reset any transforms on elements
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
-      gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
     };
   });
 
@@ -644,7 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hijack first scroll downward
   function handleForcedScroll(e) {
     if (isMobileQuery.matches) return;
-    if (transitionDone) return;
+    if (transitionDone || isTweening) return;
 
     // Only trigger if we are at the very top (scrollY <= 5)
     const isAtTop = window.scrollY <= 5;
@@ -687,6 +713,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // overflow:hidden on <html>, which makes the page unscrollable and
     // silently kills the descent. We let Lenis itself drive the scroll
     // (lock:true blocks user input for the whole animation).
+
+    // Safety net: if lenis.scrollTo's onComplete never fires for any reason
+    // (backgrounded tab throttling the rAF loop, a resize invalidating the
+    // target mid-tween, etc.) isTweening/isStageLocked would stay true
+    // forever - and blockInput/handleForcedScroll block wheel/touch/keydown
+    // on those flags, so the page would only be scrollable by dragging the
+    // native scrollbar thumb. Force an unlock no later than 6s so a stuck
+    // tween can never hijack scroll permanently.
+    clearTimeout(unlockTimeout);
+    unlockTimeout = setTimeout(() => unlockStage(true), 6000);
 
     // Target: the END of the Scroll 0 pin. One scroll gesture from the
     // hero rides through the hero exit AND the entire frame sequence
@@ -775,9 +811,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lenis.start();
 
-    // Only a genuinely completed sequence (or the explicit scroll-explore
-    // click) may mark it done - a safety-timeout bailout must stay
-    // retryable within the same page load.
+    // Only a genuinely completed sequence may mark it done - a
+    // safety-timeout bailout must stay retryable within the same page load.
     if (markComplete) {
       transitionDone = true;
       if (buildStage) {
