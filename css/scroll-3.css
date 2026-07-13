@@ -1,0 +1,152 @@
+/* -----------------------------------------
+   SCROLL 3 - physical cutout object (overlay inside #build-stage)
+   Same canvas footprint as the other sequences. Frame 0 sits pixel-aligned
+   over scroll-2's centered last frame; the object stays centered while its
+   frame sequence scrubs (the space materialises), flanked by copy on both
+   sides. main.js swaps its visibility with .reveal-layer-2 at the third
+   hand-off so the four sequences read as one continuous animation.
+   ----------------------------------------- */
+
+@media (min-width: 769px) {
+  .reveal-layer-3 {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden; /* shown via gsap autoAlpha at the third hand-off */
+    z-index: 4;
+  }
+
+  .reveal-layer-3-content {
+    width: 100%;
+    max-width: 1440px;
+    height: 100%;
+    padding: 0 6rem;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Centered slot, same width as scroll-2's ended (centered) slot so the
+     hand-off is a pixel-aligned overlap. */
+  .reveal-object-slot-3 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    max-height: 70vh;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .reveal-canvas-container-3 {
+    width: 100%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #reveal-canvas-3 {
+    width: 100%;
+    max-height: 70vh;
+    aspect-ratio: 1440 / 805;
+    transform: scale(1.02);
+  }
+
+  .reveal-copy-3-left {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 22%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    transform: translateY(-50%);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+
+  .reveal-copy-3-right {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 22%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    transform: translateY(-50%);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+
+  .reveal-copy-3-left .reveal-eyebrow,
+  .reveal-copy-3-left .reveal-headline,
+  .reveal-copy-3-right .reveal-sub {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 768px) {
+  .reveal-layer-3 {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg-dark);
+  }
+
+  .reveal-layer-3-content {
+    width: 100%;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .reveal-copy-3-left,
+  .reveal-copy-3-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    width: 100%;
+  }
+
+  .reveal-object-slot-3 {
+    width: 100%;
+    order: -1;
+  }
+
+  .reveal-canvas-container-3 {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #reveal-canvas-3 {
+    width: 100%;
+    aspect-ratio: 1440 / 805;
+    height: auto;
+  }
+}

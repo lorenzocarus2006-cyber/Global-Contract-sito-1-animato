@@ -4,15 +4,18 @@
 */
 
 document.addEventListener("DOMContentLoaded", () => {
-  
-  // Prevent browser scroll restoration and force page to top on reload
-  if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-  }
-  window.scrollTo(0, 0);
-  
+
   // Register GSAP ScrollTrigger
   gsap.registerPlugin(ScrollTrigger);
+
+  // Always start from the very top. Browsers restore the previous scroll
+  // position on reload, which would drop the user mid-pin: the hero
+  // forced-scroll hijack requires scrollY<=5, so a restored mid-page
+  // position silently kills the whole scroll-0 -> scroll-1 choreography
+  // (it just free-scrolls into the sections below). Force manual control
+  // and reset to top before anything measures scroll.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
 
   /* -----------------------------------------
      1. INITIALIZE LENIS SMOOTH SCROLL
@@ -28,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Stop scroll while loading
   lenis.stop();
 
+  // Exposed so scroll-1.js can drive the same smooth-scroll instance for
+  // its own forced-scroll hijack (mirrors the Scroll 0 forced tween below).
+  window.__lenis = lenis;
+
   // Connect Lenis to GSAP ticker
   lenis.on('scroll', ScrollTrigger.update);
   
@@ -37,13 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
   
   gsap.ticker.lagSmoothing(0);
 
-  // Scroll explore button interaction
-  const scrollExploreBtn = document.getElementById('scroll-explore');
+
   // In-memory only (no sessionStorage): every fresh page load/reload starts
   // false, so the forced full-run always replays on refresh. It only stays
   // true for the lifetime of this script execution, so scrolling back up
   // and down again without reloading does not retrigger it.
   let transitionDone = false;
+  // Gate for scroll-1.js's own forced-scroll hijack: only arms once Scroll 0
+  // has genuinely finished, so a not-yet-refreshed ScrollTrigger on the
+  // reveal layer can never mistakenly hijack the very first hero scroll.
+  window.__scroll0Done = false;
   let isStageLocked = false;
   let isTweening = false;
   let unlockTimeout = null;
@@ -111,24 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (scrollExploreBtn) {
-    scrollExploreBtn.addEventListener('click', () => {
-      // Mark transition done to prevent scroll locks
-      transitionDone = true;
-      if (buildStage) {
-        buildStage.classList.add("transition-done");
-      }
-      drawSeqFrame(SEQ_FRAME_COUNT - 1);
-      isStageLocked = false;
-      isTweening = false;
-      clearTimeout(unlockTimeout);
-      lenis.start();
-      lenis.scrollTo('#dettagli', {
-        duration: 1.4,
-        ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-      });
-    });
-  }
+
 
   // Header state on scroll
   lenis.on('scroll', (e) => {
@@ -313,8 +306,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (desc) gsap.killTweensOf(desc);
       if (cta) gsap.killTweensOf(cta);
 
-      // Clean inline styles
-      gsap.set(panel, { flexGrow: 1, flexBasis: 0 });
+      // Clean inline styles - clearProps (not a hardcoded flexBasis:0) so the
+      // mobile height-tween isn't fought by a leftover inline flex-basis,
+      // which takes priority over height as the column flex main-axis size.
+      gsap.set(panel, { clearProps: "flexGrow,flexBasis,height" });
       if (body) gsap.set(body, { clearProps: "all" });
       if (desc) gsap.set(desc, { clearProps: "all" });
       if (cta) gsap.set(cta, { clearProps: "all" });
@@ -350,8 +345,10 @@ document.addEventListener("DOMContentLoaded", () => {
         panels.forEach((panel, idx) => {
           const enterHandler = () => {
             if (window.scrollY > 5) return; // Ignore hover if scrolled down
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             if (hoverTimeout) clearTimeout(hoverTimeout);
             hoverTimeout = setTimeout(() => {
+              if (isTweening || isStageLocked) return; // Re-check: forced-scroll may have started mid-debounce
               if (activeIndex !== idx) {
                 animateAccordionState(idx);
               }
@@ -359,9 +356,10 @@ document.addEventListener("DOMContentLoaded", () => {
           };
           panel._enterHandler = enterHandler;
           panel.addEventListener('mouseenter', enterHandler);
-          
+
           const focusHandler = () => {
             if (window.scrollY > 5) return; // Ignore focus if scrolled down
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             if (hoverTimeout) clearTimeout(hoverTimeout);
             animateAccordionState(idx);
           };
@@ -371,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Reset when mouse leaves the entire gallery area to the default first category
         const leaveHandler = () => {
+          if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
           if (hoverTimeout) clearTimeout(hoverTimeout);
           animateAccordionState(0);
         };
@@ -383,6 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (panel.classList.contains('active')) {
               return;
             }
+            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
             e.preventDefault();
             animateAccordionState(idx);
           };
@@ -438,32 +438,52 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function animateMobileAccordionState(targetIndex) {
+    if (targetIndex !== -1 && targetIndex !== null) {
+      gallery.classList.add('has-active');
+    } else {
+      gallery.classList.remove('has-active');
+    }
+
     panels.forEach((panel, idx) => {
       const isActive = idx === targetIndex;
-      const targetGrow = isActive ? 5.8 : 1.0;
-      
-      gsap.to(panel, {
-        flexGrow: targetGrow,
-        duration: 0.6,
-        ease: "power2.out",
-        overwrite: "auto"
-      });
-
+      const targetHeight = isActive ? 380 : 240;
       const desc = panel.querySelector('.panel-description');
       const cta = panel.querySelector('.panel-cta');
+      // Fade only the description/cta - the label has no rotated collapsed
+      // stand-in on mobile (unlike desktop), so it must stay legible always.
+      const fadeTargets = [desc, cta].filter(Boolean);
+
+      // Stop running tweens to prevent overlapping visual state collisions
+      gsap.killTweensOf(panel);
+      if (fadeTargets.length) gsap.killTweensOf(fadeTargets);
+
+      // Animate height on mobile column layout instead of flex-grow
+      gsap.to(panel, {
+        height: targetHeight,
+        duration: 0.5,
+        ease: "power2.out"
+      });
 
       if (isActive) {
         panel.classList.add('active');
-        if (desc && cta) {
-          gsap.fromTo([desc, cta], 
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", overwrite: "auto", delay: 0.1 }
-          );
+        if (fadeTargets.length) {
+          gsap.to(fadeTargets, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            delay: 0.1,
+            ease: "power2.out"
+          });
         }
       } else {
         panel.classList.remove('active');
-        if (desc && cta) {
-          gsap.set([desc, cta], { opacity: 0, y: 10 });
+        if (fadeTargets.length) {
+          gsap.to(fadeTargets, {
+            opacity: 0,
+            y: 10,
+            duration: 0.22,
+            ease: "power2.out"
+          });
         }
       }
     });
@@ -484,13 +504,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const isGalleryReset = targetIndex === null;
       const targetGrow = isGalleryReset ? 1 : (isActive ? 4.6 : 0.4);
       const body = panel.querySelector('.panel-body');
-      
+
+      // overwrite:"auto" (not killTweensOf(panel)) - killTweensOf(panel) would
+      // also wipe this panel's unrelated heroExitTL y-exit tween whenever the
+      // scroll pin resets the accordion (onUpdate below), freezing the ascent
+      // dead. killTweensOf(body) is safe on its own: heroExitTL never targets
+      // .panel-body, only the panel itself and .hero-text-block. It's needed
+      // here on top of overwrite:"auto" because the active-state tween below
+      // carries a delay - under fast repeated hover switching, overwrite:auto
+      // can race with a still-delayed (not yet started) tween and leave the
+      // body's opacity/transform stuck rather than reset, a rare ghost-text
+      // state that only shows up under rapid input.
       gsap.to(panel, {
         flexGrow: targetGrow,
         duration: 1.0, // Heavy, physically smooth deceleration glide
         ease: "expo.out", // Premium Apple-style exponential ease
         overwrite: "auto"
       });
+
+      gsap.killTweensOf(body);
 
       if (isActive) {
         panel.classList.add('active');
@@ -499,8 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
           y: 0,
           duration: 0.85,
           delay: 0.12, // Let the panel expand first, preventing text overlap jitter
-          ease: "power3.out",
-          overwrite: "auto"
+          ease: "power3.out"
         });
       } else {
         panel.classList.remove('active');
@@ -508,8 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
           opacity: 0,
           y: 20,
           duration: 0.45,
-          ease: "power3.out",
-          overwrite: "auto"
+          ease: "power3.out"
         });
       }
     });
@@ -579,11 +609,15 @@ document.addEventListener("DOMContentLoaded", () => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // Reset the hover accordion once descent actually starts.
+        // Reset the hover accordion once descent starts, restore primary index 0 when scrolled back to 0.
         onUpdate: (self) => {
           if (self.progress > 0.001) {
             if (activeIndex !== null) {
               animateAccordionState(null);
+            }
+          } else {
+            if (activeIndex !== 0) {
+              animateAccordionState(0);
             }
           }
         }
@@ -596,23 +630,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // runForcedScrollTween) so the scrub progress maps ~1:1 to wall-clock
     // time - the ascent must consume nearly the whole forced run, not
     // finish early and leave a dead black gap before the build stage.
+    //
+    // Staggered by VISUAL (CSS `order`) position, not DOM/data-index - the
+    // gallery is reordered on screen so Bar & Ristoranti sits centered, and
+    // staggering by data-index would fire the centered card first instead of
+    // in its actual left-to-right screen position, breaking the staircase.
+    // Every panel travels the exact same distance so the rhythm comes purely
+    // from the stagger delay - a uniform step, not a widening spread.
     const staggerDelay = 0.12;
     const panelTravelDuration = 3.4;
-    panels.forEach((panel, index) => {
-      // Parallax: Panels exit upward. Speed difference by varying travel distance.
+    panels.forEach((panel) => {
+      const visualIndex = parseInt(getComputedStyle(panel).order, 10) || 0;
       heroExitTL.to(panel, {
-        y: () => -window.innerHeight - 320 - (index * 70),
+        y: () => -window.innerHeight - 320,
         duration: panelTravelDuration,
-      }, index * staggerDelay);
+      }, visualIndex * staggerDelay);
     });
+
+    // No opacity animation on .gallery-blend-overlay so it remains active and masks the seam throughout transition
 
     // Headline and scroll indicator exits
     heroExitTL.to(".hero-text-block", {
-      y: () => -window.innerHeight * 0.8,
-      opacity: 0,
-    }, 0);
-
-    heroExitTL.to(".hero-bottom-block", {
       y: () => -window.innerHeight * 0.8,
       opacity: 0,
     }, 0);
@@ -630,7 +668,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // Reset any transforms on elements
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
-      gsap.set(".hero-bottom-block", { y: 0, opacity: 1 });
     };
   });
 
@@ -644,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hijack first scroll downward
   function handleForcedScroll(e) {
     if (isMobileQuery.matches) return;
-    if (transitionDone) return;
+    if (transitionDone || isTweening) return;
 
     // Only trigger if we are at the very top (scrollY <= 5)
     const isAtTop = window.scrollY <= 5;
@@ -675,8 +712,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Pin lengths as fractions of the viewport height. The build-stage pin
+  // now spans BOTH sequences: scroll-0 plays over the first fraction, then
+  // hands off in place to scroll-1 for the remaining fraction (no page
+  // travel between them). Shared with the forced tweens' targets so the
+  // descents always land exactly on the hand-off / unpin points.
   // Scroll 0 pin length is reduced by 65% for a denser, faster canvas frame sequence.
   const SCROLL0_PIN_FRACTION = 0.525;
+  const SCROLL1_PIN_FRACTION = 1.8;
+  const SCROLL2_PIN_FRACTION = 1.8;
+  const SCROLL3_PIN_FRACTION = 1.8;
+  const TOTAL_PIN_FRACTION =
+    SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION + SCROLL2_PIN_FRACTION + SCROLL3_PIN_FRACTION;
+  const HANDOFF = SCROLL0_PIN_FRACTION / TOTAL_PIN_FRACTION;
+  const HANDOFF2 = (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION) / TOTAL_PIN_FRACTION;
+  const HANDOFF3 =
+    (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION + SCROLL2_PIN_FRACTION) / TOTAL_PIN_FRACTION;
 
   function runForcedScrollTween() {
     if (isTweening || transitionDone) return;
@@ -688,10 +739,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // silently kills the descent. We let Lenis itself drive the scroll
     // (lock:true blocks user input for the whole animation).
 
-    // Target: the END of the Scroll 0 pin. One scroll gesture from the
-    // hero rides through the hero exit AND the entire frame sequence
-    // (the scrubbed canvas follows the scroll position), unlocking only
-    // when the section unpins.
+    // Safety net: if lenis.scrollTo's onComplete never fires for any reason
+    // (backgrounded tab throttling the rAF loop, a resize invalidating the
+    // target mid-tween, etc.) isTweening/isStageLocked would stay true
+    // forever - and blockInput/handleForcedScroll block wheel/touch/keydown
+    // on those flags, so the page would only be scrollable by dragging the
+    // native scrollbar thumb. Force an unlock no later than 6s so a stuck
+    // tween can never hijack scroll permanently.
+    clearTimeout(unlockTimeout);
+    unlockTimeout = setTimeout(() => unlockStage(true), 6000);
+
+    // Target: the scroll-0/scroll-1 HAND-OFF point (mid-pin). One scroll
+    // gesture from the hero rides through the hero exit AND the entire
+    // scroll-0 frame sequence (the scrubbed canvas follows the scroll
+    // position), locking there. Scroll-1's own forced tween then covers
+    // the rest of the pin on the next input.
     const stageTop = buildStage
       ? buildStage.getBoundingClientRect().top + window.scrollY
       : window.innerHeight * (1 + PIN_VH_FRACTION);
@@ -705,29 +767,85 @@ document.addEventListener("DOMContentLoaded", () => {
       onComplete: () => {
         isTweening = false;
         // Scroll 0 fully played. Page unlocks here; scrolling back up
-        // replays the sequence in reverse, freely.
+        // replays the sequence in reverse, freely. Scroll 1's own forced
+        // tween (scroll-1.js) only fires on a fresh scroll input once the
+        // user reaches its pin - it is not chained automatically.
         unlockStage(true);
       }
     });
   }
 
   /* -----------------------------------------
-     SCROLL 0 - PINNED SCROLL-SCRUBBED SEQUENCE
-     The section pins for an extra 150% of viewport height (~250vh of page
-     travel in total). Scroll progress maps 1:1 onto the frame index, fully
-     bidirectional - down plays forward, up plays backward. No autoplay,
-     no time-based timelines. The copy fades in with a slight vertical
-     drift early in the pin and then stays fully visible - it must not
-     disappear before the section actually unpins into Scroll 1.
+     SCROLL 0 + SCROLL 1 - ONE PINNED SCROLL-SCRUBBED SEQUENCE
+     The section pins for TOTAL_PIN_FRACTION extra viewport heights. The
+     first SCROLL0_PIN_FRACTION worth of scroll scrubs the scroll-0 frame
+     sequence; past the HANDOFF point the .reveal-layer overlay (scroll-1)
+     takes over in the exact same screen position - the page never visibly
+     moves between the two, it reads as one continuous animation. Fully
+     bidirectional - down plays forward, up plays backward.
      ----------------------------------------- */
   if (buildStage && buildCtx) {
     const scroll0Copy = [".build-eyebrow", ".build-headline", ".build-sub"];
+    const revealLayer = document.getElementById("reveal-layer");
+    const revealLayer2 = document.getElementById("reveal-layer-2");
+    const revealLayer3 = document.getElementById("reveal-layer-3");
+    // Tracks which of the 4 sequences is active (0=scroll0, 1=scroll1,
+    // 2=scroll2, 3=scroll3) so the canvas swap only fires when a boundary
+    // is actually crossed (not on every update).
+    let activePhase = null;
 
     // Neutralize the CSS entrance offsets (they belonged to the old
     // autoplay choreography): the canvas is always visible inside the
     // pinned stage, the copy is driven purely by the scrubbed timeline.
     gsap.set(".build-canvas-container", { opacity: 1, x: 0 });
     gsap.set(scroll0Copy, { opacity: 0, x: 0, y: 36 });
+
+    function setPhase(phase) {
+      // Mobile shows all blocks statically (scroll-1.js/scroll-2.js mobile
+      // branches); the visibility swap is a desktop-only mechanic.
+      if (isMobileQuery.matches) return;
+      if (activePhase === phase) return;
+      activePhase = phase;
+      // Instant swap: each sequence's frame 0 sits pixel-aligned over the
+      // previous sequence's last frame, so flipping visibility is
+      // invisible to the eye.
+      gsap.set(".build-canvas-container", { autoAlpha: phase === 0 ? 1 : 0 });
+      if (revealLayer) gsap.set(revealLayer, { autoAlpha: phase === 1 ? 1 : 0 });
+      if (revealLayer2) gsap.set(revealLayer2, { autoAlpha: phase === 2 ? 1 : 0 });
+      if (revealLayer3) gsap.set(revealLayer3, { autoAlpha: phase === 3 ? 1 : 0 });
+    }
+
+    function renderPinned(progress) {
+      if (progress <= HANDOFF) {
+        setPhase(0);
+        const p0 = HANDOFF > 0 ? progress / HANDOFF : 0;
+        drawSeqFrame(Math.round(p0 * (SEQ_FRAME_COUNT - 1)));
+        if (typeof window.__scroll1Render === "function") window.__scroll1Render(0);
+        if (typeof window.__scroll2Render === "function") window.__scroll2Render(0);
+        if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
+      } else if (progress <= HANDOFF2) {
+        setPhase(1);
+        drawSeqFrame(SEQ_FRAME_COUNT - 1);
+        const p1 = (progress - HANDOFF) / (HANDOFF2 - HANDOFF);
+        if (typeof window.__scroll1Render === "function") window.__scroll1Render(p1);
+        if (typeof window.__scroll2Render === "function") window.__scroll2Render(0);
+        if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
+      } else if (progress <= HANDOFF3) {
+        setPhase(2);
+        drawSeqFrame(SEQ_FRAME_COUNT - 1);
+        if (typeof window.__scroll1Render === "function") window.__scroll1Render(1);
+        const p2 = (progress - HANDOFF2) / (HANDOFF3 - HANDOFF2);
+        if (typeof window.__scroll2Render === "function") window.__scroll2Render(p2);
+        if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
+      } else {
+        setPhase(3);
+        drawSeqFrame(SEQ_FRAME_COUNT - 1);
+        if (typeof window.__scroll1Render === "function") window.__scroll1Render(1);
+        if (typeof window.__scroll2Render === "function") window.__scroll2Render(1);
+        const p3 = (progress - HANDOFF3) / (1 - HANDOFF3);
+        if (typeof window.__scroll3Render === "function") window.__scroll3Render(p3);
+      }
+    }
 
     // Timeline authored on a 10-unit scale: positions map directly to
     // fractions of the pin's scroll range (scrub does the time mapping).
@@ -736,34 +854,56 @@ document.addEventListener("DOMContentLoaded", () => {
       scrollTrigger: {
         trigger: "#build-stage",
         start: "top top",
-        end: () => "+=" + (window.innerHeight * SCROLL0_PIN_FRACTION),
+        end: () => "+=" + (window.innerHeight * TOTAL_PIN_FRACTION),
         pin: true,
         scrub: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
-          drawSeqFrame(Math.round(self.progress * (SEQ_FRAME_COUNT - 1)));
+          renderPinned(self.progress);
         },
         onRefresh: (self) => {
-          drawSeqFrame(Math.round(self.progress * (SEQ_FRAME_COUNT - 1)));
+          // Positions for scroll-1.js's forced-scroll hijack: the hand-off
+          // lock point and the pin end, in page scroll coordinates.
+          window.__scroll0Meta = {
+            start: self.start,
+            handoffY: self.start + window.innerHeight * SCROLL0_PIN_FRACTION,
+            handoff2Y: self.start + window.innerHeight * (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION),
+            handoff3Y: self.start + window.innerHeight * (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION + SCROLL2_PIN_FRACTION),
+            endY: self.start + window.innerHeight * TOTAL_PIN_FRACTION,
+          };
+          renderPinned(self.progress);
         }
       }
     });
 
-    // Copy in: fade + upward drift over the first ~20% of the pin. No
-    // fade-out - it stays on screen for the rest of the pin and only
-    // leaves when the section unpins and the page moves on to Scroll 1.
+    // The scroll-0 copy lives ENTIRELY inside the scroll-0 phase of the
+    // combined pin. On the 10-unit scale that phase is [0 .. S0], where
+    // S0 = HANDOFF*10 (~0.89 with the current fractions). Both the fade-in
+    // and the fade-out are authored as fractions of S0 so they scale with
+    // SCROLL0_PIN_FRACTION and never bleed into scroll-1/2/3 - the copy is
+    // fully faded out by the hand-off and stays gone for the rest of the pin.
+    const S0 = HANDOFF * 10;
+
+    // Copy in: fade + upward drift over the first ~40% of scroll-0.
     scroll0TL.to(scroll0Copy, {
       opacity: 1,
       y: 0,
-      duration: 1.4,
-      stagger: 0.25
-    }, 0.4);
+      duration: S0 * 0.28,
+      stagger: S0 * 0.05
+    }, S0 * 0.08);
 
-    // Pad the timeline to the same 10-unit scale as before: keeps the
-    // fade-in fast and early (~20% of the pin) instead of the scrub
-    // stretching it across the whole reduced timeline now that the
-    // fade-out tween (which used to anchor the far end) is gone.
+    // Copy out: leaves over the last stretch of scroll-0, fully gone before
+    // the hand-off (~0.85*S0 end) so scroll-1/2/3 never show the build copy.
+    scroll0TL.to(scroll0Copy, {
+      opacity: 0,
+      x: -36,
+      duration: S0 * 0.20,
+      stagger: S0 * 0.03
+    }, S0 * 0.68);
+
+    // Pad the timeline to the full 10-unit scale so the scrub maps the
+    // authored positions 1:1 onto the whole (extended) pin range.
     scroll0TL.to({}, { duration: 0.1 }, 9.9);
   }
 
@@ -775,11 +915,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lenis.start();
 
-    // Only a genuinely completed sequence (or the explicit scroll-explore
-    // click) may mark it done - a safety-timeout bailout must stay
-    // retryable within the same page load.
+    // Only a genuinely completed sequence may mark it done - a
+    // safety-timeout bailout must stay retryable within the same page load.
     if (markComplete) {
       transitionDone = true;
+      window.__scroll0Done = true;
       if (buildStage) {
         buildStage.classList.add("transition-done");
       }
@@ -838,6 +978,87 @@ document.addEventListener("DOMContentLoaded", () => {
         lenis.start();
       });
     });
+  }
+
+  /* -----------------------------------------
+     3D INTERACTIVE TILT GALLERY (PC ONLY)
+     Calculates vector deltas from cursor to cards
+     and drives tilt rotation/translation smoothly via GSAP.
+     ----------------------------------------- */
+  const detailsSection = document.querySelector('.details-section');
+  const galleryContainer = document.querySelector('.floating-gallery-container');
+  const floatingCards = document.querySelectorAll('.floating-card');
+
+  if (detailsSection && galleryContainer && floatingCards.length > 0) {
+    const handleMouseMove = (e) => {
+      // Don't run on screen sizes below desktop breakpoint
+      if (window.innerWidth < 1024) return;
+
+      const rect = galleryContainer.getBoundingClientRect();
+      const containerWidth = rect.width;
+      const containerHeight = rect.height;
+
+      // Mouse position relative to the gallery container
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      floatingCards.forEach((card) => {
+        // Find card center relative to container
+        const cardCenterX = card.offsetLeft + card.offsetWidth / 2;
+        const cardCenterY = card.offsetTop + card.offsetHeight / 2;
+
+        // Vector differences
+        const dx = mouseX - cardCenterX;
+        const dy = mouseY - cardCenterY;
+
+        // Percentages of difference relative to the container size
+        const pctX = dx / containerWidth;
+        const pctY = dy / containerHeight;
+
+        // Base max rotation angles (degrees)
+        const isOutline = card.classList.contains('decorative-outline');
+        const maxAngleX = isOutline ? 20 : 12;
+        const maxAngleY = isOutline ? 20 : 12;
+
+        // Tilt logic:
+        // dx > 0 (cursor right) -> rotate around Y axis positively
+        // dy > 0 (cursor down) -> rotate around X axis negatively
+        const targetRotateY = pctX * maxAngleY;
+        const targetRotateX = -pctY * maxAngleX;
+
+        // Dynamic translation based on data-speed for depth parallax
+        const speed = parseFloat(card.getAttribute('data-speed')) || 1.0;
+        const targetTransX = pctX * 30 * speed;
+        const targetTransY = pctY * 30 * speed;
+
+        gsap.to(card, {
+          rotateX: targetRotateX,
+          rotateY: targetRotateY,
+          x: targetTransX,
+          y: targetTransY,
+          duration: 0.6,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
+      });
+    };
+
+    const handleMouseLeave = () => {
+      floatingCards.forEach((card) => {
+        gsap.to(card, {
+          rotateX: 0,
+          rotateY: 0,
+          x: 0,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
+      });
+    };
+
+    detailsSection.addEventListener('mousemove', handleMouseMove);
+    detailsSection.addEventListener('mouseleave', handleMouseLeave);
   }
 
 });

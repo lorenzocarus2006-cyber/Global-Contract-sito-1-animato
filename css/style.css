@@ -228,7 +228,7 @@ html.lenis, html.lenis body {
   border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline border */
   border-radius: 100px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); /* Understated soft shadow */
-  padding: 0.3rem 1.25rem; /* Sleeker visual padding */
+  padding: 0.45rem 1.4rem; /* Roomier to frame the bolder nav typography */
   /* Specific transitions to prevent GSAP opacity animation conflicts */
   transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s, box-shadow 0.4s, border-color 0.4s;
   opacity: 0; /* Initially hidden for the preloader animation */
@@ -247,26 +247,48 @@ html.lenis, html.lenis body {
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: center; /* Center the navigation menu */
+  justify-content: space-between; /* Space out the three column slots */
   align-items: center;
-  position: relative;
-  height: 34px; /* Sleeker explicit height for perfect vertical alignment */
+  height: 44px;
+}
+
+.header-left {
+  flex: 0 0 auto; /* Sized to the logo, not stretched - see .header-center */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.header-center {
+  /* Fills exactly the space left over between the logo and the CTA, then
+     centers the nav within THAT space - so the two gaps either side of the
+     nav match regardless of how wide the logo vs. the CTA happen to be.
+     Centering against the full header width instead would look centered
+     mathematically but lopsided optically, since logo and CTA aren't the
+     same width. */
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right {
+  flex: 0 0 auto; /* Sized to the CTA, not stretched - see .header-center */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .logo-link {
-  position: absolute;
-  left: 0.5rem; /* Align left inside header container padding */
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 26px;
+  height: 37px; /* +~19% again: strong optical presence in the header */
   text-decoration: none;
 }
 
 .nav-logo-img {
-  height: 26px; /* Sleeker height */
+  height: 37px;
   width: auto;
   display: block;
   opacity: 0; /* Starts hidden for the preloader anim landing */
@@ -284,17 +306,21 @@ html.lenis, html.lenis body {
   gap: 2.2rem; /* Clean, refined spacing */
 }
 
+.nav-mobile-wordmark {
+  display: none; /* Hidden on desktop */
+}
+
 .nav-item {
   font-family: var(--font-sans);
-  font-size: 0.76rem; /* Slightly smaller for high-end feel */
-  font-weight: 400; /* Lighter weight */
-  letter-spacing: 0.12em; /* More open tracking */
+  font-size: 0.95rem; /* Bolder optical presence */
+  font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--color-offwhite) !important; /* Premium offwhite text color */
   text-decoration: none;
   position: relative;
   padding: 0.2rem 0; /* Sleeker vertical height */
   transition: opacity 0.3s ease, color 0.3s ease;
-  opacity: 0.75;
+  opacity: 0.9;
 }
 
 .nav-item:hover, .nav-item.active {
@@ -308,8 +334,8 @@ html.lenis, html.lenis body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px; /* Subtle hairline indicator */
-  background-color: var(--color-white);
+  height: 1.5px; /* Slightly more defined hairline indicator */
+  background-color: var(--color-magenta-glow); /* Brand magenta accent */
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -321,29 +347,25 @@ html.lenis, html.lenis body {
 }
 
 .header-actions {
-  position: absolute;
-  right: 0.25rem; /* Align right inside header container */
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
 }
 
 .header-actions .btn-outline {
-  color: var(--color-bg-dark) !important; /* Dark text on white button */
-  background-color: var(--color-white) !important; /* Solid white background for Apple/Linear premium style */
+  color: var(--color-white) !important; /* White text on magenta button */
+  background-color: var(--color-magenta-deep) !important; /* Global Contract magenta background */
   border: none !important;
-  height: 26px !important; /* Sleeker vertical profile (26px height) */
+  height: 34px !important; /* Scaled up to match the bolder nav typography */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0 1.0rem !important; /* Symmetrical padding */
+  padding: 0 1.4rem !important; /* Symmetrical padding */
   border-radius: 100px !important;
-  font-size: 0.65rem !important; /* Precise, high-end display size */
-  font-weight: 500 !important; /* Less chunky weight */
-  letter-spacing: 0.1em !important; /* Open luxury tracking */
+  font-size: 0.8rem !important; /* Stays clearly stronger than the nav labels */
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important; /* Open luxury tracking */
   text-transform: uppercase !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .header-actions .btn-outline::before {
@@ -351,9 +373,9 @@ html.lenis, html.lenis body {
 }
 
 .header-actions .btn-outline:hover {
-  background-color: var(--color-magenta-glow) !important;
-  color: var(--color-white) !important;
-  box-shadow: 0 4px 15px rgba(230, 35, 106, 0.4) !important;
+  background-color: var(--color-white) !important; /* White background on hover */
+  color: var(--color-magenta-deep) !important; /* Magenta text on hover */
+  box-shadow: 0 4px 12px rgba(176, 30, 86, 0.25) !important; /* Elegant soft shadow */
   transform: translateY(-1px) !important;
 }
 
@@ -443,12 +465,33 @@ html.lenis, html.lenis body {
 }
 
 .hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem; /* Vertical grid lock gap */
+  margin: 0;
+  max-width: 900px;
+}
+
+.hero-title-top {
   font-family: var(--font-serif);
-  font-size: 2.9rem; /* Reduced by ~17% for high-end elegance */
-  font-weight: 300;
-  line-height: 1.25; /* Editorial leading */
-  letter-spacing: -0.015em;
-  color: var(--color-offwhite);
+  font-size: clamp(2.6rem, 6.4vh, 4rem); /* Dynamic viewport-locked serif height - real headline scale */
+  font-weight: 500; /* Up from 300: reads as a headline, not a whisper */
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.hero-title-bottom {
+  font-family: var(--font-sans);
+  font-size: clamp(0.76rem, 1.7vh, 0.9rem); /* Architectural sub-statement size */
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: 0.22em; /* High-end tracked geometric lockup */
+  color: var(--color-gray-text);
+  text-transform: uppercase;
+  opacity: 0.92;
 }
 
 /* Editorial Statistics Grid */
@@ -487,6 +530,10 @@ html.lenis, html.lenis body {
   color: var(--color-gray-text);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.text-magenta {
+  color: var(--color-magenta-glow);
 }
 
 /* -----------------------------------------
@@ -541,9 +588,14 @@ html.lenis, html.lenis body {
   left: 0;
   width: 100%;
   height: 100vh;
-  background-color: rgba(6, 6, 8, 0.96); /* Matches Deep Dark Canvas */
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  /* Layered dark ground instead of a flat fill: a faint warm magenta glow
+     high in the frame plus a deep vertical gradient - the same "spotlight in
+     the dark" language as the sector cards, not a generic solid overlay. */
+  background:
+    radial-gradient(circle at 50% 15%, rgba(176, 30, 86, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98) 0%, rgba(5, 5, 6, 0.99) 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -551,68 +603,117 @@ html.lenis, html.lenis body {
   align-items: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-              visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  clip-path: inset(0 0 100% 0);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              clip-path 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-menu-overlay.active {
   opacity: 1;
   visibility: visible;
+  clip-path: inset(0 0 0% 0);
 }
 
 .mobile-nav-menu {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.2rem;
+  gap: 0;
+  width: 100%;
+  padding: 0 2.5rem;
 }
 
 .mobile-nav-item {
-  font-family: var(--font-sans);
-  font-size: 1.3rem;
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-family: var(--font-serif); /* Same voice as the hero headline */
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-transform: none;
   color: var(--color-offwhite);
   text-decoration: none;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.3s ease;
+}
+
+.mobile-nav-item:last-of-type {
+  border-bottom: none;
 }
 
 .mobile-menu-overlay.active .mobile-nav-item {
-  opacity: 0.85;
+  opacity: 0.92;
   transform: translateY(0);
 }
 
+.mobile-menu-overlay.active .mobile-nav-item:active,
 .mobile-menu-overlay.active .mobile-nav-item:hover {
   opacity: 1;
   color: var(--color-white);
 }
 
+/* Magenta sweep on touch/hover - the same underline motif as the desktop
+   nav, so the mobile drawer reads as the same brand, not a different menu. */
+.mobile-nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 0;
+  height: 1.5px;
+  background-color: var(--color-magenta-glow);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-menu-overlay.active .mobile-nav-item:active::after,
+.mobile-menu-overlay.active .mobile-nav-item:hover::after {
+  width: 60%;
+  left: 20%;
+}
+
 .mobile-cta-item {
-  margin-top: 1rem;
+  margin-top: 2.2rem;
+  font-family: var(--font-sans);
   font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.6rem 1.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1rem 2.2rem;
+  border: none;
+  border-bottom: none;
   border-radius: 100px;
-  background-color: transparent;
-  transition: all 0.3s ease;
+  color: var(--color-white);
+  background-color: var(--color-magenta-deep);
+  box-shadow: 0 8px 24px rgba(176, 30, 86, 0.3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-.mobile-cta-item:hover {
-  background-color: var(--color-white);
-  color: var(--color-bg-dark) !important;
-  border-color: var(--color-white);
+.mobile-cta-item::after {
+  display: none; /* Solid pill, no underline sweep */
 }
 
-/* Staggered transition delays for menu items */
-.mobile-menu-overlay.active .mobile-nav-item:nth-child(1) { transition-delay: 0.1s; }
+.mobile-menu-overlay.active .mobile-cta-item:active,
+.mobile-menu-overlay.active .mobile-cta-item:hover {
+  color: var(--color-white) !important;
+  background-color: var(--color-magenta-glow);
+  box-shadow: 0 10px 30px rgba(230, 35, 106, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Staggered transition delays for menu items - premium cascade */
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(1) { transition-delay: 0.12s; }
 .mobile-menu-overlay.active .mobile-nav-item:nth-child(2) { transition-delay: 0.2s; }
-.mobile-menu-overlay.active .mobile-nav-item:nth-child(3) { transition-delay: 0.3s; }
-.mobile-menu-overlay.active .mobile-nav-item:nth-child(4) { transition-delay: 0.4s; }
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(3) { transition-delay: 0.28s; }
+.mobile-menu-overlay.active .mobile-nav-item:nth-child(4) { transition-delay: 0.36s; }
 
 /* Stacking context and style shift for mobile menu open state */
 body.menu-open .main-header {
@@ -639,6 +740,12 @@ body.menu-open .mobile-menu-toggle span {
   z-index: 150; /* Above .main-header (100) for the ascent pass-through */
 }
 
+/* Soft blend where the hero's black canvas meets the card photos - a
+   continuous fade across the whole row instead of one hard seam, so the
+   hero and the gallery read as one composition rather than section A
+   ending and section B starting. */
+/* Gallery Blend Overlay removed. Blending has been integrated directly into panel-overlay to move with the cards. */
+
 /* Sector Panel */
 .sector-panel {
   position: relative;
@@ -654,13 +761,48 @@ body.menu-open .mobile-menu-toggle span {
   flex-direction: column;
   justify-content: space-between;
   padding: 2rem 1.5rem;
-  transition: box-shadow 0.8s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.8s ease;
-  will-change: flex-grow, flex-basis, transform, opacity;
+  transition: border-color 0.8s ease;
+  /* transform/opacity only: flex-grow/flex-basis aren't compositable, hinting
+     them doesn't help the GPU and just keeps 7 large-image layers pinned in
+     memory for properties that always need a real layout pass anyway. */
+  will-change: transform, opacity;
 }
 
 .sector-panel:last-child {
   border-right: none;
 }
+
+/* Active glow as a static inset shadow on a separate layer, faded with
+   opacity instead of transitioning box-shadow directly - box-shadow is a
+   paint property (repaints the panel every tick for 0.8s), opacity is
+   compositor-only. Same visual result, cheaper during the flex-grow hover
+   animation that's already the expensive part of this transition. */
+.sector-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: inset 0 0 40px rgba(176, 30, 86, 0.25);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sector-panel.active::after {
+  opacity: 1;
+}
+
+/* Visually center Bar & Ristoranti (data-index 0, active by default) as the
+   4th of 7 cards, framed symmetrically by 3 panels on each side. Applies to
+   both the desktop row and the mobile column stack - `order` doesn't care
+   about flex-direction. */
+.sector-panel[data-index="0"] { order: 3; }
+.sector-panel[data-index="1"] { order: 0; }
+.sector-panel[data-index="2"] { order: 1; }
+.sector-panel[data-index="3"] { order: 2; }
+.sector-panel[data-index="4"] { order: 4; }
+.sector-panel[data-index="5"] { order: 5; }
+.sector-panel[data-index="6"] { order: 6; }
 
 /* Background image wrapper */
 .panel-image-wrapper {
@@ -681,8 +823,9 @@ body.menu-open .mobile-menu-toggle span {
   /* Darker base exposure to keep vertical labels & content highly legible */
   filter: brightness(0.62) contrast(1.04) saturate(0.88);
   transform: scale(1.01);
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.0s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, filter;
+  /* Removed expensive filter from transition to eliminate repaints and stutter on hover */
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 /* Subtle overlay vignette at top and bottom for typography contrast */
@@ -693,14 +836,19 @@ body.menu-open .mobile-menu-toggle span {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background: linear-gradient(to bottom, 
-    rgba(0, 0, 0, 0.6) 0%, 
-    rgba(0, 0, 0, 0.1) 30%, 
-    rgba(0, 0, 0, 0.1) 60%, 
-    rgba(0, 0, 0, 0.85) 100%
+  /* Extremely subtle, narrow top gradient (0% to 8%) to hide the top edge cutoff line,
+     followed by transparent middle, and a dark bottom fade for high contrast text readability. */
+  background: linear-gradient(to bottom,
+    var(--color-bg-dark) 0%,       /* Pure black at the very top edge to mask the seam */
+    rgba(6, 6, 8, 0.7) 3%,         /* Extremely short/subtle transition to transparent */
+    transparent 8%,                /* Fully clear image */
+    rgba(0, 0, 0, 0.15) 60%,
+    rgba(0, 0, 0, 0.93) 100%       /* Dark bottom for text readability */
   );
   pointer-events: none;
-  transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  /* GPU-accelerated opacity transition only (no expensive background transition) */
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
 }
 
 /* Panel Content */
@@ -710,33 +858,8 @@ body.menu-open .mobile-menu-toggle span {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end; /* Align the text body to the bottom of the card */
   pointer-events: none;
-}
-
-/* Header */
-.panel-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 1.5rem;
-}
-
-.panel-icon {
-  width: 36px; /* Reduced by ~14.3% (approx 15%) */
-  height: 36px;
-  color: rgba(255, 255, 255, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
-  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.panel-icon svg {
-  width: 100%;
-  height: 100%;
 }
 
 /* Vertical text for collapsed state */
@@ -763,7 +886,8 @@ body.menu-open .mobile-menu-toggle span {
   transform: scale(1);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 2.5rem 0;
-  font-size: clamp(0.58rem, 1.45vh, 0.75rem); /* Increased by ~15% for readability */
+  /* Slightly increased font clamp for better inactive vertical label readability */
+  font-size: clamp(0.68rem, 1.6vh, 0.82rem);
   letter-spacing: clamp(0.1em, 0.3vh, 0.16em);
 }
 
@@ -782,8 +906,9 @@ body.menu-open .mobile-menu-toggle span {
 .panel-label {
   font-family: var(--font-serif);
   font-size: 2.12rem; /* Increased size by ~15% */
-  font-weight: 400;
+  font-weight: 600; /* Up from 400 - stands on its own against the photo */
   line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--color-white);
   text-transform: uppercase;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
@@ -795,11 +920,13 @@ body.menu-open .mobile-menu-toggle span {
 
 .panel-description {
   font-family: var(--font-sans);
-  font-size: 0.8rem;
-  font-weight: 300;
+  /* Increased font size and weight slightly for maximum legibility */
+  font-size: 0.88rem;
+  font-weight: 450;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75);
+  color: rgba(255, 255, 255, 0.96);
+  /* Deepened shadow for high legibility over bright background pixels */
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
 }
 
 /* CTA */
@@ -854,45 +981,58 @@ body.menu-open .mobile-menu-toggle span {
 .sector-panel.active {
   border-right-color: rgba(176, 30, 86, 0.3);
   border-left-color: rgba(176, 30, 86, 0.3);
-  box-shadow: inset 0 0 40px rgba(176, 30, 86, 0.25), 0 0 30px rgba(176, 30, 86, 0.15);
+  /* Glow itself lives on ::after (see above) - faded via opacity instead of
+     a transitioning box-shadow. */
 }
 
 .sector-panel.active .panel-img {
-  filter: brightness(0.75) contrast(1.08) saturate(0.98);
+  /* Scale active panel only - filter stays static to prevent stutter */
   transform: scale(1.04);
 }
 
 /* Subtle, smooth dimming (10-15%) of non-focused panels to enhance visual discovery */
 .gallery-container.has-active .sector-panel:not(.active) .panel-img {
-  filter: brightness(0.44) contrast(1.02) saturate(0.75); /* Slightly darker for discovery depth */
+  /* No filter transitions to maintain maximum performance and fluidity */
 }
 
-/* Delicate spotlight illumination on active card, and dark vignette overlay on inactive cards */
-.sector-panel.active .panel-overlay {
-  background: 
-    radial-gradient(circle at 50% 35%, rgba(230, 218, 202, 0.12) 0%, transparent 60%), /* Gentle warm lighting beam */
-    linear-gradient(to bottom, 
-      rgba(0, 0, 0, 0.55) 0%, 
-      rgba(0, 0, 0, 0.1) 30%, 
-      rgba(0, 0, 0, 0.1) 60%, 
-      rgba(0, 0, 0, 0.85) 100%
-    );
+/* GPU-accelerated warm spotlight overlay on active card (using ::before) */
+.panel-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(230, 218, 202, 0.12) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 1;
 }
 
-.gallery-container.has-active .sector-panel:not(.active) .panel-overlay {
-  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85); /* Delicate vignette around inactive cards */
+.sector-panel.active .panel-overlay::before {
+  opacity: 1;
+}
+
+/* GPU-accelerated vignette & darkening on inactive cards (using ::after) */
+.panel-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: linear-gradient(to bottom, 
-    rgba(0, 0, 0, 0.65) 0%, 
+    rgba(0, 0, 0, 0.25) 0%, 
     rgba(0, 0, 0, 0.35) 45%, 
-    rgba(0, 0, 0, 0.9) 100%
+    rgba(0, 0, 0, 0.7) 100%
   );
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 2;
 }
 
-.sector-panel.active .panel-icon {
-  color: var(--color-white);
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 8px rgba(176, 30, 86, 0.5));
+.gallery-container.has-active .sector-panel:not(.active) .panel-overlay::after {
+  opacity: 1;
 }
+
+/* Panel icon styles removed */
 
 .sector-panel.active .panel-vertical-label {
   opacity: 0;
@@ -903,64 +1043,7 @@ body.menu-open .mobile-menu-toggle span {
 /* -----------------------------------------
    8. HERO BOTTOM BLOCK (~10vh - Scroll Hint)
    ----------------------------------------- */
-.hero-bottom-block {
-  height: 10vh;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 150; /* Above .main-header during ascent, see .gallery-container */
-  will-change: transform, opacity;
-}
 
-.scroll-explore {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 0.3s ease;
-}
-
-.scroll-explore:hover {
-  opacity: 1;
-}
-
-.mouse-icon {
-  width: 20px;
-  height: 32px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  position: relative;
-}
-
-.mouse-wheel {
-  width: 3px;
-  height: 6px;
-  background-color: var(--color-magenta-deep);
-  border-radius: 1.5px;
-  position: absolute;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: mouseScroll 1.8s infinite ease-in-out;
-}
-
-.scroll-text {
-  font-family: var(--font-sans);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-@keyframes mouseScroll {
-  0% { transform: translate(-50%, 0); opacity: 0; }
-  30% { opacity: 1; }
-  100% { transform: translate(-50%, 10px); opacity: 0; }
-}
 
 /* -----------------------------------------
    9. DETAILS SECTION (BELOW THE FOLD)
@@ -1002,6 +1085,393 @@ body.menu-open .mobile-menu-toggle span {
   line-height: 1.7;
   color: var(--color-gray-text);
   margin-bottom: 1.5rem;
+}
+
+/* Responsive visibility toggles */
+.details-mobile-fallback {
+  display: flex;
+}
+
+.details-desktop-gallery {
+  display: none;
+}
+
+/* Desktop styles for the floating interactive gallery */
+@media (min-width: 1024px) {
+  .details-mobile-fallback {
+    display: none !important;
+  }
+  
+  .details-desktop-gallery {
+    display: block;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  .details-section {
+    display: block !important;
+    min-height: 120vh;
+    padding: 6rem 2rem 10rem 2rem;
+    overflow: hidden;
+  }
+  
+  /* Gallery Header (SCOPRI TUTTI I PROGETTI) */
+  .gallery-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  
+  .gallery-discover-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--color-white);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: var(--transition-fast);
+    padding: 0.5rem 1rem;
+  }
+  
+  .gallery-discover-btn:hover {
+    color: var(--color-magenta-glow);
+  }
+  
+  .discover-arrow-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    transition: var(--transition-fast);
+  }
+  
+  .gallery-discover-btn:hover .discover-arrow-btn {
+    border-color: var(--color-magenta-glow);
+    background-color: var(--color-magenta-deep);
+    color: var(--color-white);
+    transform: translateX(4px);
+  }
+  
+  .discover-arrow-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.5px;
+  }
+
+  /* Container structure */
+  .floating-gallery-container {
+    position: relative;
+    width: 100%;
+    height: 800px;
+    margin: 3rem 0;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease, height 0.3s ease;
+  }
+  
+  /* Laptop scaling: prevent cards from overlapping too much on smaller displays */
+  @media (max-width: 1366px) {
+    .floating-gallery-container {
+      transform: scale(0.85);
+      transform-origin: center center;
+      margin: 1rem auto;
+      height: 680px;
+    }
+  }
+  
+  @media (max-width: 1100px) {
+    .floating-gallery-container {
+      transform: scale(0.72);
+      transform-origin: center center;
+      margin: -2rem auto;
+      height: 580px;
+    }
+  }
+  
+  /* Individual floating cards */
+  .floating-card {
+    position: absolute;
+    border-radius: 14px;
+    overflow: visible;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    cursor: pointer;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    background: #09090b;
+    /* Soft border glow */
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: border-color 0.5s ease, box-shadow 0.5s ease;
+  }
+  
+  .floating-card:hover {
+    border-color: rgba(230, 35, 106, 0.3);
+    box-shadow: 0 20px 45px rgba(230, 35, 106, 0.15);
+  }
+  
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+  
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .floating-card:hover .card-img {
+    transform: scale(1.08);
+  }
+  
+  .card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(5, 5, 8, 0.95) 0%,
+      rgba(5, 5, 8, 0.55) 45%,
+      rgba(5, 5, 8, 0.15) 100%
+    );
+    z-index: 1;
+  }
+  
+  .card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transform: translateZ(20px); /* 3D pop effect */
+  }
+  
+  .card-category {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--color-magenta-glow);
+    text-transform: uppercase;
+  }
+  
+  .card-title {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--color-white);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+    position: relative;
+  }
+  
+  .card-title::after {
+    content: '';
+    display: block;
+    width: 35px;
+    height: 1.5px;
+    background-color: var(--color-magenta-glow);
+    margin-top: 0.6rem;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .floating-card:hover .card-title::after {
+    width: 65px;
+  }
+  
+  /* Circular arrow button inside card */
+  .card-arrow-btn {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background-color: rgba(5, 5, 8, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    transition: var(--transition-fast);
+    transform: translateZ(10px);
+  }
+  
+  .floating-card:hover .card-arrow-btn {
+    border-color: var(--color-magenta-glow);
+    background-color: var(--color-magenta-deep);
+    color: var(--color-white);
+  }
+  
+  .card-arrow-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.5px;
+  }
+  
+  /* Positions, widths, and heights for staggered layout */
+  .card-bar {
+    width: 260px;
+    height: 380px;
+    left: 2%;
+    top: 15%;
+    z-index: 3;
+  }
+  
+  .card-restaurant {
+    width: 400px;
+    height: 270px;
+    left: 20%;
+    top: 5%;
+    z-index: 2;
+  }
+  
+  .card-pizza {
+    width: 320px;
+    height: 210px;
+    left: 50%;
+    top: 8%;
+    z-index: 1;
+  }
+  
+  .card-gelato {
+    width: 340px;
+    height: 230px;
+    left: 76%;
+    top: 10%;
+    z-index: 3;
+  }
+  
+  .card-hotel {
+    width: 350px;
+    height: 230px;
+    left: 45%;
+    top: 43%;
+    z-index: 2;
+  }
+  
+  .card-bakery {
+    width: 320px;
+    height: 210px;
+    left: 12%;
+    top: 61%;
+    z-index: 4;
+  }
+  
+  .card-enoteca {
+    width: 410px;
+    height: 260px;
+    left: 71%;
+    top: 51%;
+    z-index: 3;
+  }
+  
+  /* Decorative Wireframe Cards */
+  .decorative-outline {
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+    pointer-events: none;
+    border: 1px solid rgba(230, 35, 106, 0.12);
+    z-index: 1;
+  }
+  
+  .decorative-outline .card-inner {
+    overflow: visible;
+  }
+  
+  .dec-outline-1 {
+    width: 140px;
+    height: 100px;
+    left: 7%;
+    top: 67%;
+  }
+  
+  .dec-outline-2 {
+    width: 160px;
+    height: 110px;
+    left: 36%;
+    top: 68%;
+  }
+  
+  .dec-outline-3 {
+    width: 130px;
+    height: 90px;
+    left: 69%;
+    top: 17%;
+  }
+
+  /* Gallery Footer area styling */
+  .gallery-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+    margin-top: 5rem;
+  }
+  
+  .gallery-footer-text {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--color-white);
+    letter-spacing: -0.01em;
+  }
+  
+  .gallery-footer-text .text-magenta {
+    color: var(--color-magenta-glow);
+  }
+  
+  /* Monogram Diamond Logo */
+  .gallery-monogram {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .monogram-diamond {
+    width: 42px;
+    height: 42px;
+    background-color: var(--color-bg-dark);
+    border: 1px solid var(--color-magenta-glow);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(230, 35, 106, 0.25);
+  }
+  
+  .monogram-diamond span {
+    transform: rotate(-45deg);
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    color: var(--color-white);
+  }
 }
 
 /* -----------------------------------------
@@ -1100,31 +1570,7 @@ body.menu-open .mobile-menu-toggle span {
     padding: 1.5rem;
   }
   
-  .sector-panel::after {
-    left: auto;
-    right: 1.5rem;
-    bottom: auto;
-    top: 1.5rem;
-    transform: none;
-  }
-  
-  .sector-panel[data-index]::after {
-    content: "" !important; /* Hide collapsed vertical labels on mobile */
-  }
-  
-  .sector-panel.active {
-    height: 380px; /* Expand height on tap */
-  }
-  
-  .sector-panel.active .panel-body {
-    transform: none !important;
-    opacity: 1 !important;
-  }
 
-  .hero-bottom-block {
-    height: auto;
-    padding-top: 1.5rem;
-  }
   
   .section-title-wrapper {
     padding: 4rem 2rem 2.5rem 2rem;
@@ -1146,8 +1592,27 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 @media (max-width: 768px) {
+  .main-header {
+    width: 98%; /* Extra room so the bigger wordmark + CTA both fit */
+    padding: 0.4rem 0.7rem;
+  }
+
   .nav-menu {
     display: none; /* Hide desktop nav menu */
+  }
+
+  .nav-mobile-wordmark {
+    display: block; /* Show in mobile nav header */
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-offwhite);
+    opacity: 0.92; /* Present brand signature, part of the composition */
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-align: center;
+    margin-right: 0.4rem; /* Breathing room before the CTA pill */
   }
   
   .mobile-menu-toggle {
@@ -1155,25 +1620,40 @@ body.menu-open .mobile-menu-toggle span {
   }
   
   .header-actions {
-    gap: 0.4rem;
+    gap: 0.3rem;
+  }
+
+  .mobile-menu-toggle {
+    margin-left: 0.3rem;
   }
   
   .header-actions .btn-outline {
-    font-size: 0.62rem !important;
-    padding: 0 0.75rem !important;
+    font-size: 0.6rem !important;
+    padding: 0 0.6rem !important;
     height: 24px !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.03em !important;
+    white-space: nowrap !important;
   }
   
   .hero-text-block {
-    padding: 5.5rem 1.5rem 1.5rem;
-    gap: 1.5rem;
+    padding: 4.8rem 1.5rem 1.5rem;
+    gap: 1.25rem;
     min-height: auto;
   }
   
   .hero-title {
-    font-size: 1.75rem; /* Sleeker title size on mobile */
-    line-height: 1.3;
+    gap: 0.55rem;
+  }
+
+  .hero-title-top {
+    font-size: clamp(1.7rem, 6.2vw, 2.15rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+
+  .hero-title-bottom {
+    font-size: clamp(0.6rem, 2.3vw, 0.68rem);
+    letter-spacing: 0.16em;
   }
   
   .hero-stats-container {
@@ -1203,140 +1683,68 @@ body.menu-open .mobile-menu-toggle span {
     display: none !important;
   }
 
-  /* Make the gallery vertical */
+  /* Make the gallery vertical, natural page flow: each panel's height is
+     driven individually by animateMobileAccordionState (js/main.js) via
+     inline styles, so the container just hugs its content instead of
+     forcing a fixed viewport-height box. */
   .gallery-container {
-    flex-direction: column !important;
-    width: 100% !important; /* Full width on mobile */
-    margin: 0 !important;
-    height: 120vh !important; /* Fixed height to prevent scroll jitter */
-    min-height: 650px !important;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    height: auto;
+    min-height: auto;
   }
 
-  /* Sector Panel responsive styling */
+  /* Sector Panel: same spotlight-card language as desktop (label/description/
+     cta fade in on the active card) - only the panel's own height (240
+     collapsed / 380 active) is tweened via JS. */
   .sector-panel {
-    width: 100% !important;
-    height: auto !important;
-    flex-basis: 0 !important;
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    padding: 1.25rem 1.5rem !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    will-change: flex-grow, flex-basis;
-    transition: flex-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1), flex-basis 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    flex: 0 0 auto;
+    width: 100%;
+    height: 240px; /* fallback before JS sets the inline value on init */
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.5rem;
   }
-  
+
   .sector-panel:last-child {
-    border-bottom: none !important;
-  }
-  
-  .sector-panel.active {
-    height: auto !important;
-    flex-basis: 0 !important;
-    justify-content: space-between !important;
+    border-bottom: none;
   }
 
-  /* Control content layout inside panel */
-  .panel-content {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 1.25rem !important;
-    height: auto !important;
-    width: 100% !important;
-  }
-
-  .sector-panel.active .panel-content {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
-    height: 100% !important;
-    gap: 0 !important;
-  }
-
-  /* In collapsed state on mobile, show header (icon) and body (just the label) */
+  /* No icon on mobile - not hidden via opacity, not occupying layout space,
+     genuinely not rendered. The label alone carries the collapsed state. */
   .panel-header {
-    margin-top: 0 !important;
-    align-items: center !important;
-    width: auto !important;
+    display: none;
   }
 
-  .sector-panel.active .panel-header {
-    margin-top: 0.5rem !important;
-    align-items: flex-start !important;
-    width: 100% !important;
+  /* With the header gone, anchor the body to the bottom directly (was
+     space-between against the icon above it). */
+  .panel-content {
+    justify-content: flex-end;
   }
 
-  .panel-icon {
-    width: 27px !important; /* Reduced by ~15% */
-    height: 27px !important;
-    transition: width 0.6s ease, height 0.6s ease !important;
-  }
-
-  .sector-panel.active .panel-icon {
-    width: 34px !important; /* Reduced by ~15% */
-    height: 34px !important;
-  }
-
+  /* Body is a plain layout wrapper on mobile (no rotated collapsed label to
+     hand off to, unlike desktop) - the label stays legible at all times,
+     only the description/cta fade with the active state. */
   .panel-body {
-    opacity: 1 !important; /* Always opacity 1 on mobile, we control sub-elements */
-    transform: none !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    max-width: 100% !important;
-    gap: 0 !important;
-    flex-grow: 1 !important;
+    opacity: 1;
+    transform: none;
+    max-width: 100%;
   }
 
-  .sector-panel.active .panel-body {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.75rem !important;
-    flex-grow: 0 !important;
-  }
-
-  /* The label spans inline when collapsed, block when active */
   .panel-label {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 0.35rem !important;
-    font-size: 1.27rem !important; /* Increased by ~15% */
-    color: var(--color-white) !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
+    font-size: 1.5rem;
   }
 
-  .panel-label span {
-    display: inline-block !important;
-  }
-
-  .sector-panel.active .panel-label {
-    flex-direction: column !important;
-    gap: 0 !important;
-    font-size: 2.12rem !important; /* Increased by ~15% */
-  }
-
-  /* Description and CTA are hidden when collapsed, visible when active */
   .panel-description,
   .panel-cta {
-    display: none !important;
+    opacity: 0;
+    transform: translateY(10px);
   }
 
-  .sector-panel.active .panel-description {
-    display: block !important;
-    font-size: 0.85rem !important;
-    line-height: 1.4 !important;
-    color: var(--color-gray-text) !important;
-    margin-top: 0.25rem !important;
-    max-width: 320px !important;
-  }
-
-  .sector-panel.active .panel-cta {
-    display: flex !important;
-    margin-top: 0.5rem !important;
+  .panel-description {
+    font-size: 0.82rem;
+    max-width: 300px;
   }
 }
 
@@ -1464,6 +1872,7 @@ body.menu-open .mobile-menu-toggle span {
 @media (max-width: 768px) {
   .build-stage {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
     width: 100%;
     align-items: center;

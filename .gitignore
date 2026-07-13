@@ -7,6 +7,13 @@ Screenshot*
 IMG_*.JPG
 Untitled
 
-# Raw scroll-0 source frames (133MB) - only the processed webp/ output ships
-assets/animations/scroll-0/*.jpg
 .cursor/
+
+# Scroll animation assets: the site (js/scroll-*.js) serves ONLY the webp/
+# folders. All the raw source frames, cutout attempts, backups, previews and
+# inspection dumps (~715MB) stay on disk but must NOT be committed — they blow
+# up the pack and make `git push` time out (HTTP 408). Whitelist just webp/.
+assets/animations/scroll-*/**
+!assets/animations/scroll-*/
+!assets/animations/scroll-*/webp/
+!assets/animations/scroll-*/webp/**

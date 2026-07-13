@@ -1,0 +1,159 @@
+/* -----------------------------------------
+   SCROLL 2 - physical cutout object (overlay inside #build-stage)
+   Same canvas footprint as #build-canvas / #reveal-canvas. The object
+   starts exactly where Scroll 1 leaves it (left column) and glides to
+   the exact center of the page, flanked by copy on both sides. The
+   layer sits absolutely over the pinned build-stage: main.js swaps its
+   visibility with .reveal-layer at the second hand-off point so the
+   three sequences read as one continuous animation.
+   ----------------------------------------- */
+
+@media (min-width: 769px) {
+  .reveal-layer-2 {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden; /* shown via gsap autoAlpha at the second hand-off */
+    z-index: 3;
+  }
+
+  /* Identical content box to .build-stage-content / .reveal-layer-content */
+  .reveal-layer-2-content {
+    width: 100%;
+    max-width: 1440px;
+    height: 100%;
+    padding: 0 6rem;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Travelling slot: anchored to the LEFT column at start (left: 0),
+     the exact spot scroll-1's slot ends at (left:50% translated left by
+     half the content width = left edge at 0%). Same width as the other
+     canvas slots. JS translates it rightward until it is centered. */
+  .reveal-object-slot-2 {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 50%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .reveal-canvas-container-2 {
+    width: 100%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #reveal-canvas-2 {
+    width: 100%;
+    max-height: 70vh;
+    aspect-ratio: 1440 / 805;
+    transform: scale(1.02);
+  }
+
+  /* Copy flanking the centered object: eyebrow + headline on the left,
+     supporting text on the right - both fade in as the object settles. */
+  .reveal-copy-2-left {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 22%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    transform: translateY(-50%);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+
+  .reveal-copy-2-right {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 22%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    transform: translateY(-50%);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+
+  .reveal-copy-2-left .reveal-eyebrow,
+  .reveal-copy-2-left .reveal-headline,
+  .reveal-copy-2-right .reveal-sub {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Static stacked block below scroll-1's content inside .build-stage
+     (mirrors .reveal-layer's mobile branch). */
+  .reveal-layer-2 {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg-dark);
+  }
+
+  .reveal-layer-2-content {
+    width: 100%;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .reveal-copy-2-left,
+  .reveal-copy-2-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    width: 100%;
+  }
+
+  .reveal-object-slot-2 {
+    width: 100%;
+    order: -1;
+  }
+
+  .reveal-canvas-container-2 {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #reveal-canvas-2 {
+    width: 100%;
+    aspect-ratio: 1440 / 805;
+    height: auto;
+  }
+}

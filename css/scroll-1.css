@@ -1,0 +1,192 @@
+/* -----------------------------------------
+   SCROLL 1 - physical cutout object (overlay inside #build-stage)
+   Same canvas footprint as #build-canvas. The object starts exactly where
+   Scroll 0 leaves it (right column) and glides to the left column. The
+   layer sits absolutely over the pinned build-stage: main.js swaps its
+   visibility with .build-canvas-container at the hand-off point so the
+   two sequences read as one continuous animation.
+   ----------------------------------------- */
+
+@media (min-width: 769px) {
+  .reveal-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden; /* shown via gsap autoAlpha at hand-off */
+    z-index: 2;
+  }
+
+  /* Identical content box to .build-stage-content */
+  .reveal-layer-content {
+    width: 100%;
+    max-width: 1440px;
+    height: 100%;
+    padding: 0 6rem;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Travelling slot: anchored to the right column at start (left: 50%),
+     same width as .build-canvas-container. JS translates it leftward. */
+  .reveal-object-slot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .reveal-canvas-container {
+    width: 100%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #reveal-canvas {
+    width: 100%;
+    max-height: 70vh;
+    aspect-ratio: 1440 / 805;
+    transform: scale(1.02);
+    /* Shadow comes from the webp alpha channel, not CSS drop-shadow. */
+  }
+
+  /* Copy on the right (mirror of Scroll 0's left copy) */
+  .reveal-copy {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 45%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+    transform: translateY(-50%);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+
+  .reveal-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--color-magenta-glow);
+    margin-bottom: 0.85rem;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .reveal-headline {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vh, 4.2rem);
+    font-weight: 300;
+    line-height: 1.12;
+    color: var(--color-offwhite);
+    margin-bottom: 1.4rem;
+    text-transform: uppercase;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .reveal-sub {
+    font-family: var(--font-sans);
+    font-size: clamp(0.95rem, 1.8vh, 1.15rem);
+    font-weight: 300;
+    color: var(--color-gray-text);
+    line-height: 1.55;
+    max-width: 420px;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Static stacked block below the scroll-0 content inside .build-stage
+     (the mobile build-stage content is a flex column). */
+  .reveal-layer {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg-dark);
+  }
+
+  .reveal-layer-content {
+    width: 100%;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2.5rem;
+  }
+
+  .reveal-object-slot {
+    width: 100%;
+  }
+
+  .reveal-canvas-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #reveal-canvas {
+    width: 100%;
+    aspect-ratio: 1440 / 805;
+    height: auto;
+  }
+
+  .reveal-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    color: var(--color-offwhite);
+  }
+
+  .reveal-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--color-magenta-glow);
+    margin-bottom: 0.7rem;
+  }
+
+  .reveal-headline {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 9vw, 2.8rem);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--color-offwhite);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .reveal-sub {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--color-gray-text);
+    line-height: 1.55;
+    max-width: 420px;
+  }
+}
