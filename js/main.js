@@ -760,7 +760,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const targetScroll = stageTop + window.innerHeight * SCROLL0_PIN_FRACTION;
 
     lenis.scrollTo(targetScroll, {
-      duration: 2.8, // Proportionally reduced from 8s to match compressed scroll length
+      duration: 1.8, // Faster forced descent, same sinuous power3.inOut curve
       // power3.inOut
       easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
       lock: true,
@@ -879,13 +879,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // The scroll-0 copy lives ENTIRELY inside the scroll-0 phase of the
     // combined pin. On the 10-unit scale that phase is [0 .. S0], where
-    // S0 = HANDOFF*10 (~0.89 with the current fractions). Both the fade-in
-    // and the fade-out are authored as fractions of S0 so they scale with
-    // SCROLL0_PIN_FRACTION and never bleed into scroll-1/2/3 - the copy is
-    // fully faded out by the hand-off and stays gone for the rest of the pin.
+    // S0 = HANDOFF*10 (~0.89 with the current fractions). The fade-in is
+    // authored as a fraction of S0 so it scales with SCROLL0_PIN_FRACTION;
+    // once in, the copy stays at full opacity through the rest of scroll-0
+    // (setPhase() hides the whole canvas layer in one frame at the hand-off
+    // instead).
     const S0 = HANDOFF * 10;
 
-    // Copy in: fade + upward drift over the first ~40% of scroll-0.
+    // Copy in: fade + upward drift over the first ~40% of scroll-0. It then
+    // stays fully visible for the whole middle of scroll-0 so the reader
+    // keeps the text right up to the hand-off.
     scroll0TL.to(scroll0Copy, {
       opacity: 1,
       y: 0,
@@ -893,14 +896,16 @@ document.addEventListener("DOMContentLoaded", () => {
       stagger: S0 * 0.05
     }, S0 * 0.08);
 
-    // Copy out: leaves over the last stretch of scroll-0, fully gone before
-    // the hand-off (~0.85*S0 end) so scroll-1/2/3 never show the build copy.
+    // Copy out: an elegant scrubbed dissolve in the LAST sliver of scroll-0
+    // (last ~12%), finishing exactly at the hand-off. The copy therefore
+    // survives to the final scroll-0 frame and only fades as scroll-1 begins
+    // to take over - no early disappearance, no hard cut.
     scroll0TL.to(scroll0Copy, {
       opacity: 0,
-      x: -36,
-      duration: S0 * 0.20,
-      stagger: S0 * 0.03
-    }, S0 * 0.68);
+      y: -24,
+      duration: S0 * 0.12,
+      stagger: S0 * 0.02
+    }, S0 * 0.88);
 
     // Pad the timeline to the full 10-unit scale so the scrub maps the
     // authored positions 1:1 onto the whole (extended) pin range.
@@ -981,84 +986,406 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* -----------------------------------------
-     3D INTERACTIVE TILT GALLERY (PC ONLY)
-     Calculates vector deltas from cursor to cards
-     and drives tilt rotation/translation smoothly via GSAP.
+     3D INTERACTIVE TILT GALLERY & PROJECT DETAIL POP-UP (PC ONLY)
+     Calculates global vector deltas from cursor to cards
+     and combines them with a gentle continuous floating animation.
      ----------------------------------------- */
   const detailsSection = document.querySelector('.details-section');
   const galleryContainer = document.querySelector('.floating-gallery-container');
   const floatingCards = document.querySelectorAll('.floating-card');
 
   if (detailsSection && galleryContainer && floatingCards.length > 0) {
-    const handleMouseMove = (e) => {
-      // Don't run on screen sizes below desktop breakpoint
-      if (window.innerWidth < 1024) return;
+    let globalMouseX = window.innerWidth / 2;
+    let globalMouseY = window.innerHeight / 2;
+    let mouseActive = false;
+
+    // Track mouse coordinates globally on the window
+    window.addEventListener('mousemove', (e) => {
+      globalMouseX = e.clientX;
+      globalMouseY = e.clientY;
+      mouseActive = true;
+    });
+
+    // Reset when mouse leaves the page
+    document.addEventListener('mouseleave', () => {
+      mouseActive = false;
+    });
+
+    // Map each card to its specific animation parameters to ensure independent floating phases
+    const cardData = Array.from(floatingCards).map((card, index) => {
+      const speed = parseFloat(card.getAttribute('data-speed')) || 1.0;
+      const isOutline = card.classList.contains('decorative-outline');
+      
+      // Calculate static center relative to the gallery container to prevent layout thrashing
+      const centerX = card.offsetLeft + card.offsetWidth / 2;
+      const centerY = card.offsetTop + card.offsetHeight / 2;
+
+      // Determine initial offset values for fluid entrance animation
+      let entranceOffsetX = 0;
+      let entranceOffsetY = 0;
+      let entranceRotX = 0;
+      let entranceRotY = 0;
+      let entranceScale = 0.65;
+
+      if (card.classList.contains('card-bar') || card.classList.contains('card-bakery') || card.classList.contains('dec-outline-1')) {
+        // Left side cards fly in from the left
+        entranceOffsetX = -350;
+        entranceRotY = -35;
+      } else if (card.classList.contains('card-gelato') || card.classList.contains('card-enoteca') || card.classList.contains('dec-outline-3')) {
+        // Right side cards fly in from the right
+        entranceOffsetX = 350;
+        entranceRotY = 35;
+      } else {
+        // Center/middle cards fly in from bottom/center
+        entranceOffsetY = 220;
+        entranceRotX = 35;
+        entranceScale = 0.45;
+      }
+
+      // Pre-set cards state to hidden and scaled down to prevent FOUC
+      gsap.set(card, {
+        opacity: 0,
+        scale: entranceScale
+      });
+
+      return {
+        element: card,
+        speed: speed,
+        isOutline: isOutline,
+        centerX: centerX,
+        centerY: centerY,
+        // Distinct phases for sine/cosine oscillations so they float out of sync
+        phaseX: index * 1.7,
+        phaseY: index * 2.3,
+        phaseRotX: index * 1.2,
+        phaseRotY: index * 0.9,
+        // Amplitude scaling factor
+        ampScale: isOutline ? 1.5 : 1.0,
+        // Entrance animation parameters
+        entranceOffsetX: entranceOffsetX,
+        entranceOffsetY: entranceOffsetY,
+        entranceRotX: entranceRotX,
+        entranceRotY: entranceRotY,
+        entranceScale: entranceScale,
+        entranceBlend: 0, // Animates from 0 to 1 on ScrollTrigger entrance
+        // Keep track of current values for smooth interpolation (Lerp)
+        currentX: entranceOffsetX,
+        currentY: entranceOffsetY,
+        currentRotX: entranceRotX,
+        currentRotY: entranceRotY
+      };
+    });
+
+    // Create ScrollTrigger timeline for staggering entrance animation
+    cardData.forEach((data, index) => {
+      // Animate the entrance blend factor from 0 to 1
+      gsap.to(data, {
+        entranceBlend: 1,
+        duration: 1.6,
+        delay: index * 0.08,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".details-section",
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      });
+
+      // Animate the actual card element opacity and scale to full
+      gsap.to(data.element, {
+        opacity: 1,
+        scale: 1,
+        duration: 1.6,
+        delay: index * 0.08,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".details-section",
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      });
+    });
+
+    let time = 0;
+    let wasDesktop = window.innerWidth >= 1024;
+
+    const updateGallery = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      if (!isDesktop) {
+        if (wasDesktop) {
+          // Reset all transforms when transitioning to mobile
+          cardData.forEach((data) => {
+            gsap.set(data.element, { clearProps: "all" });
+          });
+          wasDesktop = false;
+        }
+        return;
+      }
+      wasDesktop = true;
 
       const rect = galleryContainer.getBoundingClientRect();
+      // Performance optimization: skip processing if the section is completely off-screen
+      if (rect.bottom < -150 || rect.top > window.innerHeight + 150) {
+        return;
+      }
+
       const containerWidth = rect.width;
       const containerHeight = rect.height;
 
-      // Mouse position relative to the gallery container
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      // Mouse position relative to the gallery container coordinates
+      const mouseX = globalMouseX - rect.left;
+      const mouseY = globalMouseY - rect.top;
 
-      floatingCards.forEach((card) => {
-        // Find card center relative to container
-        const cardCenterX = card.offsetLeft + card.offsetWidth / 2;
-        const cardCenterY = card.offsetTop + card.offsetHeight / 2;
+      time += 0.008; // Controls the speed of idle floating
 
-        // Vector differences
-        const dx = mouseX - cardCenterX;
-        const dy = mouseY - cardCenterY;
+      cardData.forEach((data) => {
+        // 1. Idle Floating Animation (sine/cosine waves) - Dampened for stability
+        const idleX = Math.sin(time + data.phaseX) * 5 * data.ampScale;
+        const idleY = Math.cos(time + data.phaseY) * 5 * data.ampScale;
+        const idleRotX = Math.sin(time + data.phaseRotX) * 0.5;
+        const idleRotY = Math.cos(time + data.phaseRotY) * 0.5;
 
-        // Percentages of difference relative to the container size
-        const pctX = dx / containerWidth;
-        const pctY = dy / containerHeight;
+        let targetX = idleX;
+        let targetY = idleY;
+        let targetRotX = idleRotX;
+        let targetRotY = idleRotY;
 
-        // Base max rotation angles (degrees)
-        const isOutline = card.classList.contains('decorative-outline');
-        const maxAngleX = isOutline ? 20 : 12;
-        const maxAngleY = isOutline ? 20 : 12;
+        // 2. Mouse Tracking Interactivity (global cursor position, relative to container)
+        if (mouseActive) {
+          // Vector delta from cached static center to mouse cursor coordinates
+          const dx = mouseX - data.centerX;
+          const dy = mouseY - data.centerY;
 
-        // Tilt logic:
-        // dx > 0 (cursor right) -> rotate around Y axis positively
-        // dy > 0 (cursor down) -> rotate around X axis negatively
-        const targetRotateY = pctX * maxAngleY;
-        const targetRotateX = -pctY * maxAngleX;
+          // Normalize differences relative to the container size
+          const pctX = dx / containerWidth;
+          const pctY = dy / containerHeight;
 
-        // Dynamic translation based on data-speed for depth parallax
-        const speed = parseFloat(card.getAttribute('data-speed')) || 1.0;
-        const targetTransX = pctX * 30 * speed;
-        const targetTransY = pctY * 30 * speed;
+          // Calculate interactive tilt (pointing/facing the cursor) - Dampened to 3deg max
+          const maxAngleX = data.isOutline ? 6 : 3;
+          const maxAngleY = data.isOutline ? 6 : 3;
+          const tiltRotX = -pctY * maxAngleX;
+          const tiltRotY = pctX * maxAngleY;
 
-        gsap.to(card, {
-          rotateX: targetRotateX,
-          rotateY: targetRotateY,
-          x: targetTransX,
-          y: targetTransY,
-          duration: 0.6,
-          ease: "power2.out",
+          // Calculate interactive translation (slight attraction towards cursor) - Dampened to 15px max
+          const maxTransX = 15;
+          const maxTransY = 15;
+          const tiltTransX = pctX * maxTransX * data.speed;
+          const tiltTransY = pctY * maxTransY * data.speed;
+
+          targetX += tiltTransX;
+          targetY += tiltTransY;
+          targetRotX += tiltRotX;
+          targetRotY += tiltRotY;
+        }
+
+        // 3. Interpolation (Lerp) for elastic, liquid smoothness
+        data.currentX += (targetX - data.currentX) * 0.08;
+        data.currentY += (targetY - data.currentY) * 0.08;
+        data.currentRotX += (targetRotX - data.currentRotX) * 0.08;
+        data.currentRotY += (targetRotY - data.currentRotY) * 0.08;
+
+        // 4. Blend the interpolated floating value with the entrance offset
+        const blend = data.entranceBlend;
+        const finalX = data.currentX * blend + (1 - blend) * data.entranceOffsetX;
+        const finalY = data.currentY * blend + (1 - blend) * data.entranceOffsetY;
+        const finalRotX = data.currentRotX * blend + (1 - blend) * data.entranceRotX;
+        const finalRotY = data.currentRotY * blend + (1 - blend) * data.entranceRotY;
+
+        // 5. Apply transformations to the DOM
+        gsap.set(data.element, {
+          x: finalX,
+          y: finalY,
+          rotateX: finalRotX,
+          rotateY: finalRotY,
           overwrite: "auto"
         });
       });
     };
 
-    const handleMouseLeave = () => {
-      floatingCards.forEach((card) => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          x: 0,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          overwrite: "auto"
-        });
-      });
+    // Add to GSAP ticker
+    gsap.ticker.add(updateGallery);
+
+    /* -----------------------------------------
+       PROJECT DETAILS POP-UP MODAL LOGIC
+       ----------------------------------------- */
+    const projectDetailsData = {
+      "card-bar": {
+        category: "BAR",
+        title: "Caffè del Duomo",
+        image: "./assets/bar_parisi.jpg",
+        location: "Milano, Italia",
+        date: "Marzo 2025",
+        services: "Interior design, arredo su misura di prestigio, bancone bar artigianale con marmo retroilluminato, illuminotecnica, allestimento chiavi in mano.",
+        description: "Un restyling completo progettato per coniugare l'eleganza storica della location e flussi di servizio ultra-rapidi. Il fulcro dell'ambiente è il maestoso bancone bar retroilluminato con finiture in ottone spazzolato e marmi selezionati."
+      },
+      "card-restaurant": {
+        category: "RISTORANTE",
+        title: "Ristorante Mare Blu",
+        image: "./assets/restaurant.png",
+        location: "Rimini, Italia",
+        date: "Giugno 2025",
+        services: "Pianificazione dello spazio, fornitura arredi contract di alto livello, pannelli acustici a soffitto, arredo terrazza panoramica.",
+        description: "Un'atmosfera marittima contemporanea e sofisticata. Le ampie vetrate collegano lo spazio interno con l'orizzonte marino, mentre l'uso di legni chiari sbiancati e tessuti naturali esalta il legame visivo e tattile con il territorio."
+      },
+      "card-pizza": {
+        category: "PIZZERIA",
+        title: "Pizzeria 900",
+        image: "./assets/restaurant.png",
+        location: "Napoli, Italia",
+        date: "Settembre 2025",
+        services: "Rivestimento forno a cupola artistico, layout sedute ottimizzato, carpenteria metallica su disegno, impianti di estrazione fumi.",
+        description: "Pizzeria dal carattere urbano e post-industriale. Il design ruota interamente attorno al forno a vista, rivestito in mosaico scuro. Materiali solidi come cemento a vista, metalli crudi e legno di recupero scaldano l'ambiente."
+      },
+      "card-gelato": {
+        category: "GELATERIA",
+        title: "Gelateria Dolcevita",
+        image: "./assets/gelato.png",
+        location: "Roma, Italia",
+        date: "Aprile 2025",
+        services: "Ingegnerizzazione vetrine gelato ad alta efficienza, scaffalature espositive retroilluminate, palette cromatica personalizzata, pavimentazione continua.",
+        description: "Uno spazio di vendita allegro, luminoso e ad alte prestazioni commerciali. Progettato appositamente per valorizzare la visibilità delle carapine artigianali e massimizzare i flussi d'acquisto durante le ore di punta."
+      },
+      "card-hotel": {
+        category: "HOTEL",
+        title: "Hotel Artemisia",
+        image: "./assets/hotel.png",
+        location: "Firenze, Italia",
+        date: "Novembre 2025",
+        services: "Produzione arredi camere standard, suite e corridoi, reception desk monolitico, lighting design scenografico della hall.",
+        description: "Progetto contract chiavi in mano per una raffinata struttura alberghiera di prestigio. L'integrazione di sistemi domotici intelligenti si sposa armonicamente con l'uso di boiserie classiche e caldi velluti di manifattura italiana."
+      },
+      "card-bakery": {
+        category: "PASTICCERIA",
+        title: "Dolci Tentazioni",
+        image: "./assets/bakery.png",
+        location: "Torino, Italia",
+        date: "Dicembre 2025",
+        services: "Vetrine pasticceria refrigerate su misura, isola caffetteria, porte laboratori complanari, posa carta da parati e modanature murali.",
+        description: "Un accogliente salotto dal sapore parigino rétro. Dettagli dorati, modanature sagomate e una studiata combinazione di tinte pastello creano l'ambiente perfetto per un'esperienza di degustazione indimenticabile."
+      },
+      "card-enoteca": {
+        category: "ENOTECA",
+        title: "Enoteca Vinum",
+        image: "./assets/retail.png",
+        location: "Verona, Italia",
+        date: "Ottobre 2025",
+        services: "Scaffalature vino modulari in ferro e rovere, tavoli da degustazione, illuminazione d'atmosfera regolabile, pareti divisorie in metallo e vetro.",
+        description: "Un tempio del vino moderno ed essenziale. Espositori minimalisti in ferro nero e rovere massiccio mettono in risalto l'importanza delle bottiglie storiche, mentre l'illuminazione a binario crea nicchie d'ombra intime."
+      }
     };
 
-    detailsSection.addEventListener('mousemove', handleMouseMove);
-    detailsSection.addEventListener('mouseleave', handleMouseLeave);
+    const modal = document.getElementById('projectModal');
+    const modalImg = modal.querySelector('.modal-project-img');
+    const modalCategory = modal.querySelector('.modal-project-category');
+    const modalTitle = modal.querySelector('.modal-project-title');
+    const modalLocation = document.getElementById('modal-detail-location');
+    const modalDate = document.getElementById('modal-detail-date');
+    const modalServices = document.getElementById('modal-detail-services');
+    const modalDesc = modal.querySelector('.modal-project-desc');
+    const closeBtn = modal.querySelector('.modal-close-btn');
+    const backdrop = modal.querySelector('.modal-backdrop');
+
+    const openModal = (cardKey) => {
+      const data = projectDetailsData[cardKey];
+      if (!data) return;
+
+      // Populate data
+      modalImg.src = data.image;
+      modalImg.alt = data.title;
+      modalCategory.textContent = data.category;
+      modalTitle.textContent = data.title;
+      modalLocation.textContent = data.location;
+      modalDate.textContent = data.date;
+      modalServices.textContent = data.services;
+      modalDesc.textContent = data.description;
+
+      // Prevent background scrolling
+      if (lenis) lenis.stop();
+
+      // Show modal
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+
+      // Re-enable page scrolling
+      if (lenis) lenis.start();
+
+      // Reset image src after transition to prevent layout flash next time
+      setTimeout(() => {
+        modalImg.src = '';
+      }, 500);
+    };
+
+    // Gestione click ultra-stabile sulle card fluttuanti usando pointerdown/pointerup
+    floatingCards.forEach((card) => {
+      if (card.classList.contains('decorative-outline')) return;
+
+      const classes = Array.from(card.classList);
+      const cardKey = classes.find(c => c.startsWith('card-'));
+
+      if (cardKey) {
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+
+        // La freccia apre sempre il modal, senza euristiche di distanza/tempo
+        const arrowBtn = card.querySelector('.card-arrow-btn');
+        if (arrowBtn) {
+          arrowBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(cardKey);
+          });
+        }
+
+        card.addEventListener('pointerdown', (e) => {
+          if (e.button !== 0) return; // Solo click sinistro o tap primario
+          startX = e.clientX;
+          startY = e.clientY;
+          startTime = Date.now();
+          // Cattura il puntatore: il pointerup arriva alla card anche se
+          // l'animazione la sposta da sotto il cursore durante il click.
+          // Niente cattura se il click parte dalla freccia: la cattura
+          // ritargetterebbe il click sulla card, saltando l'handler dedicato.
+          if (!(e.target.closest && e.target.closest('.card-arrow-btn'))) {
+            try { card.setPointerCapture(e.pointerId); } catch (_) {}
+          }
+        });
+
+        card.addEventListener('pointerup', (e) => {
+          if (e.button !== 0) return; // Solo click sinistro o tap primario
+          try { card.releasePointerCapture(e.pointerId); } catch (_) {}
+
+          // Ignora i click partiti dalla freccia (gestiti dal suo handler dedicato)
+          if (e.target.closest && e.target.closest('.card-arrow-btn')) return;
+
+          const diffX = e.clientX - startX;
+          const diffY = e.clientY - startY;
+          const distance = Math.sqrt(diffX * diffX + diffY * diffY);
+          const elapsed = Date.now() - startTime;
+
+          // Click valido se il rilascio avviene entro 500ms con spostamento
+          // del cursore inferiore a 24px, indipendentemente dal movimento della card.
+          if (elapsed < 500 && distance < 24) {
+            openModal(cardKey);
+          }
+        });
+      }
+    });
+
+    // Close listeners
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    // Escape key press close support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+    });
   }
 
 });

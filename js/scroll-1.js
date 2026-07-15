@@ -59,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
   const COPY_START = 0.62;
   const COPY_END = 0.86;
+  // Copy fades back out in the last sliver of the phase, finishing right at
+  // the scroll-1 -> scroll-2 hand-off: the text stays through the final
+  // scroll-1 frame, then dissolves elegantly as scroll-2 begins.
+  const COPY_OUT_START = 0.9;
+  const COPY_OUT_END = 1.0;
   const copyEls = [
     layer.querySelector(".reveal-eyebrow"),
     layer.querySelector(".reveal-headline"),
@@ -78,9 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(slot, { x, yPercent: -50 });
 
     const c = clamp01((progress - COPY_START) / (COPY_END - COPY_START));
+    const out = clamp01((progress - COPY_OUT_START) / (COPY_OUT_END - COPY_OUT_START));
     copyEls.forEach((el, idx) => {
       const staggered = clamp01(c - idx * 0.07);
-      gsap.set(el, { opacity: staggered, x: 36 * (1 - staggered) });
+      const staggeredOut = clamp01(out - idx * 0.07);
+      const op = staggered * (1 - staggeredOut);
+      gsap.set(el, { opacity: op, x: 36 * (1 - staggered) - 24 * staggeredOut });
     });
   }
 
@@ -137,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const targetScroll = meta.handoff2Y;
       lenis.scrollTo(targetScroll, {
-        duration: 8,
+        duration: 4.5,
         easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
         lock: true,
         onComplete: () => {

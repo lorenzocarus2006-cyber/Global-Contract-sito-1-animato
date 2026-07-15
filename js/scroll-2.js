@@ -20,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const FRAME_COUNT = 120;
-  const FRAME_CACHE_BUST = "v=3";
+  const FRAME_COUNT = 121;
+  const FRAME_CACHE_BUST = "v=6";
   const frames = [];
   let lastDrawn = -1;
   let pendingFrame = null;
@@ -30,23 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return `./assets/animations/scroll-2/webp/frame_${String(i).padStart(3, "0")}.webp?${FRAME_CACHE_BUST}`;
   }
 
-  // Source frames are portrait 1080x1920 with the object living in a centered
-  // band (roughly x 40..1060, y 590..1340) surrounded by black. Crop that band
-  // out of the source and contain-fit it into the 1440x805 landscape canvas so
-  // the object keeps its real proportions instead of being squished flat.
-  const SRC = { x: 40, y: 585, w: 1000, h: 760 };
+  // Frames are pre-normalized to the 1440x805 canvas: each one already has the
+  // object scaled to a constant on-screen size (temporally smoothed) and
+  // centered, so it only rotates in place instead of growing/shrinking. Draw
+  // the whole frame 1:1 into the canvas.
   function drawFrame(index) {
     const clamped = Math.max(0, Math.min(FRAME_COUNT - 1, index));
     const img = frames[clamped];
     if (img && img.complete && img.naturalWidth > 0) {
       if (clamped === lastDrawn) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const scale = Math.min(canvas.width / SRC.w, canvas.height / SRC.h);
-      const dw = SRC.w * scale;
-      const dh = SRC.h * scale;
-      const dx = (canvas.width - dw) / 2;
-      const dy = (canvas.height - dh) / 2;
-      ctx.drawImage(img, SRC.x, SRC.y, SRC.w, SRC.h, dx, dy, dw, dh);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       lastDrawn = clamped;
       pendingFrame = null;
     } else {
@@ -71,6 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
   const COPY_START = 0.62;
   const COPY_END = 0.86;
+  // Elegant scrubbed dissolve in the last sliver, finishing at the
+  // scroll-2 -> scroll-3 hand-off (copy survives to the last scroll-2 frame).
+  const COPY_OUT_START = 0.9;
+  const COPY_OUT_END = 1.0;
   const leftCopyEls = [
     layer.querySelector(".reveal-copy-2-left .reveal-eyebrow"),
     layer.querySelector(".reveal-copy-2-left .reveal-headline"),
@@ -94,9 +92,12 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(slot, { x, yPercent: -50 });
 
     const c = clamp01((progress - COPY_START) / (COPY_END - COPY_START));
+    const out = clamp01((progress - COPY_OUT_START) / (COPY_OUT_END - COPY_OUT_START));
     copyEls.forEach((el, idx) => {
       const staggered = clamp01(c - idx * 0.07);
-      gsap.set(el, { opacity: staggered, x: 36 * (1 - staggered) });
+      const staggeredOut = clamp01(out - idx * 0.07);
+      const op = staggered * (1 - staggeredOut);
+      gsap.set(el, { opacity: op, x: 36 * (1 - staggered) - 24 * staggeredOut });
     });
   }
 
@@ -143,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const targetScroll = meta.handoff3Y;
       lenis.scrollTo(targetScroll, {
-        duration: 8,
+        duration: 4.5,
         easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
         lock: true,
         onComplete: () => {

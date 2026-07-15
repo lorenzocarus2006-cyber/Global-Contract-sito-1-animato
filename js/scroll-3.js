@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const targetScroll = meta.endY;
       lenis.scrollTo(targetScroll, {
-        duration: 8,
+        duration: 4.5,
         easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
         lock: true,
         onComplete: () => {
