@@ -4,6 +4,36 @@ Registro cronologico delle modifiche al sito. Voce piu' recente in alto.
 
 ---
 
+## 2026-07-15 — Migrazione a font self-hosted (Newsreader + General Sans)
+
+**Autore:** Lorenzo Rubino (via Claude Code)
+
+### Cosa e' cambiato
+Il sito passa da **Google Fonts** (Cormorant Garamond + Inter, caricati via
+`<link>` nell'`<head>`) a **font self-hosted** serviti dal repo:
+- `--font-serif: 'Newsreader', Georgia, serif` — titoli/display
+- `--font-sans: 'General Sans', ...` — corpo testo/UI/nav
+- `--font-serif-cards: 'Cormorant Garamond'` e `--font-sans-cards: 'Inter'`
+  restano SOLO per le floating-card della home (e per la sezione Numeri).
+
+Aggiunte le regole `@font-face` in cima a `css/style.css` che puntano ai file
+locali, e i file font in `assets/fonts/` (~1.2M):
+- `assets/fonts/newsreader/` — Newsreader variable (regular + italic, TTF)
+- `assets/fonts/general-sans/` — General Sans variable (woff2 + ttf, regular + italic)
+
+### Perche'
+Meno dipendenza da CDN esterni, coerenza tipografica e controllo sul rendering.
+
+### File
+- `css/style.css` — blocco `@font-face` + token `--font-serif`/`--font-sans`.
+- `assets/fonts/**` — file font (nuovi, tracciati in git, NON gitignored).
+
+### Nota
+Sostituisce di fatto la voce "Verifica font utilizzati nel sito" piu' in basso
+(quella fotografava lo stato PRIMA della migrazione: Cormorant + Inter).
+
+---
+
 ## 2026-07-15 — Sezione "Numeri": count-up, hover interattivo, box piu' piccole, rimossa etichetta angolo
 
 **Autore:** Lorenzo Rubino (via Claude Code)
