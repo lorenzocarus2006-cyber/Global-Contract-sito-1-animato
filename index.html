@@ -28,11 +28,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./css/style.css?v=merged-pin-1">
+  <link rel="stylesheet" href="./css/style.css?v=fonts-1">
   <link rel="stylesheet" href="./css/scroll-1.css?v=merged-pin-1">
   <link rel="stylesheet" href="./css/scroll-2.css?v=1">
   <link rel="stylesheet" href="./css/scroll-3.css?v=1">
-  
+  <link rel="stylesheet" href="./css/scroll-stats.css?v=4">
+
   <!-- Preload Critical Sector Images -->
   <link rel="preload" href="./assets/bar_parisi.jpg" as="image">
   <link rel="preload" href="./assets/hotel.png" as="image">
@@ -82,7 +83,7 @@
       
       <div class="header-right">
         <div class="header-actions" id="nav-actions">
-          <a href="#dettagli" class="btn btn-outline">Richiedi consulenza</a>
+          <a href="#contatti" class="btn btn-outline">Richiedi consulenza</a>
           <button class="mobile-menu-toggle" aria-label="Apri menu" aria-expanded="false">
             <span></span>
             <span></span>
@@ -98,7 +99,7 @@
       <a href="#dettagli" class="mobile-nav-item">Chi siamo</a>
       <a href="./projects.html" class="mobile-nav-item">Progetti</a>
       <a href="#" class="mobile-nav-item">Shop</a>
-      <a href="#dettagli" class="mobile-nav-item mobile-cta-item">Richiedi consulenza</a>
+      <a href="#contatti" class="mobile-nav-item mobile-cta-item">Richiedi consulenza</a>
     </nav>
   </div>
 
@@ -431,6 +432,77 @@
       </div>
     </section>
 
+    <!-- Fixed cream backdrop: fades in only while .stats-section is in view so
+         the whole PAGE background reads as changing colour (not a section swap).
+         Sits at z-index 1, behind the opaque dark sections above/below. -->
+    <div class="stats-bg" id="stats-bg" aria-hidden="true"></div>
+
+    <!-- Stats / "Numeri" mini-section: light interlude between scroll-3 and the
+         floating-window details gallery. Boxes fly in on scroll (js/scroll-stats.js). -->
+    <section class="stats-section" id="numeri">
+      <div class="stats-inner">
+        <div class="stats-head">
+          <span class="stats-eyebrow">ESPERIENZA CHE COSTRUISCE VALORE</span>
+          <h2 class="stats-title">Numeri che parlano<br>di <em>affidabilità.</em></h2>
+          <p class="stats-sub">
+            Da oltre 30 anni progettiamo e realizziamo spazi commerciali<br>
+            per il mondo HoReCa con competenza, passione e concretezza.
+          </p>
+        </div>
+
+        <div class="stats-grid">
+          <!-- 30+ Anni di esperienza -->
+          <div class="stat-card" data-stat-index="0">
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="17" rx="2"/>
+                <path d="M3 9h18M8 2v4M16 2v4"/>
+                <path d="M8.5 14.5c0-.8.7-1.5 1.7-1.5s1.6.6 1.6 1.4c0 .7-.5 1.1-1.3 1.3.9.1 1.5.6 1.5 1.5 0 .9-.8 1.6-1.9 1.6-1 0-1.8-.5-2-1.4"/>
+              </svg>
+            </span>
+            <span class="stat-number"><span class="stat-num-value" data-target="30">0</span><sup>+</sup></span>
+            <span class="stat-rule" aria-hidden="true"></span>
+            <span class="stat-label">ANNI DI ESPERIENZA</span>
+            <p class="stat-text">Oltre tre decenni di esperienza<br>nel settore HoReCa.</p>
+          </div>
+
+          <!-- 1000+ Progetti realizzati -->
+          <div class="stat-card" data-stat-index="1">
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 21V7l7-4v18M11 21h9V11h-9"/>
+                <path d="M7 8v.01M7 11v.01M7 14v.01M14.5 14v.01M17 14v.01M14.5 17v.01M17 17v.01"/>
+              </svg>
+            </span>
+            <span class="stat-number"><span class="stat-num-value" data-target="1000">0</span><sup>+</sup></span>
+            <span class="stat-rule" aria-hidden="true"></span>
+            <span class="stat-label">PROGETTI REALIZZATI</span>
+            <p class="stat-text">Più di mille attività realizzate<br>in tutta la Sicilia e oltre.</p>
+          </div>
+
+          <!-- 25+ Marchi partner -->
+          <div class="stat-card" data-stat-index="2">
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 17l-2 2-4-4 4-4 2 2"/>
+                <path d="M13 7l2-2 4 4-4 4-2-2"/>
+                <path d="M9 15l3 3M15 9l-3-3M12 12l1.5 1.5"/>
+              </svg>
+            </span>
+            <span class="stat-number"><span class="stat-num-value" data-target="25">0</span><sup>+</sup></span>
+            <span class="stat-rule" aria-hidden="true"></span>
+            <span class="stat-label">MARCHI PARTNER</span>
+            <p class="stat-text">Collaboriamo con i migliori brand<br>delle attrezzature professionali.</p>
+          </div>
+        </div>
+
+        <div class="stats-scroll-hint">
+          <span>SCORRI PER CONTINUARE</span>
+          <span class="stats-scroll-line" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Details Section below the fold to demonstrate smooth scrolling -->
     <!-- Details Section below the fold to demonstrate smooth scrolling -->
     <section class="details-section" id="dettagli">
@@ -448,20 +520,18 @@
       <!-- Desktop PC Floating Interactive Gallery -->
       <div class="details-desktop-gallery">
         
-        <!-- Header area -->
-        <div class="gallery-header">
-          <a href="./projects.html" class="gallery-discover-btn">
-            SCOPRI TUTTI I PROGETTI
+        <!-- The Floating Grid Container -->
+        <div class="floating-gallery-container">
+
+          <!-- Central Floating CTA: SCOPRI TUTTI I PROGETTI -->
+          <a href="./projects.html" class="floating-card floating-cta" data-speed="0.9">
+            <span class="cta-label">SCOPRI TUTTI I PROGETTI</span>
             <span class="discover-arrow-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
           </a>
-        </div>
-
-        <!-- The Floating Grid Container -->
-        <div class="floating-gallery-container">
           
           <!-- Card 1: Caffè del Duomo (Bar) -->
           <div class="floating-card card-bar" data-speed="1.0">
@@ -595,19 +665,95 @@
 
         </div>
 
-        <!-- Footer Area -->
-        <div class="gallery-footer">
-          <p class="gallery-footer-text">
-            Dall'idea alla realizzazione.<br>
-            Consegniamo locali che funzionano, <span class="text-magenta">ogni giorno.</span>
-          </p>
-          <div class="gallery-monogram">
-            <div class="monogram-diamond"><span>GC</span></div>
-          </div>
-        </div>
-
       </div>
 
+    </section>
+
+    <!-- Free Consultation CTA Section -->
+    <section class="consult-section" id="contatti">
+      <!-- Ambient magenta glow field -->
+      <div class="consult-glow consult-glow-a"></div>
+      <div class="consult-glow consult-glow-b"></div>
+
+      <div class="consult-inner">
+        <span class="consult-eyebrow">PRONTI A REALIZZARE IL TUO PROGETTO?</span>
+
+        <h2 class="consult-title">
+          <span>Dall'idea alla realtà,</span>
+          <span>il prossimo progetto</span>
+          <span class="text-magenta">potrebbe essere il tuo.</span>
+        </h2>
+
+        <p class="consult-sub">
+          Raccontaci la tua attività e le tue esigenze:<br>
+          ti ricontatteremo entro 24 ore con una proposta su misura.
+        </p>
+
+        <!-- Primary CTA with orbiting glow swirl -->
+        <div class="consult-cta-wrap">
+          <span class="consult-cta-orbit" aria-hidden="true"></span>
+          <button type="button" class="consult-cta" id="consultOpen">
+            <span class="consult-cta-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="consult-cta-label">RICHIEDI UNA CONSULENZA</span>
+            <span class="consult-cta-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <div class="consult-reassure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round"/>
+          </svg>
+          <span>I tuoi dati sono al sicuro.<br>Nessun impegno, solo una consulenza gratuita.</span>
+        </div>
+
+        <!-- Trust features row -->
+        <div class="consult-features">
+          <div class="consult-feature">
+            <div class="consult-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="consult-feature-label">CONSULENZA<br>GRATUITA</span>
+          </div>
+          <div class="consult-feature">
+            <div class="consult-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3.5 2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="consult-feature-label">RISPOSTA ENTRO<br>24 ORE</span>
+          </div>
+          <div class="consult-feature">
+            <div class="consult-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M12 20h9" stroke-linecap="round"/>
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="consult-feature-label">PROGETTI SU<br>MISURA</span>
+          </div>
+          <div class="consult-feature">
+            <div class="consult-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M12 3l7 3v5c0 4.5-3 8.3-7 9.5-4-1.2-7-5-7-9.5V6z" stroke-linejoin="round"/>
+                <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="consult-feature-label">100% RISERVATO<br>E SICURO</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Footer Space -->
@@ -624,6 +770,142 @@
 
   </div>
 
+  <!-- Project Details Modal Overlay -->
+  <div class="project-modal" id="projectModal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-window">
+      <button class="modal-close-btn" aria-label="Chiudi dettagli">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-layout">
+        <div class="modal-media-side">
+          <div class="modal-img-container">
+            <img src="" alt="" class="modal-project-img">
+          </div>
+        </div>
+        <div class="modal-info-side">
+          <span class="modal-project-category"></span>
+          <h2 class="modal-project-title"></h2>
+          <div class="modal-details-divider"></div>
+          <div class="modal-project-details-grid">
+            <div class="detail-item">
+              <span class="detail-label">LOCALITÀ</span>
+              <span class="detail-value" id="modal-detail-location"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">ANNO DI REALIZZAZIONE</span>
+              <span class="detail-value" id="modal-detail-date"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">SERVIZI FORNITI</span>
+              <span class="detail-value" id="modal-detail-services"></span>
+            </div>
+          </div>
+          <div class="modal-details-divider"></div>
+          <p class="modal-project-desc"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consultation Request Form Modal -->
+  <div class="consult-modal" id="consultModal" aria-hidden="true">
+    <div class="consult-modal-backdrop"></div>
+    <div class="consult-modal-window">
+      <button class="consult-modal-close" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="consult-form-head">
+        <span class="consult-form-eyebrow">CONSULENZA GRATUITA</span>
+        <h2 class="consult-form-title">Raccontaci il tuo progetto</h2>
+        <p class="consult-form-sub">Compila il modulo: ti ricontattiamo entro 24 ore con una proposta su misura.</p>
+      </div>
+
+      <form class="consult-form" id="consultForm" novalidate>
+        <div class="consult-field-row">
+          <div class="consult-field">
+            <label for="cf-nome">Nome e Cognome *</label>
+            <input type="text" id="cf-nome" name="nome" required autocomplete="name" placeholder="Mario Rossi">
+          </div>
+          <div class="consult-field">
+            <label for="cf-attivita">Nome attività</label>
+            <input type="text" id="cf-attivita" name="attivita" autocomplete="organization" placeholder="Es. Bar Centrale">
+          </div>
+        </div>
+
+        <div class="consult-field-row">
+          <div class="consult-field">
+            <label for="cf-email">Email *</label>
+            <input type="email" id="cf-email" name="email" required autocomplete="email" placeholder="nome@esempio.it">
+          </div>
+          <div class="consult-field">
+            <label for="cf-tel">Telefono</label>
+            <input type="tel" id="cf-tel" name="telefono" autocomplete="tel" placeholder="+39 ...">
+          </div>
+        </div>
+
+        <div class="consult-field-row">
+          <div class="consult-field">
+            <label for="cf-tipo">Tipologia di attività *</label>
+            <select id="cf-tipo" name="tipologia" required>
+              <option value="" disabled selected>Seleziona...</option>
+              <option>Bar e Ristoranti</option>
+              <option>Contract Alberghiero</option>
+              <option>Gelaterie e Pasticcerie</option>
+              <option>Salumerie e Panifici</option>
+              <option>Farmacie e Parafarmacie</option>
+              <option>Tabacchi</option>
+              <option>Spazi Commerciali</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="consult-field">
+            <label for="cf-citta">Città / Località</label>
+            <input type="text" id="cf-citta" name="citta" placeholder="Es. Catania">
+          </div>
+        </div>
+
+        <div class="consult-field consult-field-full">
+          <label for="cf-msg">Descrivi il tuo progetto</label>
+          <textarea id="cf-msg" name="messaggio" rows="4" placeholder="Metri quadri, tempistiche, budget indicativo, esigenze particolari..."></textarea>
+        </div>
+
+        <div class="consult-form-footer">
+          <p class="consult-form-privacy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round"/>
+            </svg>
+            I tuoi dati sono al sicuro e non verranno condivisi.
+          </p>
+          <button type="submit" class="consult-form-submit">
+            INVIA RICHIESTA
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="consult-form-success" id="consultSuccess">
+        <div class="consult-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Richiesta inviata</h3>
+        <p>Grazie! Ti ricontatteremo entro 24 ore.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- GSAP & Lenis CDN Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -634,5 +916,79 @@
   <script src="./js/scroll-1.js?v=merged-pin-1"></script>
   <script src="./js/scroll-2.js?v=4"></script>
   <script src="./js/scroll-3.js?v=1"></script>
+  <script src="./js/scroll-stats.js?v=4"></script>
+
+  <!-- Consultation Form Modal Controller -->
+  <script>
+    (function () {
+      const openBtn = document.getElementById('consultOpen');
+      const modal = document.getElementById('consultModal');
+      if (!openBtn || !modal) return;
+
+      const backdrop = modal.querySelector('.consult-modal-backdrop');
+      const closeBtn = modal.querySelector('.consult-modal-close');
+      const form = document.getElementById('consultForm');
+      const success = document.getElementById('consultSuccess');
+      const lenis = window.__lenis;
+
+      const open = () => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (lenis) lenis.stop();
+        const first = form.querySelector('input');
+        if (first) setTimeout(() => first.focus(), 300);
+      };
+
+      const close = () => {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (lenis) lenis.start();
+      };
+
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+
+      // Pause the orbiting glow animation while off-screen: it's an infinite
+      // rotate+blur, expensive to keep rasterising even when scrolled away.
+      const orbit = document.querySelector('.consult-cta-orbit');
+      const consultSection = document.getElementById('contatti');
+      if (orbit && consultSection && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            orbit.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+          });
+        }, { threshold: 0.01 });
+        io.observe(consultSection);
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) close();
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        // No backend yet: collect data and show confirmation.
+        // TODO: replace with real endpoint / email service.
+        const data = Object.fromEntries(new FormData(form).entries());
+        console.log('Richiesta consulenza:', data);
+        form.style.display = 'none';
+        success.classList.add('visible');
+        setTimeout(() => {
+          close();
+          setTimeout(() => {
+            form.reset();
+            form.style.display = '';
+            success.classList.remove('visible');
+          }, 500);
+        }, 2600);
+      });
+    })();
+  </script>
 </body>
 </html>
