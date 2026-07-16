@@ -299,6 +299,19 @@ html.lenis, html.lenis body {
   transform: rotate(5deg) scale(1.05);
 }
 
+.logo-text {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-offwhite);
+  text-transform: uppercase;
+  margin-left: 0.65rem;
+  white-space: nowrap;
+  opacity: 0; /* Starts hidden for the preloader anim landing */
+  transition: opacity 0.4s ease;
+}
+
 /* Nav Menu */
 .nav-menu {
   display: flex;
@@ -442,11 +455,15 @@ html.lenis, html.lenis body {
      overflow-y: auto (CSS overflow interop rule: one axis non-visible +
      other visible => visible axis becomes auto), turning this pinned,
      height:100vh box into its own internal scroll-clipped container that
-     traps the panels mid-ascent. overflow-x: clip has no such side effect. */
-  overflow-x: clip;
+     traps the panels mid-ascent. Left fully visible instead - html/body
+     already carry overflow-x: hidden, so the bled/rotated cards still get
+     clipped at the true viewport edge (with no scrollbar), but nothing in
+     the hero's own ancestor chain crops their hit area or their 3D paint. */
+  overflow-x: visible;
   overflow-y: visible;
   padding-top: 80px; /* Space for the header */
   background-color: var(--color-bg-dark);
+  background-image: radial-gradient(ellipse 60% 45% at 50% 55%, rgba(120, 40, 70, 0.14) 0%, rgba(30, 20, 26, 0.06) 45%, transparent 75%);
 }
 
 /* Compact Typography Block (~26vh) */
@@ -456,80 +473,54 @@ html.lenis, html.lenis body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 2.0rem; /* Generous spacing between title and stats grid */
+  gap: 1.2rem; /* Vertical grid lock gap */
   padding: 2.2rem 2rem 0.5rem;
   height: auto;
   min-height: 26vh;
-  z-index: 150; /* Above .main-header during ascent, see .gallery-container */
+  z-index: 150;
   will-change: transform, opacity;
 }
 
 .hero-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.75rem; /* Vertical grid lock gap */
-  margin: 0;
-  max-width: 900px;
-}
-
-.hero-title-top {
   font-family: var(--font-serif);
-  font-size: clamp(2.6rem, 6.4vh, 4rem); /* Dynamic viewport-locked serif height - real headline scale */
-  font-weight: 500; /* Up from 300: reads as a headline, not a whisper */
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.4rem, 6.2vh, 4rem); /* Dynamic elegant serif size */
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
   color: var(--color-white);
+  max-width: 900px;
+  margin: 0;
 }
 
-.hero-title-bottom {
+.hero-subheadline {
   font-family: var(--font-sans);
-  font-size: clamp(0.76rem, 1.7vh, 0.9rem); /* Architectural sub-statement size */
+  font-size: clamp(0.74rem, 1.6vh, 0.86rem); /* Architectural sub-statement size */
   font-weight: 500;
   line-height: 1.0;
-  letter-spacing: 0.22em; /* High-end tracked geometric lockup */
+  letter-spacing: 0.22em; /* tracked geometric lockup */
   color: var(--color-gray-text);
   text-transform: uppercase;
   opacity: 0.92;
+  margin: 0;
 }
 
-/* Editorial Statistics Grid */
-.hero-stats-container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 4.5rem; /* Generous spacing Boffi/Molteni style */
-  max-width: 960px;
-  width: 100%;
-}
-
-.stat-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  flex: 1;
-}
-
-.stat-number {
-  font-family: var(--font-serif);
-  font-size: 1.85rem; /* Precise editorial size */
-  font-weight: 300;
-  line-height: 1.1;
-  color: var(--color-white);
-  letter-spacing: -0.01em;
-  margin-bottom: 0.4rem;
-}
-
-.stat-label {
+.hero-cta {
   font-family: var(--font-sans);
-  font-size: 0.6rem; /* Quiet, precise uppercase description */
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--color-gray-text);
-  letter-spacing: 0.12em;
+  font-size: clamp(0.72rem, 1.5vh, 0.82rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--color-white);
   text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35);
+  padding-bottom: 5px;
+  margin-top: 0.4rem;
+  transition: border-color 0.4s ease, color 0.4s ease;
+}
+
+.hero-cta:hover {
+  color: var(--color-magenta-glow);
+  border-bottom-color: var(--color-magenta-glow);
 }
 
 .text-magenta {
@@ -730,314 +721,367 @@ body.menu-open .mobile-menu-toggle span {
 /* -----------------------------------------
    6. INTERACTIVE GALLERY (~58vh - Edge-to-Edge)
    ----------------------------------------- */
+/* -----------------------------------------
+   6. INTERACTIVE GALLERY (~58vh - Edge-to-Edge)
+   ----------------------------------------- */
 .gallery-container {
-  display: flex;
+  display: block;
   width: 100%;
-  height: 50vh; /* Reduced height by approximately 15% */
-  min-height: 300px;
-  background-color: transparent;
+  height: auto;
   position: relative;
+  /* Pushes the chain down away from the headline/CTA (Problem 2): the flex
+     hero-section already puts max space between .hero-text-block and this
+     block via space-between, but the tallest panel's clamp height still
+     reached up into that gap - this margin reserves clear black space above
+     the cards so the CTA is never crowded. */
+  margin-top: 8.5vh;
+  margin-bottom: 150px; /* dark floor zone below the cards for the reflection/light pool */
   z-index: 150; /* Above .main-header (100) for the ascent pass-through */
 }
 
-/* Soft blend where the hero's black canvas meets the card photos - a
-   continuous fade across the whole row instead of one hard seam, so the
-   hero and the gallery read as one composition rather than section A
-   ending and section B starting. */
-/* Gallery Blend Overlay removed. Blending has been integrated directly into panel-overlay to move with the cards. */
-
-/* Sector Panel */
-.sector-panel {
+/* Desktop Gallery styling */
+.desktop-gallery {
+  display: block;
   position: relative;
-  flex-grow: 1;
-  flex-basis: 0;
-  min-width: 0; /* Prevents text overflow breaking layout */
-  height: 100%;
-  overflow: hidden;
-  cursor: pointer;
-  outline: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 2rem 1.5rem;
-  transition: border-color 0.8s ease;
-  /* transform/opacity only: flex-grow/flex-basis aren't compositable, hinting
-     them doesn't help the GPU and just keeps 7 large-image layers pinned in
-     memory for properties that always need a real layout pass anyway. */
-  will-change: transform, opacity;
+  width: 100%;
+  height: 40vh;
+  min-height: 340px;
+  margin: 0;
+  z-index: 150;
+  overflow: visible;
 }
 
-.sector-panel:last-child {
-  border-right: none;
+/* Stage: perspective lives here, separate from .desktop-gallery's own layout
+   rule above (same element, two classes) so the 3D-scene concern and the
+   block-layout concern don't live in one selector. */
+.hero-stage {
+  perspective: 1500px;
+  perspective-origin: 50% 30%;
+  transform-style: preserve-3d;
 }
 
-/* Active glow as a static inset shadow on a separate layer, faded with
-   opacity instead of transitioning box-shadow directly - box-shadow is a
-   paint property (repaints the panel every tick for 0.8s), opacity is
-   compositor-only. Same visual result, cheaper during the flex-grow hover
-   animation that's already the expensive part of this transition. */
-.sector-panel::after {
+/* Soft floor light pool under the group - the boards read as standing on a
+   dark reflective floor rather than floating, without a literal floor asset. */
+.desktop-gallery::before {
   content: '';
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  left: 50%;
+  bottom: -30px;
+  transform: translateX(-50%);
+  width: 68%;
+  height: 160px;
+  background: radial-gradient(ellipse at center, rgba(230, 35, 106, 0.10) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 72%);
+  filter: blur(28px);
+  z-index: 1;
   pointer-events: none;
-  box-shadow: inset 0 0 40px rgba(176, 30, 86, 0.25);
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sector-panel.active::after {
-  opacity: 1;
-}
-
-/* Visually center Bar & Ristoranti (data-index 0, active by default) as the
-   4th of 7 cards, framed symmetrically by 3 panels on each side. Applies to
-   both the desktop row and the mobile column stack - `order` doesn't care
-   about flex-direction. */
-.sector-panel[data-index="0"] { order: 3; }
-.sector-panel[data-index="1"] { order: 0; }
-.sector-panel[data-index="2"] { order: 1; }
-.sector-panel[data-index="3"] { order: 2; }
-.sector-panel[data-index="4"] { order: 4; }
-.sector-panel[data-index="5"] { order: 5; }
-.sector-panel[data-index="6"] { order: 6; }
-
-/* Background image wrapper */
-.panel-image-wrapper {
+/* Panel wrapper: rotation/height driven by --ry/--h set inline per panel in
+   index.html. transform-origin/preserve-3d/rotateY are the mandated literal
+   rule; cursor/box-shadow/filter/transition are supplementary (existing,
+   pre-approved behavior - clickable cursor, grounding shadow, resting
+   brightness - carried over, not part of the thickness technique itself). */
+.hero-panel {
   position: absolute;
-  top: 0;
-  left: 0;
+  bottom: 0;
+  height: calc(var(--panel-base-h) * var(--h));
+  transform-origin: bottom center;
+  transform: rotateY(var(--ry));
+  transform-style: preserve-3d;
+  --panel-base-h: clamp(368px, 42vh, 460px);
+  cursor: pointer;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  /* No filter here (moved to .hero-panel__face) - discovered via this pass's
+     truth test: `filter` on an element forces its whole subtree to be
+     pre-composited as a flat 2D bitmap before the filter is applied, which
+     silently flattened every nested preserve-3d child (face/back/sides),
+     making the new real side faces render nothing regardless of correct
+     transform math. Confirmed by directly toggling filter:none and watching
+     the side face appear. Rotation/position/scale tweens still target this
+     wrapper only (per spec); only the brightness filter itself now targets
+     .hero-panel__face, a 3D-content-free leaf where filter is safe. */
+}
+
+/* Thickness (glass slab pass): the side faces are the SAME photo, blurred/
+   darkened/desaturated - a glass mass showing its own material continuing
+   around the corner, not a separate colored strip (a "tail"). --panel-img
+   is set per panel by initPanelSlabImage in main.js. */
+.hero-panel__slab {
+  /* position/width/height are required infrastructure, not part of the
+     mandated value list - without them the slab (position:static, no
+     explicit size) collapses to near-zero height: transform-style:
+     preserve-3d makes it a containing block for its position:absolute
+     children regardless of its own static position, so an undersized slab
+     drags every inset:0 child (face/back/sides) down to the same collapsed
+     size. This was the actual root cause of the panels rendering as a
+     sliver of near-black - not a loader or headless-timing issue as it
+     first appeared to be. */
+  position: relative;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
+  --depth: 18px;
+  --radius: 12px;
+  transform-style: preserve-3d;
 }
-
-.panel-img {
+.hero-panel__face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transform: translateZ(calc(var(--depth) / 2));
+  backface-visibility: hidden;
+  /* filter lives here, not on .hero-panel (see comment on .hero-panel above) -
+     CSS filter on an ancestor of preserve-3d content flattens it to 2D,
+     which would hide the side faces entirely regardless of correct geometry. */
+  filter: brightness(0.82);
+}
+.hero-panel__back {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: #101010;
+  transform: translateZ(calc(var(--depth) / -2)) rotateY(180deg);
+  backface-visibility: hidden;
+}
+.hero-panel__side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--depth);
+  overflow: hidden;
+  backface-visibility: hidden;
+  background-image: var(--panel-img);
+  background-size: auto 100%;
+  filter: blur(7px) brightness(.5) saturate(1.15);
+}
+.hero-panel__side--left {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-90deg) translateZ(calc(var(--depth) / 2 * -1));
+  border-radius: var(--radius) 0 0 var(--radius);
+  background-position: left center;
+}
+.hero-panel__side--right {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(90deg) translateZ(calc(var(--depth) / 2 * -1));
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background-position: right center;
+}
+.hero-panel__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Darker base exposure to keep vertical labels & content highly legible */
-  filter: brightness(0.62) contrast(1.04) saturate(0.88);
-  transform: scale(1.01);
-  /* Removed expensive filter from transition to eliminate repaints and stutter on hover */
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
-}
-
-/* Subtle overlay vignette at top and bottom for typography contrast */
-.panel-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  /* Extremely subtle, narrow top gradient (0% to 8%) to hide the top edge cutoff line,
-     followed by transparent middle, and a dark bottom fade for high contrast text readability. */
-  background: linear-gradient(to bottom,
-    var(--color-bg-dark) 0%,       /* Pure black at the very top edge to mask the seam */
-    rgba(6, 6, 8, 0.7) 3%,         /* Extremely short/subtle transition to transparent */
-    transparent 8%,                /* Fully clear image */
-    rgba(0, 0, 0, 0.15) 60%,
-    rgba(0, 0, 0, 0.93) 100%       /* Dark bottom for text readability */
-  );
-  pointer-events: none;
-  /* GPU-accelerated opacity transition only (no expensive background transition) */
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity;
-}
-
-/* Panel Content */
-.panel-content {
-  position: relative;
-  z-index: 3;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* Align the text body to the bottom of the card */
-  pointer-events: none;
-}
-
-/* Vertical text for collapsed state */
-.panel-vertical-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  white-space: nowrap;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 4px 15px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
-  z-index: 4;
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 2.5rem 0;
-  /* Slightly increased font clamp for better inactive vertical label readability */
-  font-size: clamp(0.68rem, 1.6vh, 0.82rem);
-  letter-spacing: clamp(0.1em, 0.3vh, 0.16em);
-}
-
-/* Body: Label, Description, CTA */
-.panel-body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.75rem;
-  max-width: 280px;
-  opacity: 0;
-  transform: translateY(15px);
-  will-change: transform, opacity;
-}
-
-.panel-label {
-  font-family: var(--font-serif);
-  font-size: 2.12rem; /* Increased size by ~15% */
-  font-weight: 600; /* Up from 400 - stands on its own against the photo */
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  color: var(--color-white);
-  text-transform: uppercase;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
-}
-
-.panel-label span {
   display: block;
+  /* Brightness lives solely on .hero-panel__face (see REST_FILTER in
+     main.js) so raising a panel to brightness(1.08) actually brightens the
+     visible photo instead of fighting a second, separately-baked dark
+     filter here. */
+  filter: contrast(1.02);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.panel-description {
-  font-family: var(--font-sans);
-  /* Increased font size and weight slightly for maximum legibility */
-  font-size: 0.88rem;
-  font-weight: 450;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.96);
-  /* Deepened shadow for high legibility over bright background pixels */
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
-}
-
-/* CTA */
-.panel-cta {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.cta-text {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--color-white);
-}
-
-.cta-arrow-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: var(--color-magenta-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-white);
-  box-shadow: 0 0 15px rgba(176, 30, 86, 0.4);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.cta-arrow-btn svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.3s ease;
-}
-
-.sector-panel:hover .cta-arrow-btn {
-  background-color: var(--color-magenta-glow);
-  box-shadow: 0 0 20px rgba(230, 35, 106, 0.6);
-  transform: scale(1.05);
-}
-
-.sector-panel:hover .cta-arrow-btn svg {
-  transform: translateX(3px);
-}
-
-/* -----------------------------------------
-   7. ACTIVE/EXPANDED STATES (MANAGED BY GSAP & CSS CLASSES)
-   ----------------------------------------- */
-/* When a panel is active/expanded */
-.sector-panel.active {
-  border-right-color: rgba(176, 30, 86, 0.3);
-  border-left-color: rgba(176, 30, 86, 0.3);
-  /* Glow itself lives on ::after (see above) - faded via opacity instead of
-     a transitioning box-shadow. */
-}
-
-.sector-panel.active .panel-img {
-  /* Scale active panel only - filter stays static to prevent stutter */
+.hero-panel.is-active .hero-panel__img {
   transform: scale(1.04);
 }
 
-/* Subtle, smooth dimming (10-15%) of non-focused panels to enhance visual discovery */
-.gallery-container.has-active .sector-panel:not(.active) .panel-img {
-  /* No filter transitions to maintain maximum performance and fluidity */
-}
-
-/* GPU-accelerated warm spotlight overlay on active card (using ::before) */
-.panel-overlay::before {
+/* Bottom darkening so the image melts into its floor contact point instead
+   of cutting off with a hard edge - moved to ::before (::after is now the
+   mandated glass corner-glow below, both live on .hero-panel__face). */
+.hero-panel__face::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 35%, rgba(230, 218, 202, 0.12) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.sector-panel.active .panel-overlay::before {
-  opacity: 1;
-}
-
-/* GPU-accelerated vignette & darkening on inactive cards (using ::after) */
-.panel-overlay::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, 
-    rgba(0, 0, 0, 0.25) 0%, 
-    rgba(0, 0, 0, 0.35) 45%, 
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85);
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(to bottom, transparent 65%, rgba(0, 0, 0, 0.55) 100%);
   pointer-events: none;
   z-index: 2;
 }
 
-.gallery-container.has-active .sector-panel:not(.active) .panel-overlay::after {
+/* Glass light on the corner - the glow where front meets side, inside the
+   face itself, not a separate stripe. Only one side's inset highlight reads
+   as prominent depending on the panel's own rotation sign - correct/desired. */
+.hero-panel__face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow:
+    inset 2px 0 3px -1px rgba(255, 255, 255, .35),
+    inset -2px 0 3px -1px rgba(255, 255, 255, .35),
+    inset 0 0 0 1px rgba(255, 255, 255, .06);
+  pointer-events: none;
+}
+
+/* Always-visible sector label - replaces the old .card-title-block/
+   .card-title/.card-title-line trio with a single element per the mandated
+   markup; the ::after recreates the same magenta underline accent. */
+.hero-panel__label {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.6rem;
+  right: 1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: var(--font-sans);
+  font-size: clamp(0.6rem, 1.25vh, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--color-white);
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  line-height: 1.3;
+  pointer-events: none;
+}
+.hero-panel__label::after {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background-color: var(--color-magenta-deep);
+  margin-top: 0.3rem;
+}
+
+.hero-panel.is-active {
+  box-shadow: 0 45px 90px rgba(0, 0, 0, 0.9), 0 0 50px rgba(176, 30, 86, 0.35);
+}
+
+/* Floor reflection: a JS-cloned copy of each panel's image, flipped and
+   masked to a soft fade (see initReflections in main.js). Not built with
+   -webkit-box-reflect - that property silently no-ops on elements inside
+   ScrollTrigger's pinned/GPU-composited hero, so the duplicated-element
+   technique is used instead, per the fallback called out in spec. Resting
+   rotateY/z are applied by GSAP (see REST table in main.js), matching each
+   reflection to its source panel so the floor plane continues its card. */
+.desktop-gallery .card-reflection {
+  position: absolute;
+  top: 100%;
+  height: 150px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: blur(3px);
+  transform-style: preserve-3d;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 100%);
+}
+/* Contact shadow: a soft dark ellipse at the seam, independent of the
+   reflection's own opacity/mask - what actually reads as "standing on the
+   floor" rather than floating above it. */
+.desktop-gallery .card-reflection::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 8%;
+  width: 84%;
+  height: 20px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 45%, transparent 75%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+.desktop-gallery .card-reflection[data-index="0"] { left: -6.81%; width: 22.86%; }
+.desktop-gallery .card-reflection[data-index="1"] { left: 13.23%; width: 16.19%; }
+.desktop-gallery .card-reflection[data-index="3"] { left: 27.11%; width: 16.56%; }
+.desktop-gallery .card-reflection[data-index="2"] { left: 42.41%; width: 15.53%; }
+.desktop-gallery .card-reflection[data-index="4"] { left: 56.94%; width: 15.77%; }
+.desktop-gallery .card-reflection[data-index="5"] { left: 71.42%; width: 16.41%; }
+.desktop-gallery .card-reflection[data-index="6"] { left: 85.87%; width: 13.68%; }
+
+/* Seven physical panels standing on one shared floor line (bottom: 0), read
+   as a folding-screen / paravent chain - rotation direction ALTERNATES card
+   to card (-,+,-,+,-,+,-, see REST table in main.js, mandatory), translateZ
+   stays shallow because the depth read comes from the rotation angles, not
+   from pushing cards far back. Resting rotateY/z are applied by GSAP on load
+   so the activate/hover choreography can tween the exact same properties
+   back to these values. Only layout (position/size/stacking) lives here.
+   Left/width form an edge-to-edge hinged chain (0.6% kiss-overlap per seam,
+   just enough to avoid a black sliver where two rotated edges meet - not a
+   stacked/overlapping deck). Height follows the symmetric tall-short wave:
+   tall,short,tall,short(center),tall,short,tall - only tops vary, all
+   bottoms share the floor baseline. */
+.hero-panel[data-index="0"] {
+  left: -6.81%;
+  width: 22.86%;
+  z-index: 8;
+  order: 0; /* visually inert under position:absolute - kept because
+    runForcedScrollTween in main.js reads getComputedStyle(panel).order to
+    sequence the descent stagger; do not remove. */
+}
+.hero-panel[data-index="1"] {
+  left: 13.23%;
+  width: 16.19%;
+  z-index: 16;
+  order: 1;
+}
+.hero-panel[data-index="3"] {
+  left: 27.11%;
+  width: 16.56%;
+  z-index: 12;
+  order: 2;
+}
+.hero-panel[data-index="2"] {
+  left: 42.41%;
+  width: 15.53%;
+  z-index: 20;
+  order: 3;
+}
+.hero-panel[data-index="4"] {
+  left: 56.94%;
+  width: 15.77%;
+  z-index: 16;
+  order: 4;
+}
+.hero-panel[data-index="5"] {
+  left: 71.42%;
+  width: 16.41%;
+  z-index: 12;
+  order: 5;
+}
+.hero-panel[data-index="6"] {
+  left: 85.97%;
+  width: 13.68%;
+  z-index: 8;
+  order: 6;
+}
+
+/* Active-state label strip: confined to the bottom strip only, at well under
+   25% opacity, so activating a panel (brightness(1.08)) actually reads the
+   photo instead of hiding it under a veil. */
+.hero-panel .card-hover-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.24) 0%, transparent 100%);
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1.4rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-panel.is-active .card-hover-overlay {
   opacity: 1;
 }
 
-/* Panel icon styles removed */
+.hero-panel .discover-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.7rem, 1.5vh, 0.8rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--color-white);
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--color-magenta-glow);
+  padding-bottom: 0.3rem;
+}
 
-.sector-panel.active .panel-vertical-label {
-  opacity: 0;
-  transform: scale(0.95);
-  pointer-events: none;
+/* Default Mobile Gallery (hidden on desktop) */
+.mobile-gallery {
+  display: none;
 }
 
 /* -----------------------------------------
@@ -1214,18 +1258,16 @@ body.menu-open .mobile-menu-toggle span {
     display: none; /* Hide desktop nav menu */
   }
 
-  .nav-mobile-wordmark {
-    display: block; /* Show in mobile nav header */
-    font-family: var(--font-sans);
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--color-offwhite);
-    opacity: 0.92; /* Present brand signature, part of the composition */
-    text-transform: uppercase;
-    white-space: nowrap;
-    text-align: center;
-    margin-right: 0.4rem; /* Breathing room before the CTA pill */
+  .logo-text {
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    margin-left: 0.45rem;
+  }
+  .nav-logo-img {
+    height: 30px;
+  }
+  .logo-link {
+    height: 30px;
   }
   
   .mobile-menu-toggle {
@@ -1291,73 +1333,85 @@ body.menu-open .mobile-menu-toggle span {
     line-height: 1.3;
   }
 
-  /* Hide the vertical label on mobile */
-  .panel-vertical-label {
+  .desktop-gallery {
     display: none !important;
   }
-
-  /* Make the gallery vertical, natural page flow: each panel's height is
-     driven individually by animateMobileAccordionState (js/main.js) via
-     inline styles, so the container just hugs its content instead of
-     forcing a fixed viewport-height box. */
-  .gallery-container {
+  
+  .mobile-gallery {
+    display: flex;
     flex-direction: column;
+    gap: 0.75rem;
+    width: 90%;
+    margin: 1.5rem auto 3rem auto;
+    padding-bottom: 2rem;
+  }
+  
+  .mobile-card-row {
+    display: flex;
+    gap: 0.75rem;
     width: 100%;
-    margin: 0;
-    height: auto;
-    min-height: auto;
   }
-
-  /* Sector Panel: same spotlight-card language as desktop (label/description/
-     cta fade in on the active card) - only the panel's own height (240
-     collapsed / 380 active) is tweened via JS. */
-  .sector-panel {
-    flex: 0 0 auto;
+  
+  .mobile-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #0f0f13;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .mobile-card-full {
     width: 100%;
-    height: 240px; /* fallback before JS sets the inline value on init */
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1.5rem;
+    height: 160px;
   }
-
-  .sector-panel:last-child {
-    border-bottom: none;
+  
+  .mobile-card-half {
+    flex: 1;
+    width: 50%;
+    height: 120px;
   }
-
-  /* No icon on mobile - not hidden via opacity, not occupying layout space,
-     genuinely not rendered. The label alone carries the collapsed state. */
-  .panel-header {
-    display: none;
+  
+  .mobile-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.6);
   }
-
-  /* With the header gone, anchor the body to the bottom directly (was
-     space-between against the icon above it). */
-  .panel-content {
-    justify-content: flex-end;
+  
+  .mobile-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+    pointer-events: none;
   }
-
-  /* Body is a plain layout wrapper on mobile (no rotated collapsed label to
-     hand off to, unlike desktop) - the label stays legible at all times,
-     only the description/cta fade with the active state. */
-  .panel-body {
-    opacity: 1;
-    transform: none;
-    max-width: 100%;
+  
+  .mobile-card-content {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
   }
-
-  .panel-label {
-    font-size: 1.5rem;
+  
+  .mobile-card-title {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-white);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
-
-  .panel-description,
-  .panel-cta {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  .panel-description {
-    font-size: 0.82rem;
-    max-width: 300px;
+  
+  .mobile-card-arrow {
+    color: var(--color-magenta-glow);
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1;
   }
 }
 

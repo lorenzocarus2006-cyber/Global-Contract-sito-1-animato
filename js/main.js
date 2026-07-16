@@ -204,6 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loader) {
           loader.remove();
         }
+        // Re-measure now that the hero is actually on screen at its real size
+        if (typeof syncReflectionHeights === 'function') syncReflectionHeights();
       }
     });
 
@@ -256,321 +258,311 @@ document.addEventListener("DOMContentLoaded", () => {
     }, "-=0.75");
 
     // 5. Land the logo: make the actual navbar logo visible and hide the loader logo
-    tl.set(".nav-logo-img", { opacity: 1 });
+    tl.set([".nav-logo-img", ".logo-text"], { opacity: 1 });
     tl.set(".loader-logo-container", { display: "none" });
   }
 
 
   /* -----------------------------------------
-     4. ACCORDION PANELS GALLERY LOGIC
+     4. HERO CARD GALLERY INTERACTION LOGIC
      ----------------------------------------- */
-  const gallery = document.getElementById('gallery-container');
-  const panels = gsap.utils.toArray('.sector-panel');
-  
+  const panels = gsap.utils.toArray('.hero-stage .hero-panel');
   const isMobileQuery = window.matchMedia('(max-width: 768px)');
-  
-  let hoverTimeout = null;
   let activeIndex = null;
-  let activeMobileIndex = -1;
-  let mobileScrollListener = null;
+
+  // Resting 3D geometry - a folding-screen / paravent chain where rotation
+  // direction ALTERNATES card to card (-,+,-,+,-,+,-), not a fan or a
+  // pyramid converging on one frontal centerpiece. Mandatory table. Hover/
+  // click tweens away from these values and back to them exactly, so this
+  // table is also the single source of truth the state machine resets to
+  // (see deactivateAll below) - no separate CSS transform to fall out of
+  // sync with.
+  const REST = {
+    '0': { rotationY: -32, z: -40 },
+    '1': { rotationY: 22, z: 0 },
+    '3': { rotationY: -25, z: -30 },
+    '2': { rotationY: 15, z: 20 },
+    '4': { rotationY: -18, z: 0 },
+    '5': { rotationY: 24, z: -30 },
+    '6': { rotationY: -30, z: -40 },
+  };
+  // Mirrors the z-index values authored in css/style.css for these same
+  // selectors - nearest-to-viewer (highest z) card stacks on top at rest.
+  const Z_INDEX_BASE = { '0': 8, '1': 16, '3': 12, '2': 20, '4': 16, '5': 12, '6': 8 };
+  const REST_FILTER = 'brightness(0.82)';
+
+  panels.forEach((panel) => {
+    const rest = REST[panel.dataset.index];
+    gsap.set(panel, { rotationY: rest.rotationY, z: rest.z, transformOrigin: '50% 100%' });
+    const face = panel.querySelector('.hero-panel__face');
+    if (face) gsap.set(face, { filter: REST_FILTER });
+  });
 
   function initGallery() {
-    // Clear any previous state or event listeners
-    gallery.classList.remove('has-active');
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    if (mobileScrollListener) {
-      window.removeEventListener('scroll', mobileScrollListener);
-      mobileScrollListener = null;
-    }
-    
-    // Reset panels state
-    panels.forEach((panel) => {
-      panel.classList.remove('active');
-      const body = panel.querySelector('.panel-body');
-      const desc = panel.querySelector('.panel-description');
-      const cta = panel.querySelector('.panel-cta');
-      
-      gsap.killTweensOf(panel);
-      if (body) gsap.killTweensOf(body);
-      if (desc) gsap.killTweensOf(desc);
-      if (cta) gsap.killTweensOf(cta);
+    // Desktop click navigation lives on the hover zones (see initHoverZones
+    // below), not on the panels themselves - the zones sit on top and are
+    // what actually receives pointer input for a rotated card.
 
-      // Clean inline styles - clearProps (not a hardcoded flexBasis:0) so the
-      // mobile height-tween isn't fought by a leftover inline flex-basis,
-      // which takes priority over height as the column flex main-axis size.
-      gsap.set(panel, { clearProps: "flexGrow,flexBasis,height" });
-      if (body) gsap.set(body, { clearProps: "all" });
-      if (desc) gsap.set(desc, { clearProps: "all" });
-      if (cta) gsap.set(cta, { clearProps: "all" });
-    });
-
-    if (isMobileQuery.matches) {
-      // MOBILE SCROLL-DRIVEN ACCORDION
-      activeMobileIndex = -1;
-      
-      // Initial call to set active panel on load
-      updateMobileActivePanel();
-      
-      mobileScrollListener = updateMobileActivePanel;
-      window.addEventListener('scroll', mobileScrollListener);
-    } else {
-      // DESKTOP HOVER ACCORDION
-      activeIndex = 0;
-      
-      // Set initial desktop state
-      panels.forEach((panel) => {
-        const body = panel.querySelector('.panel-body');
-        gsap.set(body, { opacity: 0, y: 20 });
-      });
-
-      // Default focus: Bar & Restaurants active by default on load
-      animateAccordionState(0);
-
-      // Register interactions based on touch/mouse
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      
-      if (!isTouchDevice) {
-        // Desktop: Hover with Intent
-        panels.forEach((panel, idx) => {
-          const enterHandler = () => {
-            if (window.scrollY > 5) return; // Ignore hover if scrolled down
-            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            hoverTimeout = setTimeout(() => {
-              if (isTweening || isStageLocked) return; // Re-check: forced-scroll may have started mid-debounce
-              if (activeIndex !== idx) {
-                animateAccordionState(idx);
-              }
-            }, 100);
-          };
-          panel._enterHandler = enterHandler;
-          panel.addEventListener('mouseenter', enterHandler);
-
-          const focusHandler = () => {
-            if (window.scrollY > 5) return; // Ignore focus if scrolled down
-            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            animateAccordionState(idx);
-          };
-          panel._focusHandler = focusHandler;
-          panel.addEventListener('focus', focusHandler);
-        });
-
-        // Reset when mouse leaves the entire gallery area to the default first category
-        const leaveHandler = () => {
-          if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
-          if (hoverTimeout) clearTimeout(hoverTimeout);
-          animateAccordionState(0);
-        };
-        gallery._leaveHandler = leaveHandler;
-        gallery.addEventListener('mouseleave', leaveHandler);
-      } else {
-        // Tablet / Fallback (Touch but not phone <768px): Tap-to-expand
-        panels.forEach((panel, idx) => {
-          const clickHandler = (e) => {
-            if (panel.classList.contains('active')) {
-              return;
-            }
-            if (isTweening || isStageLocked) return; // Forced-scroll owns the panels right now
-            e.preventDefault();
-            animateAccordionState(idx);
-          };
-          panel._clickHandler = clickHandler;
-          panel.addEventListener('click', clickHandler);
-        });
-      }
-    }
-  }
-
-  function updateMobileActivePanel() {
-    const scrollY = window.scrollY || window.pageYOffset;
-    
-    // Force first panel active when scrolled to the top area
-    if (scrollY < 120) {
-      if (activeMobileIndex !== 0) {
-        activeMobileIndex = 0;
-        animateMobileAccordionState(0);
-      }
-      return;
-    }
-    
-    // Force last panel active when scrolled to the bottom area
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (scrollY > maxScroll - 120) {
-      const lastIndex = panels.length - 1;
-      if (activeMobileIndex !== lastIndex) {
-        activeMobileIndex = lastIndex;
-        animateMobileAccordionState(lastIndex);
-      }
-      return;
-    }
-
-    const viewportCenter = window.innerHeight / 2;
-    let closestIndex = 0;
-    let minDistance = Infinity;
-
-    panels.forEach((panel, idx) => {
-      const rect = panel.getBoundingClientRect();
-      const panelCenter = rect.top + rect.height / 2;
-      const distance = Math.abs(panelCenter - viewportCenter);
-      
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestIndex = idx;
-      }
-    });
-
-    if (closestIndex !== activeMobileIndex) {
-      activeMobileIndex = closestIndex;
-      animateMobileAccordionState(closestIndex);
-    }
-  }
-
-  function animateMobileAccordionState(targetIndex) {
-    if (targetIndex !== -1 && targetIndex !== null) {
-      gallery.classList.add('has-active');
-    } else {
-      gallery.classList.remove('has-active');
-    }
-
-    panels.forEach((panel, idx) => {
-      const isActive = idx === targetIndex;
-      const targetHeight = isActive ? 380 : 240;
-      const desc = panel.querySelector('.panel-description');
-      const cta = panel.querySelector('.panel-cta');
-      // Fade only the description/cta - the label has no rotated collapsed
-      // stand-in on mobile (unlike desktop), so it must stay legible always.
-      const fadeTargets = [desc, cta].filter(Boolean);
-
-      // Stop running tweens to prevent overlapping visual state collisions
-      gsap.killTweensOf(panel);
-      if (fadeTargets.length) gsap.killTweensOf(fadeTargets);
-
-      // Animate height on mobile column layout instead of flex-grow
-      gsap.to(panel, {
-        height: targetHeight,
-        duration: 0.5,
-        ease: "power2.out"
-      });
-
-      if (isActive) {
-        panel.classList.add('active');
-        if (fadeTargets.length) {
-          gsap.to(fadeTargets, {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            delay: 0.1,
-            ease: "power2.out"
-          });
+    // Click handlers for mobile gallery
+    const mobileCards = document.querySelectorAll('.mobile-gallery .mobile-card');
+    mobileCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const category = card.getAttribute('data-category');
+        if (category) {
+          window.location.href = `./projects.html?category=${category}`;
         }
-      } else {
-        panel.classList.remove('active');
-        if (fadeTargets.length) {
-          gsap.to(fadeTargets, {
-            opacity: 0,
-            y: 10,
-            duration: 0.22,
-            ease: "power2.out"
-          });
-        }
-      }
-    });
-  }
-
-  function animateAccordionState(targetIndex) {
-    activeIndex = targetIndex;
-    
-    // Toggle has-active class on gallery container to coordinate brightness dimming
-    if (targetIndex !== null) {
-      gallery.classList.add('has-active');
-    } else {
-      gallery.classList.remove('has-active');
-    }
-    
-    panels.forEach((panel, idx) => {
-      const isActive = idx === targetIndex;
-      const isGalleryReset = targetIndex === null;
-      const targetGrow = isGalleryReset ? 1 : (isActive ? 4.6 : 0.4);
-      const body = panel.querySelector('.panel-body');
-
-      // overwrite:"auto" (not killTweensOf(panel)) - killTweensOf(panel) would
-      // also wipe this panel's unrelated heroExitTL y-exit tween whenever the
-      // scroll pin resets the accordion (onUpdate below), freezing the ascent
-      // dead. killTweensOf(body) is safe on its own: heroExitTL never targets
-      // .panel-body, only the panel itself and .hero-text-block. It's needed
-      // here on top of overwrite:"auto" because the active-state tween below
-      // carries a delay - under fast repeated hover switching, overwrite:auto
-      // can race with a still-delayed (not yet started) tween and leave the
-      // body's opacity/transform stuck rather than reset, a rare ghost-text
-      // state that only shows up under rapid input.
-      gsap.to(panel, {
-        flexGrow: targetGrow,
-        duration: 1.0, // Heavy, physically smooth deceleration glide
-        ease: "expo.out", // Premium Apple-style exponential ease
-        overwrite: "auto"
       });
-
-      gsap.killTweensOf(body);
-
-      if (isActive) {
-        panel.classList.add('active');
-        gsap.to(body, {
-          opacity: 1,
-          y: 0,
-          duration: 0.85,
-          delay: 0.12, // Let the panel expand first, preventing text overlap jitter
-          ease: "power3.out"
-        });
-      } else {
-        panel.classList.remove('active');
-        gsap.to(body, {
-          opacity: 0,
-          y: 20,
-          duration: 0.45,
-          ease: "power3.out"
-        });
-      }
     });
   }
 
   // Initial initialization
   initGallery();
 
-  // Watch for breakpoint transitions to prevent event listener conflicts
-  isMobileQuery.addEventListener('change', () => {
-    // Remove listeners before re-initializing
-    panels.forEach(panel => {
-      if (panel._enterHandler) panel.removeEventListener('mouseenter', panel._enterHandler);
-      if (panel._focusHandler) panel.removeEventListener('focus', panel._focusHandler);
-      if (panel._clickHandler) panel.removeEventListener('click', panel._clickHandler);
+  // Floor reflections: a flipped clone of each card's image, appended as a
+  // sibling inside .desktop-gallery. Built with plain DOM cloning rather
+  // than -webkit-box-reflect because that property silently fails to paint
+  // on elements living inside ScrollTrigger's pinned/GPU-composited hero.
+  function initReflections() {
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    if (!desktopGallery) return;
+    const sourcePanels = desktopGallery.querySelectorAll('.hero-panel');
+    const reflections = [];
+    sourcePanels.forEach((panel) => {
+      const img = panel.querySelector('.hero-panel__img');
+      if (!img) return;
+      const reflection = document.createElement('div');
+      reflection.className = 'card-reflection';
+      reflection.dataset.index = panel.dataset.index;
+      // Match the source panel's resting angle/depth so the floor plane
+      // reads as a continuation of the card standing on it.
+      const rest = REST[panel.dataset.index];
+      gsap.set(reflection, { rotationY: rest.rotationY, z: rest.z, transformOrigin: '50% 0%' });
+      const imgClone = document.createElement('img');
+      imgClone.src = img.currentSrc || img.src;
+      imgClone.alt = '';
+      // transform-origin is intentionally left at its default (center): the
+      // element's own box already sits flush at the seam (top:0 inside a
+      // container positioned at the panel's bottom edge), and a center-origin
+      // flip keeps that box in place while mirroring its content - a
+      // top-origin flip looks equivalent on paper but Chrome fails to paint
+      // an absolutely positioned <img> at all when scaleY(-1) is combined
+      // with a non-center transform-origin.
+      imgClone.style.cssText = 'position:absolute; top:0; left:0; width:100%; object-fit:cover; transform:scaleY(-1); filter:brightness(0.65) contrast(1.02);';
+      reflection.appendChild(imgClone);
+      desktopGallery.appendChild(reflection);
+      reflections.push({ panel, imgClone });
     });
-    if (gallery._leaveHandler) gallery.removeEventListener('mouseleave', gallery._leaveHandler);
-    
-    initGallery();
+
+    function syncHeights() {
+      reflections.forEach(({ panel, imgClone }) => {
+        imgClone.style.height = panel.offsetHeight + 'px';
+      });
+    }
+    // A synchronous measurement here can race the layout that resolves the
+    // desktop/mobile matchMedia CSS (offsetHeight reads back 0 if it lands
+    // before the browser has settled on the real viewport width), so defer
+    // the first read a frame and re-sync once the entrance animation - which
+    // is when the hero is actually first shown - has finished.
+    requestAnimationFrame(syncHeights);
+    window.addEventListener('resize', syncHeights);
+    return syncHeights;
+  }
+  const syncReflectionHeights = initReflections();
+
+  // Panel thickness (glass slab pass): real back/side faces, not a
+  // stacked-layer illusion. Static geometry only, set once on init - no
+  // interaction with hover/click state, and no future motion should ever
+  // target the slab or its faces individually (only the .hero-panel wrapper
+  // itself).
+  function initPanelFaces() {
+    document.querySelectorAll('.hero-panel__slab').forEach((slab) => {
+      const face = slab.querySelector('.hero-panel__face');
+      const back = document.createElement('div');
+      back.className = 'hero-panel__back';
+      const sideLeft = document.createElement('div');
+      sideLeft.className = 'hero-panel__side hero-panel__side--left';
+      const sideRight = document.createElement('div');
+      sideRight.className = 'hero-panel__side hero-panel__side--right';
+      [back, sideLeft, sideRight].forEach((el) => slab.insertBefore(el, face));
+    });
+  }
+  initPanelFaces();
+
+  document.querySelectorAll('.hero-panel').forEach((p) => {
+    const src = p.querySelector('.hero-panel__img').getAttribute('src');
+    p.querySelector('.hero-panel__slab').style.setProperty('--panel-img', `url("${src}")`);
   });
 
-  // Make the entire panel clickable to navigate (applies to both desktop & mobile when active)
-  panels.forEach((panel) => {
-    panel.addEventListener('click', (e) => {
-      if (panel.classList.contains('active')) {
-        const sectorLabel = panel.querySelector('.panel-label');
-        if (!sectorLabel) return;
-        const sectorName = sectorLabel.innerText.replace(/\n/g, ' ').trim().toLowerCase();
-        let catParam = "";
-        if (sectorName.includes("bar")) catParam = "bar-restaurants";
-        else if (sectorName.includes("alberghiero") || sectorName.includes("hotel")) catParam = "hotels";
-        else if (sectorName.includes("gelaterie")) catParam = "gelaterie-pasticcerie";
-        else if (sectorName.includes("salumerie")) catParam = "salumerie-panifici";
-        else if (sectorName.includes("farmacie")) catParam = "farmacie-parafarmacie";
-        else if (sectorName.includes("tabacchi")) catParam = "tabacchi";
-        else if (sectorName.includes("commerciali") || sectorName.includes("commercial")) catParam = "commercial-spaces";
-        
-        if (catParam) {
-          window.location.href = `./projects.html?category=${catParam}`;
-        }
+  /* -----------------------------------------
+     4b. HOVER HIT-ZONES (desktop only)
+     ----------------------------------------- */
+  // WHY THIS EXISTS: measured with a 5x5 elementFromPoint grid test across
+  // each panel's own bounding box, cards #0 and #6 (the most steeply
+  // rotated, +-35deg) scored 0/20 hits - their actual painted trapezoid is
+  // much narrower than their flat CSS box once foreshortened, so milder
+  // neighbors (which keep nearly their full flat width) visually cover and
+  // steal 100% of their hit area. This isn't a hit-testing engine bug to
+  // work around - it's the real geometry of a rotated card in a shared
+  // perspective. Fix: decouple "what looks like it's touching" (the visual,
+  // overlapping, rotated .hero-panel elements) from "what receives the
+  // hover" (flat, non-rotated, NON-overlapping zones tiling the full 0-100%
+  // width by the midpoints between each card's center). Every card gets an
+  // uncontested slice regardless of how its rotated neighbor paints over it.
+  const ZONES = {
+    '0': { left: '0%', width: '12.97%' },
+    '1': { left: '12.97%', width: '15.39%' },
+    '3': { left: '28.36%', width: '14.42%' },
+    '2': { left: '42.78%', width: '14.72%' },
+    '4': { left: '57.5%', width: '14.73%' },
+    '5': { left: '72.23%', width: '13.94%' },
+    '6': { left: '86.17%', width: '13.83%' },
+  };
+  // Mirrors each panel's own CSS height so a zone never reaches above its
+  // card into the headline area.
+  const ZONE_HEIGHT = {
+    '0': 'clamp(368px, 42vh, 460px)',
+    '1': 'clamp(294px, 33.6vh, 368px)',
+    '3': 'clamp(375px, 42.84vh, 469px)',
+    '2': 'clamp(287px, 32.76vh, 359px)',
+    '4': 'clamp(375px, 42.84vh, 469px)',
+    '5': 'clamp(294px, 33.6vh, 368px)',
+    '6': 'clamp(368px, 42vh, 460px)',
+  };
+
+  function initHoverZones() {
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    const zones = {};
+    if (!desktopGallery) return zones;
+    panels.forEach((panel) => {
+      const idx = panel.dataset.index;
+      const cfg = ZONES[idx];
+      const zone = document.createElement('div');
+      zone.className = 'hover-zone';
+      zone.dataset.index = idx;
+      // translateZ(200px) matters more than the z-index here: .desktop-gallery
+      // shares one preserve-3d scene with every card, and inside that scene
+      // hit-testing resolves by actual 3D depth, not just CSS stacking order -
+      // a card's own translateZ (max +30 at rest) would otherwise still win
+      // against this flat zone's implicit z:0 regardless of z-index.
+      zone.style.cssText = `position:absolute; bottom:0; left:${cfg.left}; width:${cfg.width}; height:${ZONE_HEIGHT[idx]}; z-index:60; cursor:pointer; transform:translateZ(200px);`;
+      desktopGallery.appendChild(zone);
+      zones[idx] = zone;
+    });
+    return zones;
+  }
+  const hoverZones = initHoverZones();
+
+  const HOVER_INTENT_DELAY = 80;
+  let hoverIntentTimer = null;
+
+  function getReflectionFor(panel) {
+    return document.querySelector(`.card-reflection[data-index="${panel.dataset.index}"]`);
+  }
+
+  // Brightness targets .hero-panel__face, not the .hero-panel wrapper: CSS
+  // `filter` forces the element it's on to be pre-composited as a flat 2D
+  // bitmap before the filter applies, which silently flattens any nested
+  // preserve-3d content - confirmed directly (toggling filter:none on the
+  // wrapper made the panel's 3D side faces render immediately). Rotation/
+  // position/scale tweens still target the wrapper only, unchanged.
+  function getFaceFor(panel) {
+    return panel.querySelector('.hero-panel__face');
+  }
+
+  function killPanelTweens() {
+    panels.forEach((panel) => {
+      gsap.killTweensOf(panel);
+      const refl = getReflectionFor(panel);
+      if (refl) gsap.killTweensOf(refl);
+      const face = getFaceFor(panel);
+      if (face) gsap.killTweensOf(face);
+    });
+  }
+
+  // Single exclusive state machine (BUG A fix): activeIndex is the only
+  // source of truth, and every call re-derives ALL 7 panels' classes from
+  // it in one pass - so no sequence of clicks/hovers, however fast, can
+  // ever leave more than one panel marked active. Both hover and click
+  // funnel through activatePanel/deactivateAll so the two input paths can
+  // never fight each other or desync.
+  function activatePanel(panel) {
+    const targetIdx = panel.dataset.index;
+    if (activeIndex === targetIdx) return;
+    killPanelTweens();
+    activeIndex = targetIdx;
+    panels.forEach((p) => {
+      const pIdx = p.dataset.index;
+      const refl = getReflectionFor(p);
+      const isActive = pIdx === targetIdx;
+      p.classList.toggle('is-active', isActive);
+      const face = getFaceFor(p);
+      if (isActive) {
+        p.style.zIndex = 50;
+        const rest = REST[pIdx];
+        // Straightens PARTIALLY (half its resting angle), never to 0deg -
+        // keeps the chain feeling instead of popping frontal (BUG A/B spec).
+        gsap.to(p, { rotationY: rest.rotationY / 2, y: -45, z: 120, scale: 1.05, duration: 0.7, ease: 'back.out(1.2)' });
+        if (face) gsap.to(face, { filter: 'brightness(1.08)', duration: 0.7, ease: 'back.out(1.2)' });
+        if (refl) gsap.to(refl, { rotationY: rest.rotationY / 2, z: 120, scale: 1.1, opacity: 0.5, duration: 0.7, ease: 'back.out(1.2)' });
+      } else {
+        const dir = p.offsetLeft < panel.offsetLeft ? -1 : 1;
+        gsap.to(p, { x: dir * 20, scale: 0.97, duration: 0.6, ease: 'power2.inOut' });
+        if (face) gsap.to(face, { filter: 'brightness(0.6)', duration: 0.6, ease: 'power2.inOut' });
       }
     });
+  }
+
+  function deactivateAll() {
+    if (activeIndex === null) return;
+    killPanelTweens();
+    activeIndex = null;
+    panels.forEach((panel) => {
+      panel.classList.remove('is-active');
+      panel.style.zIndex = Z_INDEX_BASE[panel.dataset.index];
+      const rest = REST[panel.dataset.index];
+      gsap.to(panel, { rotationY: rest.rotationY, z: rest.z, y: 0, x: 0, scale: 1, duration: 0.8, ease: 'power3.inOut' });
+      const face = getFaceFor(panel);
+      if (face) gsap.to(face, { filter: REST_FILTER, duration: 0.8, ease: 'power3.inOut' });
+      const refl = getReflectionFor(panel);
+      if (refl) gsap.to(refl, { rotationY: rest.rotationY, z: rest.z, scale: 1, opacity: 0.85, duration: 0.8, ease: 'power3.inOut' });
+    });
+  }
+
+  panels.forEach((panel) => {
+    const idx = panel.dataset.index;
+    const zone = hoverZones[idx];
+    if (!zone) return;
+    // Click: first click on an inactive panel raises it (mirrors hover-intent
+    // for touch, where there is no hover); clicking the already-active panel
+    // navigates - tap-to-preview, tap-again-to-open.
+    zone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeIndex === idx) {
+        const category = panel.getAttribute('data-category');
+        if (category) window.location.href = `./projects.html?category=${category}`;
+      } else {
+        activatePanel(panel);
+      }
+    });
+    zone.addEventListener('mouseenter', () => {
+      if (isMobileQuery.matches) return;
+      clearTimeout(hoverIntentTimer);
+      hoverIntentTimer = setTimeout(() => activatePanel(panel), HOVER_INTENT_DELAY);
+    });
+    zone.addEventListener('mouseleave', () => {
+      if (isMobileQuery.matches) return;
+      clearTimeout(hoverIntentTimer);
+      deactivateAll();
+    });
+  });
+
+  // Click anywhere outside the gallery returns the raised panel to rest.
+  document.addEventListener('click', (e) => {
+    if (isMobileQuery.matches) return;
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    if (desktopGallery && !desktopGallery.contains(e.target)) {
+      deactivateAll();
+    }
   });
 
 
@@ -600,15 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
         invalidateOnRefresh: true,
         // Reset the hover accordion once descent starts, restore primary index 0 when scrolled back to 0.
         onUpdate: (self) => {
-          if (self.progress > 0.001) {
-            if (activeIndex !== null) {
-              animateAccordionState(null);
-            }
-          } else {
-            if (activeIndex !== 0) {
-              animateAccordionState(0);
-            }
-          }
+          // No accordion state to reset
         }
       }
     });
@@ -630,7 +614,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelTravelDuration = 3.4;
     panels.forEach((panel) => {
       const visualIndex = parseInt(getComputedStyle(panel).order, 10) || 0;
-      heroExitTL.to(panel, {
+      const reflection = document.querySelector(`.card-reflection[data-index="${panel.dataset.index}"]`);
+      heroExitTL.to(reflection ? [panel, reflection] : panel, {
         y: () => -window.innerHeight - 320,
         duration: panelTravelDuration,
       }, visualIndex * staggerDelay);
@@ -656,6 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
       heroExitTL = null;
       // Reset any transforms on elements
       panels.forEach(panel => gsap.set(panel, { y: 0 }));
+      gsap.set(document.querySelectorAll('.card-reflection'), { y: 0 });
       gsap.set(".hero-text-block", { y: 0, opacity: 1 });
     };
   });
