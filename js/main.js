@@ -400,7 +400,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initPanelFaces();
 
   document.querySelectorAll('.hero-panel').forEach((p) => {
-    const src = p.querySelector('.hero-panel__img').getAttribute('src');
+    // .src (not getAttribute) resolves the relative path to an absolute URL -
+    // this value lands in a CSS custom property consumed by an external
+    // stylesheet, and browsers resolve url() inside custom properties
+    // relative to the stylesheet using them, not the document, so a raw
+    // relative path here would 404 under css/.
+    const src = p.querySelector('.hero-panel__img').src;
     p.querySelector('.hero-panel__slab').style.setProperty('--panel-img', `url("${src}")`);
   });
 
@@ -601,7 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // Reset the hover accordion once descent starts, restore primary index 0 when scrolled back to 0.
+        // No accordion state to reset (hero panel gallery has no hover state).
         onUpdate: (self) => {
         }
       }
@@ -624,6 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelTravelDuration = 3.4;
     panels.forEach((panel) => {
       const visualIndex = parseInt(getComputedStyle(panel).order, 10) || 0;
+      const reflection = document.querySelector(`.card-reflection[data-index="${panel.dataset.index}"]`);
       heroExitTL.to(reflection ? [panel, reflection] : panel, {
         y: () => -window.innerHeight - 320,
         duration: panelTravelDuration,
