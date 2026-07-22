@@ -198,87 +198,12 @@
       </div>
     </section>
 
-    <!-- Scroll 0 + Scroll 1: one pinned section. Scroll position first
-         drives the scroll-0 frame sequence (assets/animations/scroll-0),
-         then hands off in place to the scroll-1 sequence rendered in the
-         .reveal-layer overlay - the page never visibly scrolls between the
-         two, it reads as one continuous animation. -->
-    <section class="build-stage" id="build-stage">
-      <div class="build-stage-content">
-        <div class="build-copy">
-          <span class="build-eyebrow">GLOBAL CONTRACT</span>
-          <h2 class="build-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
-          <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
-        </div>
-        <div class="build-canvas-container">
-          <canvas id="build-canvas" width="1440" height="805"></canvas>
-        </div>
-      </div>
-      <!-- Scroll 1 overlay: frame 0 overlaps scroll-0's last frame in the
-           same screen position; the object then travels from the right
-           column to the left while the sequence plays; copy on the right. -->
-      <div class="reveal-layer" id="reveal-layer">
-        <div class="reveal-layer-content">
-          <div class="reveal-object-slot" id="reveal-object-slot">
-            <div class="reveal-canvas-container" id="reveal-canvas-container">
-              <canvas id="reveal-canvas" width="1440" height="805"></canvas>
-            </div>
-          </div>
-          <div class="reveal-copy">
-            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
-            <h2 class="reveal-headline">CREIAMO IL<br>TUO SPAZIO</h2>
-            <p class="reveal-sub">Studiamo gli ambienti per rendere il tuo locale il più efficiente possibile e il più bello esteticamente.</p>
-          </div>
-        </div>
-      </div>
-      <!-- Scroll 2 overlay: frame 0 overlaps scroll-1's last frame in the
-           same screen position (left column); the object then travels
-           further right, settling centered in the page, flanked by copy
-           on both sides. -->
-      <div class="reveal-layer-2" id="reveal-layer-2">
-        <div class="reveal-layer-2-content">
-          <div class="reveal-copy-2-left">
-            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
-            <h2 class="reveal-headline">PRONTI AD APRIRE</h2>
-          </div>
-          <div class="reveal-object-slot-2" id="reveal-object-slot-2">
-            <div class="reveal-canvas-container-2" id="reveal-canvas-container-2">
-              <canvas id="reveal-canvas-2" width="1440" height="805"></canvas>
-            </div>
-          </div>
-          <div class="reveal-copy-2-right">
-            <p class="reveal-sub">Dal cantiere all'accoglienza dei primi ospiti: consegniamo il tuo locale completo e già operativo.</p>
-          </div>
-        </div>
-      </div>
-      <!-- Scroll 3 overlay: frame 0 overlaps scroll-2's centered last frame
-           in the same screen position/size; the sequence then scrubs in
-           place (the space materialises), flanked by copy on both sides. -->
-      <div class="reveal-layer-3" id="reveal-layer-3">
-        <div class="reveal-layer-3-content">
-          <div class="reveal-copy-3-left">
-            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
-            <h2 class="reveal-headline">IL TUO<br>LOCALE</h2>
-          </div>
-          <div class="reveal-object-slot-3" id="reveal-object-slot-3">
-            <div class="reveal-canvas-container-3" id="reveal-canvas-container-3">
-              <canvas id="reveal-canvas-3" width="1440" height="805"></canvas>
-            </div>
-          </div>
-          <div class="reveal-copy-3-right">
-            <p class="reveal-sub">Progettazione, arredo e allestimento: ogni dettaglio curato fino all'ultimo, pronto a prendere vita.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SETTORI — relocated from the old hero (was the 7-card zigzag gallery
-         above the fold). Same cards/order/labels/interaction logic, now a
-         normal in-page section: no pin, no forced-descent coupling. -->
+    <!-- S3. SECTOR CARDS [MOVE-ONLY] -->
     <section class="sectors-section" id="settori">
       <div class="section-title-wrapper">
         <span class="section-tag">I NOSTRI SETTORI</span>
-        <h2 class="details-title">Progettiamo per ogni settore.</h2>
+        <h2 class="details-title">Qualunque sia il tuo locale, lo abbiamo già costruito.</h2>
+        <p class="sectors-subline">Riconosci la tua attività: ogni settore ha esigenze diverse, e noi le conosciamo una per una.</p>
       </div>
 
       <!-- Interactive 7-Panel Gallery -->
@@ -449,6 +374,80 @@
               <span class="mobile-card-title">Commerciali</span>
               <span class="mobile-card-arrow">→</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scroll 0 + Scroll 1: one pinned section. Scroll position first
+         drives the scroll-0 frame sequence (assets/animations/scroll-0),
+         then hands off in place to the scroll-1 sequence rendered in the
+         .reveal-layer overlay - the page never visibly scrolls between the
+         two, it reads as one continuous animation. -->
+    <section class="build-stage" id="build-stage">
+      <div class="build-stage-content">
+        <div class="build-copy">
+          <span class="build-eyebrow">GLOBAL CONTRACT</span>
+          <h2 class="build-headline">DA UN'IDEA<br>A UN'ATTIVITÀ</h2>
+          <p class="build-sub">Spazi progettati e realizzati chiavi in mano.</p>
+        </div>
+        <div class="build-canvas-container">
+          <canvas id="build-canvas" width="1440" height="805"></canvas>
+        </div>
+      </div>
+      <!-- Scroll 1 overlay: frame 0 overlaps scroll-0's last frame in the
+           same screen position; the object then travels from the right
+           column to the left while the sequence plays; copy on the right. -->
+      <div class="reveal-layer" id="reveal-layer">
+        <div class="reveal-layer-content">
+          <div class="reveal-object-slot" id="reveal-object-slot">
+            <div class="reveal-canvas-container" id="reveal-canvas-container">
+              <canvas id="reveal-canvas" width="1440" height="805"></canvas>
+            </div>
+          </div>
+          <div class="reveal-copy">
+            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
+            <h2 class="reveal-headline">CREIAMO IL<br>TUO SPAZIO</h2>
+            <p class="reveal-sub">Studiamo gli ambienti per rendere il tuo locale il più efficiente possibile e il più bello esteticamente.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Scroll 2 overlay: frame 0 overlaps scroll-1's last frame in the
+           same screen position (left column); the object then travels
+           further right, settling centered in the page, flanked by copy
+           on both sides. -->
+      <div class="reveal-layer-2" id="reveal-layer-2">
+        <div class="reveal-layer-2-content">
+          <div class="reveal-copy-2-left">
+            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
+            <h2 class="reveal-headline">PRONTI AD APRIRE</h2>
+          </div>
+          <div class="reveal-object-slot-2" id="reveal-object-slot-2">
+            <div class="reveal-canvas-container-2" id="reveal-canvas-container-2">
+              <canvas id="reveal-canvas-2" width="1440" height="805"></canvas>
+            </div>
+          </div>
+          <div class="reveal-copy-2-right">
+            <p class="reveal-sub">Dal cantiere all'accoglienza dei primi ospiti: consegniamo il tuo locale completo e già operativo.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Scroll 3 overlay: frame 0 overlaps scroll-2's centered last frame
+           in the same screen position/size; the sequence then scrubs in
+           place (the space materialises), flanked by copy on both sides. -->
+      <div class="reveal-layer-3" id="reveal-layer-3">
+        <div class="reveal-layer-3-content">
+          <div class="reveal-copy-3-left">
+            <span class="reveal-eyebrow">GLOBAL CONTRACT</span>
+            <h2 class="reveal-headline">IL TUO<br>LOCALE</h2>
+          </div>
+          <div class="reveal-object-slot-3" id="reveal-object-slot-3">
+            <div class="reveal-canvas-container-3" id="reveal-canvas-container-3">
+              <canvas id="reveal-canvas-3" width="1440" height="805"></canvas>
+            </div>
+          </div>
+          <div class="reveal-copy-3-right">
+            <p class="reveal-sub">Progettazione, arredo e allestimento: ogni dettaglio curato fino all'ultimo, pronto a prendere vita.</p>
           </div>
         </div>
       </div>
