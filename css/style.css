@@ -3092,3 +3092,101 @@ body.menu-open .mobile-menu-toggle span {
     font-size: 0.68rem;
   }
 }
+
+/* -----------------------------------------
+   S6. VINCENZO FOUNDER SECTION (.gc-founder-*)
+   Dark, sober, editorial portrait section.
+   ----------------------------------------- */
+.gc-founder-section {
+  position: relative;
+  width: 100%;
+  background: #0D0D0D;
+  padding: 5.5rem 1.5rem;
+  z-index: var(--z-content);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.gc-founder-container {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.gc-founder-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+.gc-founder-photo-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1A1A1A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+.gc-founder-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #222222 0%, #121212 100%);
+}
+.gc-founder-monogram {
+  font-family: var(--font-serif-cards);
+  font-size: 3.5rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.18);
+  user-select: none;
+}
+.gc-founder-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gray-text);
+  display: block;
+  margin-bottom: 0.85rem;
+}
+.gc-founder-title {
+  font-family: var(--font-serif-cards);
+  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+  font-weight: 500;
+  color: var(--color-white);
+  line-height: 1.15;
+  margin: 0 0 1.5rem;
+}
+.gc-founder-body {
+  font-family: var(--font-sans);
+  font-size: clamp(0.92rem, 1.15vw, 1.05rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.75;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .gc-founder-section {
+    padding: 3.5rem 1.25rem;
+  }
+  .gc-founder-grid {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+  .gc-founder-photo-slot {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  .gc-founder-title {
+    font-size: 1.95rem;
+    margin-bottom: 1rem;
+  }
+  .gc-founder-body {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+}
