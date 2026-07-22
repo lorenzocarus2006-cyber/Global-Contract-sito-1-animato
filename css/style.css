@@ -2953,3 +2953,130 @@ body.menu-open .mobile-menu-toggle span {
     animation-duration: 20s;
   }
 }
+
+/* -----------------------------------------
+   S2. TRUST BLOCK (.gc-trust-*) - Hybrid Plaque
+   Compact dark block (#0D0D0D) combining 3 serif stats, a thin scrolling
+   marquee of real reference names, and a discreet caption.
+   ----------------------------------------- */
+.gc-trust-block {
+  position: relative;
+  width: 100%;
+  background: #0D0D0D;
+  padding: 3rem 1.25rem 2.25rem;
+  z-index: var(--z-content);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.gc-trust-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gc-trust-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 850px;
+  margin-bottom: 2rem;
+  text-align: center;
+  align-items: baseline;
+}
+.gc-trust-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gc-trust-figure {
+  font-family: var(--font-serif-cards);
+  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+  font-weight: 500;
+  color: var(--color-white);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+.gc-trust-label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.gc-trust-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 0.85rem 0;
+  margin-bottom: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.015);
+}
+.gc-trust-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: gcTrustMarquee 32s linear infinite;
+  will-change: transform;
+}
+.gc-trust-marquee-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 1.5rem;
+}
+.gc-trust-client {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  padding: 0 0.4rem;
+}
+.gc-trust-dot {
+  margin: 0 1.2rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+}
+.gc-trust-caption {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+@keyframes gcTrustMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+  .gc-trust-block {
+    padding: 2.25rem 1rem 1.75rem;
+  }
+  .gc-trust-numbers {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .gc-trust-figure {
+    font-size: 1.85rem;
+  }
+  .gc-trust-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+  }
+  .gc-trust-client {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+  .gc-trust-caption {
+    font-size: 0.68rem;
+  }
+}
