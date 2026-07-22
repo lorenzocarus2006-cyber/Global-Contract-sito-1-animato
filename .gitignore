@@ -17,3 +17,10 @@ assets/animations/scroll-*/**
 !assets/animations/scroll-*/
 !assets/animations/scroll-*/webp/
 !assets/animations/scroll-*/webp/**
+
+# Archived old animation frames (~344MB) - local-only backup, never commit.
+assets/animations/scroll vecchi/
+
+# Claude Code local env (not part of the site)
+.agents/
+skills-lock.json

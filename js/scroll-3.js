@@ -20,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const FRAME_COUNT = 169;
-  const FRAME_CACHE_BUST = "v=1";
+  const FRAME_COUNT = 41;
+  const FRAME_CACHE_BUST = "v=black-1";
   const frames = [];
   let lastDrawn = -1;
   let pendingFrame = null;

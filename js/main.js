@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
      no borders, no halos. All frames are preloaded up front; nothing is
      fetched during the scroll itself.
      ----------------------------------------- */
-  const SEQ_FRAME_COUNT = 198;
+  const SEQ_FRAME_COUNT = 44;
   const seqFrames = [];
   let seqLoadedCount = 0;
   let seqReady = false;
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function seqFramePath(i) {
     const n = String(i).padStart(3, "0");
-    return `./assets/animations/scroll-0/webp/frame_${n}.webp`;
+    return `./assets/animations/scroll-0/webp/frame_${n}.webp?v=black-1`;
   }
 
   if (buildCtx) {
