@@ -57,20 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // In-memory only (no sessionStorage): every fresh page load/reload starts
-  // false, so the forced full-run always replays on refresh. It only stays
-  // true for the lifetime of this script execution, so scrolling back up
-  // and down again without reloading does not retrigger it.
-  let transitionDone = false;
-  // Gate for scroll-1.js's own forced-scroll hijack: only arms once Scroll 0
-  // has genuinely finished, so a not-yet-refreshed ScrollTrigger on the
-  // reveal layer can never mistakenly hijack the very first hero scroll.
-  window.__scroll0Done = false;
-  let isStageLocked = false;
-  let isTweening = false;
-  let unlockTimeout = null;
-
-  // Revisit state handling on load.
   const buildStage = document.getElementById("build-stage");
   const buildCanvas = document.getElementById("build-canvas");
   const buildCtx = buildCanvas ? buildCanvas.getContext("2d") : null;
@@ -641,35 +627,10 @@ document.addEventListener("DOMContentLoaded", () => {
       duration: 1,
     }, 0);
 
-    // 2. Forced-descent ENTRY TRIGGER. OLD mechanism: a global wheel/
-    // touchmove/keydown hijack on the very first downward gesture while
-    // window.scrollY <= 5 (i.e. at the very top of the page, since
-    // #build-stage used to sit immediately below the hero). Now #build-stage
-    // sits after the marquee + numbers section, so "top of page" no longer
-    // identifies the right moment - scrollY<=5 would fire the descent while
-    // the user is still reading the marquee/numbers, jumping straight past
-    // them. NEW mechanism: a plain ScrollTrigger on #build-stage itself,
-    // firing onEnter (its top hits viewport top, scrolling down) - i.e. the
-    // instant the user's normal scroll actually reaches the section that
-    // needs the forced descent. Same one-shot guard (transitionDone/
-    // isTweening), same runForcedScrollTween() body/duration/easing/lock
-    // untouched - only the "when do we call it" trigger changed. onEnterBack
-    // is intentionally not bound, so scrolling back up into the section from
-    // below never retriggers it.
-    const forcedDescentTrigger = ScrollTrigger.create({
-      trigger: "#build-stage",
-      start: "top top",
-      onEnter: () => {
-        if (transitionDone || isTweening) return;
-        runForcedScrollTween();
-      }
-    });
-
     return () => {
       if (heroExitTL) heroExitTL.kill();
       heroExitTL = null;
       gsap.set(".hero-proof-photo", { y: 0, opacity: 1 });
-      forcedDescentTrigger.kill();
     };
   });
 
@@ -689,52 +650,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const HANDOFF2 = (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION) / TOTAL_PIN_FRACTION;
   const HANDOFF3 =
     (SCROLL0_PIN_FRACTION + SCROLL1_PIN_FRACTION + SCROLL2_PIN_FRACTION) / TOTAL_PIN_FRACTION;
-
-  function runForcedScrollTween() {
-    if (isTweening || transitionDone) return;
-
-    isTweening = true;
-    isStageLocked = true;
-    // NOTE: no lenis.stop() here. The .lenis-stopped class sets
-    // overflow:hidden on <html>, which makes the page unscrollable and
-    // silently kills the descent. We let Lenis itself drive the scroll
-    // (lock:true blocks user input for the whole animation).
-
-    // Safety net: if lenis.scrollTo's onComplete never fires for any reason
-    // (backgrounded tab throttling the rAF loop, a resize invalidating the
-    // target mid-tween, etc.) isTweening/isStageLocked would stay true
-    // forever - and blockInput blocks wheel/touch/keydown on those flags,
-    // so the page would only be scrollable by dragging the
-    // native scrollbar thumb. Force an unlock no later than 6s so a stuck
-    // tween can never hijack scroll permanently.
-    clearTimeout(unlockTimeout);
-    unlockTimeout = setTimeout(() => unlockStage(true), 6000);
-
-    // Target: the scroll-0/scroll-1 HAND-OFF point (mid-pin). One scroll
-    // gesture from the hero rides through the hero exit AND the entire
-    // scroll-0 frame sequence (the scrubbed canvas follows the scroll
-    // position), locking there. Scroll-1's own forced tween then covers
-    // the rest of the pin on the next input.
-    const stageTop = buildStage
-      ? buildStage.getBoundingClientRect().top + window.scrollY
-      : window.innerHeight * (1 + PIN_VH_FRACTION);
-    const targetScroll = stageTop + window.innerHeight * SCROLL0_PIN_FRACTION;
-
-    lenis.scrollTo(targetScroll, {
-      duration: 1.8, // Faster forced descent, same sinuous power3.inOut curve
-      // power3.inOut
-      easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-      lock: true,
-      onComplete: () => {
-        isTweening = false;
-        // Scroll 0 fully played. Page unlocks here; scrolling back up
-        // replays the sequence in reverse, freely. Scroll 1's own forced
-        // tween (scroll-1.js) only fires on a fresh scroll input once the
-        // user reaches its pin - it is not chained automatically.
-        unlockStage(true);
-      }
-    });
-  }
 
   /* -----------------------------------------
      SCROLL 0 + SCROLL 1 - ONE PINNED SCROLL-SCRUBBED SEQUENCE
@@ -872,45 +787,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // authored positions 1:1 onto the whole (extended) pin range.
     scroll0TL.to({}, { duration: 0.1 }, 9.9);
   }
-
-  function unlockStage(markComplete = true) {
-    if (!isStageLocked) return;
-    isStageLocked = false;
-    isTweening = false;
-    clearTimeout(unlockTimeout);
-
-    lenis.start();
-
-    // Only a genuinely completed sequence may mark it done - a
-    // safety-timeout bailout must stay retryable within the same page load.
-    if (markComplete) {
-      transitionDone = true;
-      window.__scroll0Done = true;
-      if (buildStage) {
-        buildStage.classList.add("transition-done");
-      }
-    }
-    console.log("Stage building complete. Page unlocked.");
-  }
-
-  // Hard input block during the forced descent AND the build sequence.
-  function blockInput(e) {
-    if (isTweening || isStageLocked) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }
-  window.addEventListener('wheel', blockInput, { passive: false, capture: true });
-  window.addEventListener('touchmove', blockInput, { passive: false, capture: true });
-  window.addEventListener('keydown', (e) => {
-    if (isTweening || isStageLocked) {
-      const keys = ['ArrowDown', 'PageDown', 'ArrowUp', 'PageUp', ' ', 'Spacebar', 'Home', 'End'];
-      if (keys.includes(e.key)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
-  }, { passive: false, capture: true });
 
   // Mobile menu toggle logic
   const mobileToggle = document.querySelector('.mobile-menu-toggle');
