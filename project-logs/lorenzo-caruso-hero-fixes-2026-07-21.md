@@ -118,19 +118,88 @@ blank `.hero-section`. `isMobileQuery` relocated above its first surviving use.
 Verified: page loads, no console errors, preloader → navbar logo animation plays
 identically, forced descent still triggers/completes/reverses, sections below intact.
 
-## Commit 2 — build proof hero in the shell
+## Follow-up pass (same day) — build proof hero, relocate cards, generate photo
 
-Pending the Nano Banana asset-approval gate (see chat). Will fill `.hero-proof-photo`
-with the generated image + headline/subline, `.hero-proof-block` with the three-lockup
-signature plaque + proof line + micro-link. All new classes `.hero-proof-*`.
+Second pass on top of commit 1 (`42011e5`). **Left uncommitted at the user's explicit
+request** ("finish without committing") — everything below is in the working tree only.
+
+### Part A — Proof hero built
+Filled `.hero-proof-photo` (headline "Dietro ogni locale / c'è un metodo." with the
+accent word in `#B01E56`, subline, gradient, photo) and `.hero-proof-block` (three
+lockups 30/ANNI · 850+/LOCALI CONSEGNATI · Sicilia/UNA REGIONE, client line, micro-link
+"SCOPRI COME LAVORIAMO"). New classes all `.hero-proof-*`.
+
+**Bug found and fixed:** a pre-existing `@media (max-width:1024px) { .hero-section {
+height: auto; ... } }` rule (written for the old hero-text-block's content-flow layout)
+overrode the base `height:100vh`. With no definite height on the flex container, the
+`flex: 0 0 72%`/`flex: 0 0 28%` basis percentages on `.hero-proof-photo`/
+`.hero-proof-block` couldn't resolve, so both blocks collapsed to content-height and
+`justify-content:space-between` threw the leftover space as a dead gap between them -
+this is what a 390px screenshot would have shown before the fix. Removed the stale
+override (selector is exclusive to `.hero-section`, confirmed no other rule depends on
+it - it duplicated `min-height:100vh` which the base rule already effectively provides
+at these widths).
+
+Micro-link (`#heroProofLink`) wired in `js/main.js`: `e.preventDefault()` +
+`lenis.scrollTo('#build-stage')`, no `lenis.stop()`.
+
+### Part B — Old 7-card gallery relocated, not deleted
+Recovered verbatim from `git show f56f1a8:index.html|css/style.css|js/main.js` (the
+commit immediately before the removal commit `42011e5`) - NOT from the redesign branch,
+per instruction. New section `<section class="sectors-section" id="settori">` inserted
+between `#build-stage` and the stats section, matching the redesign branch's Metodo →
+Settori → Chi-siamo ordering (checked live against the :8001 read-only worktree
+preview). Added a minimal header (`I NOSTRI SETTORI` / "Progettiamo per ogni settore.")
+using the site's existing `.section-tag`/`.details-title` classes plus a small
+`.sectors-section`-scoped rule to style `.section-tag` (it had no base style anywhere
+in the file even before this pass - pre-existing gap, only patched for my own new
+section, not touched elsewhere).
+
+Markup/CSS/JS restored **byte-for-byte** from the recovered commit: same 7 cards, same
+`data-index`/`data-category`/`data-sector`, same labels, same order, same
+`REST`/`Z_INDEX_BASE`/`ZONES`/`ZONE_HEIGHT` tables, same activate/deactivate state
+machine, same reflections/slab-face generation. Only two things changed on purpose:
+- `.gallery-container`'s `margin-top`/`z-index` (was tuned to clear the old hero
+  headline and sit above the header "for the ascent pass-through" - neither applies
+  in a normal in-page section; replaced with plain section spacing).
+- Nothing in the interaction JS itself needed changing - it was already fully
+  self-contained (no forced-descent/sessionStorage coupling to begin with; the only
+  hero-specific entanglement was `heroExitTL`'s ascent tween, which commit 1 had
+  already retargeted away from the cards).
+
+`isMobileQuery`: re-declared once at the top of the restored gallery block (its
+original position); the placeholder declaration commit 1 had added in section 5 was
+removed to avoid a duplicate `const` in the same scope.
+
+### Part C — Hero photo generated
+Approval gate cleared in chat (2 credits, Nano Banana, 1 image). First attempt used
+`aspect_ratio: 9:16` - wrong call for a `object-fit:cover` block that's very wide/short
+on desktop and tall/narrow on mobile; a 16:9 source crops sensibly to both, a 9:16
+source would have cropped away most of the width on desktop. Regenerated at 16:9,
+accepted (marble counter, brass/wood, LED strip lighting, barista + steam, customer
+with motion blur, calm dark lower third, no faces, no text/logos - matches brief).
+Saved `assets/hero/hero-proof.jpg` (JPEG q85, from the 2752x1536 source).
+
+## Files touched (this pass, on top of commit 1)
+- `index.html` - hero content filled in; new `#settori` section added.
+- `css/style.css` - `.hero-proof-*` rules completed; `.hero-proof-photo` given
+  `display:flex; flex-direction:column; justify-content:flex-end` (fixes the
+  absolutely-positioned img/gradient siblings not pushing the in-flow headline down);
+  stale `.hero-section{height:auto}` override at max-width:1024px removed; gallery
+  CSS block + its mobile fragment restored under `.sectors-section`.
+- `js/main.js` - gallery interaction block restored (section "4."); micro-link handler
+  added; duplicate `isMobileQuery` declaration removed.
+- `assets/hero/hero-proof.jpg` - new (generated).
 
 ## NOT touched (confirmed)
 
-- Preloader ✓ · logo-to-navbar animation ✓ · navbar itself ✓ · every section below the
-  hero (`#build-stage` and its 4 scroll-scrubbed sequences, stats, details/floating
-  gallery, consult CTA, footer, modals) ✓ · `redesign-funnel-v2` branch (not checked
-  out, not modified) ✓ · remote (zero pushes, confirmed via `git status` on both
-  worktrees below) ✓
+- Preloader ✓ · logo-to-navbar animation ✓ · navbar itself ✓ · stats section, details/
+  floating gallery, consult CTA, footer, modals ✓ · `redesign-funnel-v2` branch (not
+  checked out, not modified) ✓ · remote (zero pushes; nothing in this pass was
+  committed at all, per explicit instruction) ✓
+- `#build-stage` and its 4 scroll-scrubbed sequences: markup/CSS/JS untouched, still the
+  immediate next `<section>` after the hero (unchanged position - `#settori` was
+  inserted AFTER `#build-stage`, between it and the stats section, not before it).
 
 ## MERGE NOTES for Luis
 
@@ -154,3 +223,11 @@ His section lands on `main` later, separately. Contact points to check when comb
 - **No new `#contatti`/anchor IDs added** by this pass — the proof hero's micro-link
   target is the existing next section after the hero (`#build-stage`), scrolled via the
   existing `window.__lenis` instance (`lenis.scrollTo`), not a new anchor.
+- **New id: `#settori`** — the relocated card gallery section, positioned between
+  `#build-stage` and `#numeri` (stats). If his section also needs a "sectors/settori"
+  concept, this id already exists and is live - check before introducing a duplicate.
+- **`.section-tag` now has a real style** (previously unstyled everywhere in the file)
+  but ONLY scoped under `.sectors-section .section-tag` - the bare class is still
+  unstyled elsewhere (e.g. `.details-mobile-fallback`). If his work wants `.section-tag`
+  styled globally, that's an intentional design decision to make separately, not
+  something this pass did.
