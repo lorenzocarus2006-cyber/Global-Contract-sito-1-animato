@@ -643,42 +643,57 @@
       </div>
     </section>
 
-    <!-- Free Consultation CTA Section -->
+    <!-- S7. FINAL CTA SECTION (UPGRADED) -->
     <section class="consult-section" id="contatti">
       <!-- Ambient magenta glow field -->
       <div class="consult-glow consult-glow-a"></div>
       <div class="consult-glow consult-glow-b"></div>
 
       <div class="consult-inner">
-        <span class="consult-eyebrow">PRONTI A REALIZZARE IL TUO PROGETTO?</span>
+        <span class="consult-eyebrow">PRONTI A PARTIRE?</span>
 
         <h2 class="consult-title">
-          <span>Dall'idea alla realtà,</span>
-          <span>il prossimo progetto</span>
+          <span>Il prossimo locale</span>
           <span class="text-magenta">potrebbe essere il tuo.</span>
         </h2>
 
         <p class="consult-sub">
-          Raccontaci la tua attività e le tue esigenze:<br>
-          ti ricontatteremo entro 24 ore con una proposta su misura.
+          Raccontaci la tua attività e le tue esigenze: ti ricontatteremo entro 24 ore con una proposta su misura.
         </p>
 
-        <!-- Primary CTA with orbiting glow swirl -->
-        <div class="consult-cta-wrap">
-          <span class="consult-cta-orbit" aria-hidden="true"></span>
-          <button type="button" class="consult-cta" id="consultOpen">
-            <span class="consult-cta-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            <span class="consult-cta-label">RICHIEDI UNA CONSULENZA</span>
-            <span class="consult-cta-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </button>
+        <!-- Sector Selector + Primary CTA -->
+        <div class="gc-cta-box">
+          <div class="gc-cta-select-wrap">
+            <label for="gcSectorSelect" class="gc-cta-select-label">Che tipo di locale vuoi aprire?</label>
+            <select class="gc-cta-select" id="gcSectorSelect">
+              <option value="" disabled selected>Seleziona la tipologia...</option>
+              <option value="Bar / Ristorante">Bar / Ristorante</option>
+              <option value="Hotel">Hotel</option>
+              <option value="Gelateria / Pasticceria">Gelateria / Pasticceria</option>
+              <option value="Salumeria / Panificio">Salumeria / Panificio</option>
+              <option value="Farmacia / Parafarmacia">Farmacia / Parafarmacia</option>
+              <option value="Tabacchi">Tabacchi</option>
+              <option value="Spazio commerciale">Spazio commerciale</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+
+          <div class="consult-cta-wrap">
+            <span class="consult-cta-orbit" aria-hidden="true"></span>
+            <button type="button" class="consult-cta" id="consultOpen">
+              <span class="consult-cta-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="consult-cta-label">RICHIEDI UNA CONSULENZA GRATUITA</span>
+              <span class="consult-cta-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </button>
+          </div>
         </div>
 
         <div class="consult-reassure">
@@ -742,6 +757,14 @@
       </div>
     </footer>
 
+  </div>
+
+  <!-- Mobile Sticky Micro-CTA (bottom bar on mobile) -->
+  <div class="gc-sticky-cta" id="gcStickyCta" aria-hidden="true">
+    <a href="#contatti" class="gc-sticky-cta-btn" id="gcStickyCtaBtn">
+      <span>Richiedi una consulenza gratuita</span>
+      <span class="gc-sticky-cta-arrow">→</span>
+    </a>
   </div>
 
   <!-- Project Details Modal Overlay -->
@@ -905,6 +928,16 @@
       const lenis = window.__lenis;
 
       const open = () => {
+        const gcSectorSelect = document.getElementById('gcSectorSelect');
+        const cfTipo = document.getElementById('cf-tipo');
+        if (gcSectorSelect && cfTipo && gcSectorSelect.value) {
+          const selectedVal = gcSectorSelect.value.toLowerCase();
+          const matchOpt = Array.from(cfTipo.options).find(opt => {
+            const optVal = opt.value.toLowerCase();
+            return optVal.includes(selectedVal.split(' ')[0]) || selectedVal.includes(optVal.split(' ')[0]);
+          });
+          if (matchOpt) cfTipo.value = matchOpt.value;
+        }
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';

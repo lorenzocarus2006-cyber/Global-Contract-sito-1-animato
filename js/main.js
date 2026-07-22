@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  // Header state on scroll
+  // Header & Mobile Sticky CTA state on scroll
   lenis.on('scroll', (e) => {
     const header = document.querySelector('.main-header');
     if (header) {
@@ -131,7 +131,36 @@ document.addEventListener("DOMContentLoaded", () => {
         header.classList.remove('scrolled');
       }
     }
-  });  // Initial state setup for loader and nav header
+
+    const stickyCta = document.getElementById('gcStickyCta');
+    const consultSection = document.getElementById('contatti');
+    if (stickyCta) {
+      const heroHeight = window.innerHeight * 0.8;
+      const consultRect = consultSection ? consultSection.getBoundingClientRect() : null;
+      const isPastHero = e.scroll > heroHeight;
+      const isBeforeConsult = consultRect ? consultRect.top > window.innerHeight * 0.5 : true;
+
+      if (isPastHero && isBeforeConsult) {
+        stickyCta.classList.add('is-visible');
+        stickyCta.setAttribute('aria-hidden', 'false');
+      } else {
+        stickyCta.classList.remove('is-visible');
+        stickyCta.setAttribute('aria-hidden', 'true');
+      }
+    }
+  });
+
+  // Mobile Sticky CTA click smooth scroll
+  const gcStickyCtaBtn = document.getElementById('gcStickyCtaBtn');
+  if (gcStickyCtaBtn) {
+    gcStickyCtaBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById('contatti');
+      if (target && window.__lenis) {
+        window.__lenis.scrollTo(target, { duration: 1.2 });
+      }
+    });
+  }  // Initial state setup for loader and nav header
   gsap.set(".loader-logo-container", {
     xPercent: -50,
     yPercent: -50,
