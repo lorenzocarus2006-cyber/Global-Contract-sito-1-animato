@@ -44,6 +44,18 @@ document.addEventListener("DOMContentLoaded", () => {
   
   gsap.ticker.lagSmoothing(0);
 
+  // Hero micro-CTA smooth scroll to Method section (#build-stage)
+  const heroMicroCta = document.getElementById('heroMicroCta');
+  if (heroMicroCta) {
+    heroMicroCta.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById('build-stage');
+      if (target && window.__lenis) {
+        window.__lenis.scrollTo(target, { duration: 1.2 });
+      }
+    });
+  }
+
 
   // In-memory only (no sessionStorage): every fresh page load/reload starts
   // false, so the forced full-run always replays on refresh. It only stays
@@ -276,13 +288,319 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* -----------------------------------------
+     4. HERO CARD GALLERY INTERACTION LOGIC
+     ----------------------------------------- */
+  const panels = gsap.utils.toArray('.hero-stage .hero-panel');
+  const isMobileQuery = window.matchMedia('(max-width: 768px)');
+  let activeIndex = null;
+
+  // Resting 3D geometry - a folding-screen / paravent chain where rotation
+  // direction ALTERNATES card to card (-,+,-,+,-,+,-), not a fan or a
+  // pyramid converging on one frontal centerpiece. Mandatory table. Hover/
+  // click tweens away from these values and back to them exactly, so this
+  // table is also the single source of truth the state machine resets to
+  // (see deactivateAll below) - no separate CSS transform to fall out of
+  // sync with.
+  const REST = {
+    '0': { rotationY: -32, z: -40 },
+    '1': { rotationY: 22, z: 0 },
+    '3': { rotationY: -25, z: -30 },
+    '2': { rotationY: 15, z: 20 },
+    '4': { rotationY: -18, z: 0 },
+    '5': { rotationY: 24, z: -30 },
+    '6': { rotationY: -30, z: -40 },
+  };
+  // Mirrors the z-index values authored in css/style.css for these same
+  // selectors - nearest-to-viewer (highest z) card stacks on top at rest.
+  const Z_INDEX_BASE = { '0': 8, '1': 16, '3': 12, '2': 20, '4': 16, '5': 12, '6': 8 };
+  const REST_FILTER = 'brightness(0.82)';
+
+  panels.forEach((panel) => {
+    const rest = REST[panel.dataset.index];
+    gsap.set(panel, { rotationY: rest.rotationY, z: rest.z, transformOrigin: '50% 100%' });
+    const face = panel.querySelector('.hero-panel__face');
+    if (face) gsap.set(face, { filter: REST_FILTER });
+  });
+
+  function initGallery() {
+    // Desktop click navigation lives on the hover zones (see initHoverZones
+    // below), not on the panels themselves - the zones sit on top and are
+    // what actually receives pointer input for a rotated card.
+
+    // Click handlers for mobile gallery
+    const mobileCards = document.querySelectorAll('.mobile-gallery .mobile-card');
+    mobileCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const category = card.getAttribute('data-category');
+        if (category) {
+          window.location.href = `./projects.html?category=${category}`;
+        }
+      });
+    });
+  }
+
+  // Initial initialization
+  initGallery();
+
+  // Floor reflections: a flipped clone of each card's image, appended as a
+  // sibling inside .desktop-gallery. Built with plain DOM cloning rather
+  // than -webkit-box-reflect because that property silently fails to paint
+  // on elements living inside ScrollTrigger's pinned/GPU-composited hero.
+  function initReflections() {
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    if (!desktopGallery) return;
+    const sourcePanels = desktopGallery.querySelectorAll('.hero-panel');
+    const reflections = [];
+    sourcePanels.forEach((panel) => {
+      const img = panel.querySelector('.hero-panel__img');
+      if (!img) return;
+      const reflection = document.createElement('div');
+      reflection.className = 'card-reflection';
+      reflection.dataset.index = panel.dataset.index;
+      // Match the source panel's resting angle/depth so the floor plane
+      // reads as a continuation of the card standing on it.
+      const rest = REST[panel.dataset.index];
+      gsap.set(reflection, { rotationY: rest.rotationY, z: rest.z, transformOrigin: '50% 0%' });
+      const imgClone = document.createElement('img');
+      imgClone.src = img.currentSrc || img.src;
+      imgClone.alt = '';
+      // transform-origin is intentionally left at its default (center): the
+      // element's own box already sits flush at the seam (top:0 inside a
+      // container positioned at the panel's bottom edge), and a center-origin
+      // flip keeps that box in place while mirroring its content - a
+      // top-origin flip looks equivalent on paper but Chrome fails to paint
+      // an absolutely positioned <img> at all when scaleY(-1) is combined
+      // with a non-center transform-origin.
+      imgClone.style.cssText = 'position:absolute; top:0; left:0; width:100%; object-fit:cover; transform:scaleY(-1); filter:brightness(0.65) contrast(1.02);';
+      reflection.appendChild(imgClone);
+      desktopGallery.appendChild(reflection);
+      reflections.push({ panel, imgClone });
+    });
+
+    function syncHeights() {
+      reflections.forEach(({ panel, imgClone }) => {
+        imgClone.style.height = panel.offsetHeight + 'px';
+      });
+    }
+    // A synchronous measurement here can race the layout that resolves the
+    // desktop/mobile matchMedia CSS (offsetHeight reads back 0 if it lands
+    // before the browser has settled on the real viewport width), so defer
+    // the first read a frame and re-sync once the entrance animation - which
+    // is when the hero is actually first shown - has finished.
+    requestAnimationFrame(syncHeights);
+    window.addEventListener('resize', syncHeights);
+    return syncHeights;
+  }
+  const syncReflectionHeights = initReflections();
+
+  // Panel thickness (glass slab pass): real back/side faces, not a
+  // stacked-layer illusion. Static geometry only, set once on init - no
+  // interaction with hover/click state, and no future motion should ever
+  // target the slab or its faces individually (only the .hero-panel wrapper
+  // itself).
+  function initPanelFaces() {
+    document.querySelectorAll('.hero-panel__slab').forEach((slab) => {
+      const face = slab.querySelector('.hero-panel__face');
+      const back = document.createElement('div');
+      back.className = 'hero-panel__back';
+      const sideLeft = document.createElement('div');
+      sideLeft.className = 'hero-panel__side hero-panel__side--left';
+      const sideRight = document.createElement('div');
+      sideRight.className = 'hero-panel__side hero-panel__side--right';
+      [back, sideLeft, sideRight].forEach((el) => slab.insertBefore(el, face));
+    });
+  }
+  initPanelFaces();
+
+  document.querySelectorAll('.hero-panel').forEach((p) => {
+    // .src (not getAttribute) resolves the relative path to an absolute URL -
+    // this value lands in a CSS custom property consumed by an external
+    // stylesheet, and browsers resolve url() inside custom properties
+    // relative to the stylesheet using them, not the document, so a raw
+    // relative path here would 404 under css/.
+    const src = p.querySelector('.hero-panel__img').src;
+    p.querySelector('.hero-panel__slab').style.setProperty('--panel-img', `url("${src}")`);
+  });
+
+  /* -----------------------------------------
+     4b. HOVER HIT-ZONES (desktop only)
+     ----------------------------------------- */
+  // WHY THIS EXISTS: measured with a 5x5 elementFromPoint grid test across
+  // each panel's own bounding box, cards #0 and #6 (the most steeply
+  // rotated, +-35deg) scored 0/20 hits - their actual painted trapezoid is
+  // much narrower than their flat CSS box once foreshortened, so milder
+  // neighbors (which keep nearly their full flat width) visually cover and
+  // steal 100% of their hit area. This isn't a hit-testing engine bug to
+  // work around - it's the real geometry of a rotated card in a shared
+  // perspective. Fix: decouple "what looks like it's touching" (the visual,
+  // overlapping, rotated .hero-panel elements) from "what receives the
+  // hover" (flat, non-rotated, NON-overlapping zones tiling the full 0-100%
+  // width by the midpoints between each card's center). Every card gets an
+  // uncontested slice regardless of how its rotated neighbor paints over it.
+  const ZONES = {
+    '0': { left: '0%', width: '12.97%' },
+    '1': { left: '12.97%', width: '15.39%' },
+    '3': { left: '28.36%', width: '14.42%' },
+    '2': { left: '42.78%', width: '14.72%' },
+    '4': { left: '57.5%', width: '14.73%' },
+    '5': { left: '72.23%', width: '13.94%' },
+    '6': { left: '86.17%', width: '13.83%' },
+  };
+  // Mirrors each panel's own CSS height so a zone never reaches above its
+  // card into the headline area.
+  const ZONE_HEIGHT = {
+    '0': 'clamp(368px, 42vh, 460px)',
+    '1': 'clamp(294px, 33.6vh, 368px)',
+    '3': 'clamp(375px, 42.84vh, 469px)',
+    '2': 'clamp(287px, 32.76vh, 359px)',
+    '4': 'clamp(375px, 42.84vh, 469px)',
+    '5': 'clamp(294px, 33.6vh, 368px)',
+    '6': 'clamp(368px, 42vh, 460px)',
+  };
+
+  function initHoverZones() {
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    const zones = {};
+    if (!desktopGallery) return zones;
+    panels.forEach((panel) => {
+      const idx = panel.dataset.index;
+      const cfg = ZONES[idx];
+      const zone = document.createElement('div');
+      zone.className = 'hover-zone';
+      zone.dataset.index = idx;
+      // translateZ(200px) matters more than the z-index here: .desktop-gallery
+      // shares one preserve-3d scene with every card, and inside that scene
+      // hit-testing resolves by actual 3D depth, not just CSS stacking order -
+      // a card's own translateZ (max +30 at rest) would otherwise still win
+      // against this flat zone's implicit z:0 regardless of z-index.
+      zone.style.cssText = `position:absolute; bottom:0; left:${cfg.left}; width:${cfg.width}; height:${ZONE_HEIGHT[idx]}; z-index:60; cursor:pointer; transform:translateZ(200px);`;
+      desktopGallery.appendChild(zone);
+      zones[idx] = zone;
+    });
+    return zones;
+  }
+  const hoverZones = initHoverZones();
+
+  const HOVER_INTENT_DELAY = 80;
+  let hoverIntentTimer = null;
+
+  function getReflectionFor(panel) {
+    return document.querySelector(`.card-reflection[data-index="${panel.dataset.index}"]`);
+  }
+
+  // Brightness targets .hero-panel__face, not the .hero-panel wrapper: CSS
+  // `filter` forces the element it's on to be pre-composited as a flat 2D
+  // bitmap before the filter applies, which silently flattens any nested
+  // preserve-3d content - confirmed directly (toggling filter:none on the
+  // wrapper made the panel's 3D side faces render immediately). Rotation/
+  // position/scale tweens still target the wrapper only, unchanged.
+  function getFaceFor(panel) {
+    return panel.querySelector('.hero-panel__face');
+  }
+
+  function killPanelTweens() {
+    panels.forEach((panel) => {
+      gsap.killTweensOf(panel);
+      const refl = getReflectionFor(panel);
+      if (refl) gsap.killTweensOf(refl);
+      const face = getFaceFor(panel);
+      if (face) gsap.killTweensOf(face);
+    });
+  }
+
+  // Single exclusive state machine (BUG A fix): activeIndex is the only
+  // source of truth, and every call re-derives ALL 7 panels' classes from
+  // it in one pass - so no sequence of clicks/hovers, however fast, can
+  // ever leave more than one panel marked active. Both hover and click
+  // funnel through activatePanel/deactivateAll so the two input paths can
+  // never fight each other or desync.
+  function activatePanel(panel) {
+    const targetIdx = panel.dataset.index;
+    if (activeIndex === targetIdx) return;
+    killPanelTweens();
+    activeIndex = targetIdx;
+    panels.forEach((p) => {
+      const pIdx = p.dataset.index;
+      const refl = getReflectionFor(p);
+      const isActive = pIdx === targetIdx;
+      p.classList.toggle('is-active', isActive);
+      const face = getFaceFor(p);
+      if (isActive) {
+        p.style.zIndex = 50;
+        const rest = REST[pIdx];
+        // Straightens PARTIALLY (half its resting angle), never to 0deg -
+        // keeps the chain feeling instead of popping frontal (BUG A/B spec).
+        gsap.to(p, { rotationY: rest.rotationY / 2, y: -45, z: 120, scale: 1.05, duration: 0.7, ease: 'back.out(1.2)' });
+        if (face) gsap.to(face, { filter: 'brightness(1.08)', duration: 0.7, ease: 'back.out(1.2)' });
+        if (refl) gsap.to(refl, { rotationY: rest.rotationY / 2, z: 120, scale: 1.1, opacity: 0.5, duration: 0.7, ease: 'back.out(1.2)' });
+      } else {
+        const dir = p.offsetLeft < panel.offsetLeft ? -1 : 1;
+        gsap.to(p, { x: dir * 20, scale: 0.97, duration: 0.6, ease: 'power2.inOut' });
+        if (face) gsap.to(face, { filter: 'brightness(0.6)', duration: 0.6, ease: 'power2.inOut' });
+      }
+    });
+  }
+
+  function deactivateAll() {
+    if (activeIndex === null) return;
+    killPanelTweens();
+    activeIndex = null;
+    panels.forEach((panel) => {
+      panel.classList.remove('is-active');
+      panel.style.zIndex = Z_INDEX_BASE[panel.dataset.index];
+      const rest = REST[panel.dataset.index];
+      gsap.to(panel, { rotationY: rest.rotationY, z: rest.z, y: 0, x: 0, scale: 1, duration: 0.8, ease: 'power3.inOut' });
+      const face = getFaceFor(panel);
+      if (face) gsap.to(face, { filter: REST_FILTER, duration: 0.8, ease: 'power3.inOut' });
+      const refl = getReflectionFor(panel);
+      if (refl) gsap.to(refl, { rotationY: rest.rotationY, z: rest.z, scale: 1, opacity: 0.85, duration: 0.8, ease: 'power3.inOut' });
+    });
+  }
+
+  panels.forEach((panel) => {
+    const idx = panel.dataset.index;
+    const zone = hoverZones[idx];
+    if (!zone) return;
+    // Click: first click on an inactive panel raises it (mirrors hover-intent
+    // for touch, where there is no hover); clicking the already-active panel
+    // navigates - tap-to-preview, tap-again-to-open.
+    zone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeIndex === idx) {
+        const category = panel.getAttribute('data-category');
+        if (category) window.location.href = `./projects.html?category=${category}`;
+      } else {
+        activatePanel(panel);
+      }
+    });
+    zone.addEventListener('mouseenter', () => {
+      if (isMobileQuery.matches) return;
+      clearTimeout(hoverIntentTimer);
+      hoverIntentTimer = setTimeout(() => activatePanel(panel), HOVER_INTENT_DELAY);
+    });
+    zone.addEventListener('mouseleave', () => {
+      if (isMobileQuery.matches) return;
+      clearTimeout(hoverIntentTimer);
+      deactivateAll();
+    });
+  });
+
+  // Click anywhere outside the gallery returns the raised panel to rest.
+  document.addEventListener('click', (e) => {
+    if (isMobileQuery.matches) return;
+    const desktopGallery = document.querySelector('.desktop-gallery');
+    if (desktopGallery && !desktopGallery.contains(e.target)) {
+      deactivateAll();
+    }
+  });
+
+
+
+  /* -----------------------------------------
      5. DESKTOP-ONLY PINNED SCROLL & FORCED ASCENT
      ----------------------------------------- */
-  // Shared with handleForcedScroll/blockInput/setPhase below (moved here from
-  // the deleted card-gallery block, which used to be its sole declaration site).
-  const isMobileQuery = window.matchMedia('(max-width: 768px)');
+  // isMobileQuery declared above (section 4, now the sectors-section gallery).
   let heroExitTL = null;
-  let touchStartY = 0;
 
   const mm = gsap.matchMedia();
 
@@ -291,7 +609,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const PIN_VH_FRACTION = 0.35;
 
   mm.add("(min-width: 769px)", () => {
-    // 1. Initialize Pinned Timeline & ScrollTrigger
+    // 1. Initialize Scrubbed Exit Timeline (no pin). Was pin:true - but a
+    // GSAP pin reserves a "runway" in the page's actual layout equal to the
+    // pin's scroll distance (PIN_VH_FRACTION * innerHeight, ~300px+), which
+    // sits as blank space between the hero and whatever comes right after
+    // it in the DOM. That was invisible before (the old #build-stage sat
+    // right there and was reached via the forced-descent auto-scroll, never
+    // manually scrolled through). Now .gc-marquee sits right after the hero
+    // and must be visible in the FIRST viewport with zero scroll (brief
+    // requirement) - a pin-runway of any size would push it below the fold.
+    // Dropping pin:true (keeping scrub:true) removes the runway entirely:
+    // the hero still fades/rises on the first bit of scroll, it just isn't
+    // held fixed in place while doing it.
     heroExitTL = gsap.timeline({
       defaults: { duration: 1, ease: "power2.inOut" },
       scrollTrigger: {
@@ -299,77 +628,50 @@ document.addEventListener("DOMContentLoaded", () => {
         start: "top top",
         end: () => `+=${window.innerHeight * PIN_VH_FRACTION}`,
         scrub: true,
-        pin: true,
-        anticipatePin: 1,
         invalidateOnRefresh: true,
-        // No accordion state to reset (hero panel gallery has no hover state).
-        onUpdate: (self) => {
-        }
       }
     });
 
     // PROOF HERO retarget (was: staggered .hero-panel/.card-reflection exit).
-    // Placeholder exit until commit 2's real motion design: the two shell
-    // blocks fade + slide up together, same simple pattern the old
-    // .hero-text-block exit already used - no new choreography.
+    // .hero-proof-block was removed (replaced by .gc-marquee below the hero) -
+    // only the photo/headline block animates on exit now.
     heroExitTL.to(".hero-proof-photo", {
       y: () => -window.innerHeight * 0.9,
       opacity: 0,
       duration: 1,
     }, 0);
-    heroExitTL.to(".hero-proof-block", {
-      y: () => -window.innerHeight * 0.9,
-      opacity: 0,
-      duration: 1,
-    }, 0.1);
+
+    // 2. Forced-descent ENTRY TRIGGER. OLD mechanism: a global wheel/
+    // touchmove/keydown hijack on the very first downward gesture while
+    // window.scrollY <= 5 (i.e. at the very top of the page, since
+    // #build-stage used to sit immediately below the hero). Now #build-stage
+    // sits after the marquee + numbers section, so "top of page" no longer
+    // identifies the right moment - scrollY<=5 would fire the descent while
+    // the user is still reading the marquee/numbers, jumping straight past
+    // them. NEW mechanism: a plain ScrollTrigger on #build-stage itself,
+    // firing onEnter (its top hits viewport top, scrolling down) - i.e. the
+    // instant the user's normal scroll actually reaches the section that
+    // needs the forced descent. Same one-shot guard (transitionDone/
+    // isTweening), same runForcedScrollTween() body/duration/easing/lock
+    // untouched - only the "when do we call it" trigger changed. onEnterBack
+    // is intentionally not bound, so scrolling back up into the section from
+    // below never retriggers it.
+    const forcedDescentTrigger = ScrollTrigger.create({
+      trigger: "#build-stage",
+      start: "top top",
+      onEnter: () => {
+        if (transitionDone || isTweening) return;
+        runForcedScrollTween();
+      }
+    });
 
     return () => {
       if (heroExitTL) heroExitTL.kill();
       heroExitTL = null;
-      gsap.set([".hero-proof-photo", ".hero-proof-block"], { y: 0, opacity: 1 });
+      gsap.set(".hero-proof-photo", { y: 0, opacity: 1 });
+      forcedDescentTrigger.kill();
     };
   });
-
-  // Track touchstart for mobile/touch devices
-  window.addEventListener('touchstart', (e) => {
-    if (isMobileQuery.matches) return;
-    if (transitionDone) return;
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-
-  // Hijack first scroll downward
-  function handleForcedScroll(e) {
-    if (isMobileQuery.matches) return;
-    if (transitionDone || isTweening) return;
-
-    // Only trigger if we are at the very top (scrollY <= 5)
-    const isAtTop = window.scrollY <= 5;
-    if (!isAtTop) return;
-
-    let isDownward = false;
-
-    if (e.type === 'wheel') {
-      if (e.deltaY > 0) {
-        isDownward = true;
-      }
-    } else if (e.type === 'touchmove') {
-      const touchEndY = e.touches[0].clientY;
-      if (touchEndY < touchStartY) { // Finger moved up -> scrolls page down
-        isDownward = true;
-      }
-    } else if (e.type === 'keydown') {
-      const keys = ['ArrowDown', 'PageDown', ' ', 'Spacebar'];
-      if (keys.includes(e.key)) {
-        isDownward = true;
-      }
-    }
-
-    if (isDownward) {
-      e.preventDefault();
-      e.stopPropagation();
-      runForcedScrollTween();
-    }
-  }
 
   // Pin lengths as fractions of the viewport height. The build-stage pin
   // now spans BOTH sequences: scroll-0 plays over the first fraction, then
@@ -401,8 +703,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Safety net: if lenis.scrollTo's onComplete never fires for any reason
     // (backgrounded tab throttling the rAF loop, a resize invalidating the
     // target mid-tween, etc.) isTweening/isStageLocked would stay true
-    // forever - and blockInput/handleForcedScroll block wheel/touch/keydown
-    // on those flags, so the page would only be scrollable by dragging the
+    // forever - and blockInput blocks wheel/touch/keydown on those flags,
+    // so the page would only be scrollable by dragging the
     // native scrollbar thumb. Force an unlock no later than 6s so a stuck
     // tween can never hijack scroll permanently.
     clearTimeout(unlockTimeout);
@@ -590,12 +892,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     console.log("Stage building complete. Page unlocked.");
   }
-
-  // Capture phase: these fire BEFORE Lenis's own wheel/touch handlers,
-  // so stopPropagation() genuinely blocks Lenis from scrolling too.
-  window.addEventListener('wheel', handleForcedScroll, { passive: false, capture: true });
-  window.addEventListener('touchmove', handleForcedScroll, { passive: false, capture: true });
-  window.addEventListener('keydown', handleForcedScroll, { passive: false, capture: true });
 
   // Hard input block during the forced descent AND the build sequence.
   function blockInput(e) {

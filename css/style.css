@@ -72,6 +72,11 @@
   --z-content: 5;
   --z-header: 100;
   --z-loader: 200;
+
+  /* Client marquee strip height - shared with .hero-section's height calc
+     (below) so hero + marquee always sum to exactly 100vh: the marquee is
+     guaranteed visible without scrolling in the first viewport. */
+  --gc-marquee-h: clamp(48px, 6vw, 64px);
 }
 
 /* Reset & Base */
@@ -486,8 +491,8 @@ html.lenis, html.lenis body {
    5. SINGLE VIEWPORT HERO CONTAINER
    ----------------------------------------- */
 .hero-section {
-  height: 100vh;
-  min-height: 650px;
+  height: calc(100vh - var(--gc-marquee-h));
+  min-height: 590px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -508,16 +513,101 @@ html.lenis, html.lenis body {
   background-image: radial-gradient(ellipse 60% 45% at 50% 55%, rgba(120, 40, 70, 0.14) 0%, rgba(30, 20, 26, 0.06) 45%, transparent 75%);
 }
 
-/* PROOF HERO shell (commit 1: empty placeholder blocks; commit 2 fills
-   these in). heroExitTL (js/main.js) animates these two elements directly -
-   keep the class names stable. */
+/* PROOF HERO. heroExitTL (js/main.js) animates .hero-proof-photo directly on
+   the pre-descent ascent - keep the class name stable. Fills the full
+   hero-section height (the old .hero-proof-block plaque was removed - see
+   .gc-marquee near the end of this file, which replaces it below the hero). */
 .hero-proof-photo {
-  flex: 0 0 72%;
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
   background: var(--color-bg-dark-alt);
+  /* .hero-proof-headline is the only in-flow child (img/gradient are
+     absolute, so they don't push it) - flex column + flex-end is what
+     actually pins it to the calm lower third instead of the top. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
-.hero-proof-block {
-  flex: 0 0 28%;
-  background: #0D0D0D;
+.hero-proof-photo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-proof-photo-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6,6,8,0.82) 0%, rgba(6,6,8,0.25) 45%, transparent 72%);
+  pointer-events: none;
+}
+.hero-proof-headline {
+  position: relative;
+  z-index: 2;
+  padding: 0 1.5rem 1.9rem;
+}
+.hero-proof-title {
+  font-family: var(--font-serif-cards);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 7.5vw, 3.4rem);
+  line-height: 1.14;
+  color: var(--color-white);
+  margin: 0;
+}
+.hero-proof-title-accent {
+  color: var(--color-magenta-deep);
+}
+.hero-proof-subline {
+  margin: 0.7rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-gray-text);
+}
+
+.hero-micro-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 44px;
+  margin-top: 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+  transition: color 0.25s ease, opacity 0.25s ease;
+  cursor: pointer;
+}
+.hero-micro-cta:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* .hero-proof-block (proof numbers/clients/link) removed - replaced by the
+   .gc-marquee section below the hero. See css block near end of file. */
+
+@media (min-width: 769px) {
+  .hero-proof-headline {
+    max-width: 720px;
+    padding: 0 4vw 3.5vw;
+  }
+  .hero-proof-title {
+    font-size: clamp(3rem, 5.2vw, 4.6rem);
+  }
+  .hero-proof-subline {
+    font-size: 0.78rem;
+  }
+  .hero-micro-cta {
+    font-size: 0.8rem;
+    margin-top: 1.1rem;
+  }
 }
 
 .hero-title-top {
@@ -735,6 +825,399 @@ body.menu-open .mobile-menu-toggle span {
    8. HERO BOTTOM BLOCK (~10vh - Scroll Hint)
    ----------------------------------------- */
 
+
+/* -----------------------------------------
+   6b. SECTORS SECTION — relocated 7-card gallery (was the hero above the
+   fold; commit 2 moves it here as a normal in-page section, no pin).
+   ----------------------------------------- */
+.sectors-section {
+  padding: clamp(4rem, 10vh, 7rem) 4rem;
+  background: var(--color-bg-dark);
+  position: relative;
+  z-index: var(--z-content);
+}
+.sectors-section .section-title-wrapper {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.sectors-section .section-tag {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gray-text);
+  margin-bottom: 1rem;
+}
+.sectors-section .details-title {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+/* -----------------------------------------
+   6. INTERACTIVE GALLERY (~58vh - Edge-to-Edge)
+   ----------------------------------------- */
+/* -----------------------------------------
+   6. INTERACTIVE GALLERY (~58vh - Edge-to-Edge)
+   ----------------------------------------- */
+.gallery-container {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  /* Relocated from the old hero (was pushed down to clear the headline/CTA
+     that lived above it there) - now a normal in-page section, so this is
+     just breathing room above/below the card chain. */
+  margin-top: 2rem;
+  margin-bottom: 3rem; /* dark floor zone below the cards for the reflection/light pool */
+  z-index: 2;
+}
+
+/* Desktop Gallery styling */
+.desktop-gallery {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  min-height: 340px;
+  margin: 0;
+  z-index: 150;
+  overflow: visible;
+}
+
+/* Stage: perspective lives here, separate from .desktop-gallery's own layout
+   rule above (same element, two classes) so the 3D-scene concern and the
+   block-layout concern don't live in one selector. */
+.hero-stage {
+  perspective: 1500px;
+  perspective-origin: 50% 30%;
+  transform-style: preserve-3d;
+}
+
+/* Soft floor light pool under the group - the boards read as standing on a
+   dark reflective floor rather than floating, without a literal floor asset. */
+.desktop-gallery::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -30px;
+  transform: translateX(-50%);
+  width: 68%;
+  height: 160px;
+  background: radial-gradient(ellipse at center, rgba(230, 35, 106, 0.10) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 72%);
+  filter: blur(28px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Panel wrapper: rotation/height driven by --ry/--h set inline per panel in
+   index.html. transform-origin/preserve-3d/rotateY are the mandated literal
+   rule; cursor/box-shadow/filter/transition are supplementary (existing,
+   pre-approved behavior - clickable cursor, grounding shadow, resting
+   brightness - carried over, not part of the thickness technique itself). */
+.hero-panel {
+  position: absolute;
+  bottom: 0;
+  height: calc(var(--panel-base-h) * var(--h));
+  transform-origin: bottom center;
+  transform: rotateY(var(--ry));
+  transform-style: preserve-3d;
+  --panel-base-h: clamp(368px, 42vh, 460px);
+  cursor: pointer;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  /* No filter here (moved to .hero-panel__face) - discovered via this pass's
+     truth test: `filter` on an element forces its whole subtree to be
+     pre-composited as a flat 2D bitmap before the filter is applied, which
+     silently flattened every nested preserve-3d child (face/back/sides),
+     making the new real side faces render nothing regardless of correct
+     transform math. Confirmed by directly toggling filter:none and watching
+     the side face appear. Rotation/position/scale tweens still target this
+     wrapper only (per spec); only the brightness filter itself now targets
+     .hero-panel__face, a 3D-content-free leaf where filter is safe. */
+}
+
+/* Thickness (glass slab pass): the side faces are the SAME photo, blurred/
+   darkened/desaturated - a glass mass showing its own material continuing
+   around the corner, not a separate colored strip (a "tail"). --panel-img
+   is set per panel by initPanelSlabImage in main.js. */
+.hero-panel__slab {
+  /* position/width/height are required infrastructure, not part of the
+     mandated value list - without them the slab (position:static, no
+     explicit size) collapses to near-zero height: transform-style:
+     preserve-3d makes it a containing block for its position:absolute
+     children regardless of its own static position, so an undersized slab
+     drags every inset:0 child (face/back/sides) down to the same collapsed
+     size. This was the actual root cause of the panels rendering as a
+     sliver of near-black - not a loader or headless-timing issue as it
+     first appeared to be. */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  --depth: 18px;
+  --radius: 12px;
+  transform-style: preserve-3d;
+}
+.hero-panel__face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transform: translateZ(calc(var(--depth) / 2));
+  backface-visibility: hidden;
+  /* filter lives here, not on .hero-panel (see comment on .hero-panel above) -
+     CSS filter on an ancestor of preserve-3d content flattens it to 2D,
+     which would hide the side faces entirely regardless of correct geometry. */
+  filter: brightness(0.82);
+}
+.hero-panel__back {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: #101010;
+  transform: translateZ(calc(var(--depth) / -2)) rotateY(180deg);
+  backface-visibility: hidden;
+}
+.hero-panel__side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--depth);
+  overflow: hidden;
+  backface-visibility: hidden;
+  background-image: var(--panel-img);
+  background-size: auto 100%;
+  filter: blur(7px) brightness(.5) saturate(1.15);
+}
+.hero-panel__side--left {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-90deg) translateZ(calc(var(--depth) / 2 * -1));
+  border-radius: var(--radius) 0 0 var(--radius);
+  background-position: left center;
+}
+.hero-panel__side--right {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(90deg) translateZ(calc(var(--depth) / 2 * -1));
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background-position: right center;
+}
+.hero-panel__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Brightness lives solely on .hero-panel__face (see REST_FILTER in
+     main.js) so raising a panel to brightness(1.08) actually brightens the
+     visible photo instead of fighting a second, separately-baked dark
+     filter here. */
+  filter: contrast(1.02);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-panel.is-active .hero-panel__img {
+  transform: scale(1.04);
+}
+
+/* Bottom darkening so the image melts into its floor contact point instead
+   of cutting off with a hard edge - moved to ::before (::after is now the
+   mandated glass corner-glow below, both live on .hero-panel__face). */
+.hero-panel__face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 65%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Glass light on the corner - the glow where front meets side, inside the
+   face itself, not a separate stripe. Only one side's inset highlight reads
+   as prominent depending on the panel's own rotation sign - correct/desired. */
+.hero-panel__face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow:
+    inset 2px 0 3px -1px rgba(255, 255, 255, .35),
+    inset -2px 0 3px -1px rgba(255, 255, 255, .35),
+    inset 0 0 0 1px rgba(255, 255, 255, .06);
+  pointer-events: none;
+}
+
+/* Always-visible sector label - replaces the old .card-title-block/
+   .card-title/.card-title-line trio with a single element per the mandated
+   markup; the ::after recreates the same magenta underline accent. */
+.hero-panel__label {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.6rem;
+  right: 1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: var(--font-sans);
+  font-size: clamp(0.6rem, 1.25vh, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--color-white);
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  line-height: 1.3;
+  pointer-events: none;
+}
+.hero-panel__label::after {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background-color: var(--color-magenta-deep);
+  margin-top: 0.3rem;
+}
+
+.hero-panel.is-active {
+  box-shadow: 0 45px 90px rgba(0, 0, 0, 0.9), 0 0 50px rgba(176, 30, 86, 0.35);
+}
+
+/* Floor reflection: a JS-cloned copy of each panel's image, flipped and
+   masked to a soft fade (see initReflections in main.js). Not built with
+   -webkit-box-reflect - that property silently no-ops on elements inside
+   ScrollTrigger's pinned/GPU-composited hero, so the duplicated-element
+   technique is used instead, per the fallback called out in spec. Resting
+   rotateY/z are applied by GSAP (see REST table in main.js), matching each
+   reflection to its source panel so the floor plane continues its card. */
+.desktop-gallery .card-reflection {
+  position: absolute;
+  top: 100%;
+  height: 150px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: blur(3px);
+  transform-style: preserve-3d;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.12) 55%, transparent 100%);
+}
+/* Contact shadow: a soft dark ellipse at the seam, independent of the
+   reflection's own opacity/mask - what actually reads as "standing on the
+   floor" rather than floating above it. */
+.desktop-gallery .card-reflection::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 8%;
+  width: 84%;
+  height: 20px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 45%, transparent 75%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+.desktop-gallery .card-reflection[data-index="0"] { left: -6.81%; width: 22.86%; }
+.desktop-gallery .card-reflection[data-index="1"] { left: 13.23%; width: 16.19%; }
+.desktop-gallery .card-reflection[data-index="3"] { left: 27.11%; width: 16.56%; }
+.desktop-gallery .card-reflection[data-index="2"] { left: 42.41%; width: 15.53%; }
+.desktop-gallery .card-reflection[data-index="4"] { left: 56.94%; width: 15.77%; }
+.desktop-gallery .card-reflection[data-index="5"] { left: 71.42%; width: 16.41%; }
+.desktop-gallery .card-reflection[data-index="6"] { left: 85.87%; width: 13.68%; }
+
+/* Seven physical panels standing on one shared floor line (bottom: 0), read
+   as a folding-screen / paravent chain - rotation direction ALTERNATES card
+   to card (-,+,-,+,-,+,-, see REST table in main.js, mandatory), translateZ
+   stays shallow because the depth read comes from the rotation angles, not
+   from pushing cards far back. Resting rotateY/z are applied by GSAP on load
+   so the activate/hover choreography can tween the exact same properties
+   back to these values. Only layout (position/size/stacking) lives here.
+   Left/width form an edge-to-edge hinged chain (0.6% kiss-overlap per seam,
+   just enough to avoid a black sliver where two rotated edges meet - not a
+   stacked/overlapping deck). Height follows the symmetric tall-short wave:
+   tall,short,tall,short(center),tall,short,tall - only tops vary, all
+   bottoms share the floor baseline. */
+.hero-panel[data-index="0"] {
+  left: -6.81%;
+  width: 22.86%;
+  z-index: 8;
+  order: 0; /* visually inert under position:absolute - kept because
+    runForcedScrollTween in main.js reads getComputedStyle(panel).order to
+    sequence the descent stagger; do not remove. */
+}
+.hero-panel[data-index="1"] {
+  left: 13.23%;
+  width: 16.19%;
+  z-index: 16;
+  order: 1;
+}
+.hero-panel[data-index="3"] {
+  left: 27.11%;
+  width: 16.56%;
+  z-index: 12;
+  order: 2;
+}
+.hero-panel[data-index="2"] {
+  left: 42.41%;
+  width: 15.53%;
+  z-index: 20;
+  order: 3;
+}
+.hero-panel[data-index="4"] {
+  left: 56.94%;
+  width: 15.77%;
+  z-index: 16;
+  order: 4;
+}
+.hero-panel[data-index="5"] {
+  left: 71.42%;
+  width: 16.41%;
+  z-index: 12;
+  order: 5;
+}
+.hero-panel[data-index="6"] {
+  left: 85.97%;
+  width: 13.68%;
+  z-index: 8;
+  order: 6;
+}
+
+/* Active-state label strip: confined to the bottom strip only, at well under
+   25% opacity, so activating a panel (brightness(1.08)) actually reads the
+   photo instead of hiding it under a veil. */
+.hero-panel .card-hover-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.24) 0%, transparent 100%);
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1.4rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-panel.is-active .card-hover-overlay {
+  opacity: 1;
+}
+
+.hero-panel .discover-text {
+  font-family: var(--font-sans);
+  font-size: clamp(0.7rem, 1.5vh, 0.8rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--color-white);
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--color-magenta-glow);
+  padding-bottom: 0.3rem;
+}
+
+/* Default Mobile Gallery (hidden on desktop) */
+.mobile-gallery {
+  display: none;
+}
 
 /* -----------------------------------------
    9. DETAILS SECTION (BELOW THE FOLD)
@@ -1784,12 +2267,6 @@ body.menu-open .mobile-menu-toggle span {
     padding: 0 2rem;
   }
   
-  .hero-section {
-    height: auto;
-    min-height: 100vh;
-    padding-bottom: 2rem;
-  }
-
   .hero-subtitle {
     font-size: 0.85rem;
     line-height: 1.6;
@@ -1900,6 +2377,90 @@ body.menu-open .mobile-menu-toggle span {
     line-height: 1.3;
   }
 
+  .sectors-section {
+    padding: 3rem 1.5rem;
+  }
+
+  .desktop-gallery {
+    display: none !important;
+  }
+
+  .mobile-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 90%;
+    margin: 1.5rem auto 3rem auto;
+    padding-bottom: 2rem;
+  }
+
+  .mobile-card-row {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .mobile-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #0f0f13;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-card-full {
+    width: 100%;
+    height: 160px;
+  }
+
+  .mobile-card-half {
+    flex: 1;
+    width: 50%;
+    height: 120px;
+  }
+
+  .mobile-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.6);
+  }
+
+  .mobile-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .mobile-card-content {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .mobile-card-title {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-white);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-card-arrow {
+    color: var(--color-magenta-glow);
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1;
+  }
 }
 
 /* -----------------------------------------
@@ -2319,4 +2880,76 @@ body.menu-open .mobile-menu-toggle span {
   line-height: 1.65;
   color: var(--color-gray-text);
   margin-top: 1rem;
+}
+
+/* -----------------------------------------
+   CLIENT MARQUEE (.gc-marquee-*) - self-contained block.
+   Thin black strip directly under the hero, listing real client/reference
+   names, scrolling continuously left -> right in a seamless loop. Two
+   identical .gc-marquee-group tracks sit side by side inside a flex track
+   sized to content (width:max-content); animating the track's transform
+   from translateX(-50%) to translateX(0) shifts exactly one group's width
+   per loop, so the wrap is invisible. Pure CSS animation - GPU-composited
+   (transform-only), no GSAP/JS involved.
+   ----------------------------------------- */
+.gc-marquee {
+  position: relative;
+  width: 100%;
+  height: var(--gc-marquee-h);
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  z-index: var(--z-content);
+}
+.gc-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: gc-marquee-scroll 26s linear infinite;
+  will-change: transform;
+}
+.gc-marquee-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 2.5rem;
+}
+.gc-marquee-item {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  white-space: nowrap;
+}
+.gc-marquee-sep {
+  margin: 0 1.6rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.9rem;
+}
+@keyframes gc-marquee-scroll {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-marquee-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+@media (max-width: 768px) {
+  :root {
+    --gc-marquee-h: 44px;
+  }
+  .gc-marquee-item {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+  }
+  .gc-marquee-sep {
+    margin: 0 1.1rem;
+  }
+  .gc-marquee-track {
+    animation-duration: 20s;
+  }
 }
