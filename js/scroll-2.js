@@ -63,12 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
   else frames[0].addEventListener("load", () => drawFrame(0), { once: true });
 
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  // Fade-IN only: copy ramps up and stays at full opacity through the LAST
+  // frame of scroll-2 (no fade-out), so the copy is complete on the final
+  // frame.
   const COPY_START = 0.62;
   const COPY_END = 0.86;
-  // Elegant scrubbed dissolve in the last sliver, finishing at the
-  // scroll-2 -> scroll-3 hand-off (copy survives to the last scroll-2 frame).
-  const COPY_OUT_START = 0.9;
-  const COPY_OUT_END = 1.0;
   const leftCopyEls = [
     layer.querySelector(".reveal-copy-2-left .reveal-eyebrow"),
     layer.querySelector(".reveal-copy-2-left .reveal-headline"),
@@ -92,12 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(slot, { x, yPercent: -50 });
 
     const c = clamp01((progress - COPY_START) / (COPY_END - COPY_START));
-    const out = clamp01((progress - COPY_OUT_START) / (COPY_OUT_END - COPY_OUT_START));
     copyEls.forEach((el, idx) => {
       const staggered = clamp01(c - idx * 0.07);
-      const staggeredOut = clamp01(out - idx * 0.07);
-      const op = staggered * (1 - staggeredOut);
-      gsap.set(el, { opacity: op, x: 36 * (1 - staggered) - 24 * staggeredOut });
+      gsap.set(el, { opacity: staggered, x: 36 * (1 - staggered) });
     });
   }
 

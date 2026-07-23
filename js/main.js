@@ -718,28 +718,48 @@ document.addEventListener("DOMContentLoaded", () => {
       if (revealLayer) gsap.set(revealLayer, { autoAlpha: phase === 1 ? 1 : 0 });
       if (revealLayer2) gsap.set(revealLayer2, { autoAlpha: phase === 2 ? 1 : 0 });
       if (revealLayer3) gsap.set(revealLayer3, { autoAlpha: phase === 3 ? 1 : 0 });
+      // The scroll-0 copy lives in .build-stage-content (not in the canvas
+      // layer), so it must be hidden here too: it belongs ONLY to phase 0 and
+      // must not linger over scroll-1/2/3. Toggle VISIBILITY only (opacity is
+      // owned by the scrubbed scroll0TL fade-in, so touching opacity here would
+      // fight it). In phase 0 the timeline drives the fade; outside phase 0 the
+      // copy is force-hidden regardless of its leftover opacity value.
+      scroll0Copy.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((el) => {
+          el.style.visibility = phase === 0 ? "" : "hidden";
+        });
+      });
     }
 
+    // Hysteresis at the phase boundaries: an auto-scroll stops EXACTLY on a
+    // boundary (e.g. HANDOFF2). We want the phase that just finished to stay
+    // shown there (its copy full, its last frame on screen) until the NEXT
+    // auto-scroll actually advances past the boundary. Without this, the
+    // ease-out settle can nudge progress a hair past the boundary and flip to
+    // the next phase, hiding the just-finished copy. So a phase only ADVANCES
+    // once progress is a touch beyond the boundary.
+    const PH_EPS = 0.004;
+
     function renderPinned(progress) {
-      if (progress <= HANDOFF) {
+      if (progress <= HANDOFF + PH_EPS) {
         setPhase(0);
-        const p0 = HANDOFF > 0 ? progress / HANDOFF : 0;
+        const p0 = HANDOFF > 0 ? clamp01(progress / HANDOFF) : 0;
         drawSeqFrame(Math.round(p0 * (SEQ_FRAME_COUNT - 1)));
         if (typeof window.__scroll1Render === "function") window.__scroll1Render(0);
         if (typeof window.__scroll2Render === "function") window.__scroll2Render(0);
         if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
-      } else if (progress <= HANDOFF2) {
+      } else if (progress <= HANDOFF2 + PH_EPS) {
         setPhase(1);
         drawSeqFrame(SEQ_FRAME_COUNT - 1);
-        const p1 = (progress - HANDOFF) / (HANDOFF2 - HANDOFF);
+        const p1 = clamp01((progress - HANDOFF) / (HANDOFF2 - HANDOFF));
         if (typeof window.__scroll1Render === "function") window.__scroll1Render(p1);
         if (typeof window.__scroll2Render === "function") window.__scroll2Render(0);
         if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
-      } else if (progress <= HANDOFF3) {
+      } else if (progress <= HANDOFF3 + PH_EPS) {
         setPhase(2);
         drawSeqFrame(SEQ_FRAME_COUNT - 1);
         if (typeof window.__scroll1Render === "function") window.__scroll1Render(1);
-        const p2 = (progress - HANDOFF2) / (HANDOFF3 - HANDOFF2);
+        const p2 = clamp01((progress - HANDOFF2) / (HANDOFF3 - HANDOFF2));
         if (typeof window.__scroll2Render === "function") window.__scroll2Render(p2);
         if (typeof window.__scroll3Render === "function") window.__scroll3Render(0);
       } else {
@@ -747,10 +767,12 @@ document.addEventListener("DOMContentLoaded", () => {
         drawSeqFrame(SEQ_FRAME_COUNT - 1);
         if (typeof window.__scroll1Render === "function") window.__scroll1Render(1);
         if (typeof window.__scroll2Render === "function") window.__scroll2Render(1);
-        const p3 = (progress - HANDOFF3) / (1 - HANDOFF3);
+        const p3 = clamp01((progress - HANDOFF3) / (1 - HANDOFF3));
         if (typeof window.__scroll3Render === "function") window.__scroll3Render(p3);
       }
     }
+    // Local clamp (renderPinned runs before the per-phase clamp01 defs).
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
     // Timeline authored on a 10-unit scale: positions map directly to
     // fractions of the pin's scroll range (scrub does the time mapping).
@@ -782,6 +804,103 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // ========================================================================
+    // AUTO-SCROLL PER PHASE
+    // Inside the pinned build-stage the four sequences (scroll-0..3) each play
+    // as a SELF-RUNNING clip: a single scroll gesture in a direction (any
+    // strength) triggers a fixed-duration programmatic scroll that carries the
+    // page from the current phase boundary to the adjacent one, replaying that
+    // sequence first->last (down) or last->first (up). The animation then stops
+    // at the boundary and waits for the next gesture. The GSAP scrub still
+    // drives the frame rendering off the (now programmatically driven) scroll
+    // position, so the frames animate smoothly during the auto-scroll.
+    // ========================================================================
+    const AUTO_DUR = 1.4;              // fixed seconds per phase
+    const BOUNDARY_EPS = 6;            // px tolerance when testing "at boundary"
+    let autoScrolling = false;
+
+    // The 5 phase boundaries in absolute page-Y, in order. Rebuilt from the
+    // ScrollTrigger meta (kept fresh by onRefresh).
+    function boundaries() {
+      const m = window.__scroll0Meta;
+      if (!m) return null;
+      return [m.start, m.handoffY, m.handoff2Y, m.handoff3Y, m.endY];
+    }
+
+    // Index of the boundary at (or nearest below) the current scroll position.
+    function currentBoundaryIndex(y, bs) {
+      let idx = 0;
+      for (let i = 0; i < bs.length; i++) {
+        if (y >= bs[i] - BOUNDARY_EPS) idx = i;
+      }
+      return idx;
+    }
+
+    function runAutoScroll(dir) {
+      const bs = boundaries();
+      if (!bs) return;
+      const y = lenis.scroll ?? window.scrollY;
+      // Only hijack while we are inside the pinned range.
+      if (y < bs[0] - BOUNDARY_EPS || y > bs[bs.length - 1] + BOUNDARY_EPS) return;
+
+      const cur = currentBoundaryIndex(y, bs);
+      let target = null;
+      if (dir > 0 && cur < bs.length - 1) target = bs[cur + 1];
+      else if (dir < 0 && cur > 0) target = bs[cur - 1];
+      if (target == null) return; // at an end, let the page scroll normally
+
+      autoScrolling = true;
+      lenis.scrollTo(target, {
+        duration: AUTO_DUR,
+        easing: (t) => 1 - Math.pow(1 - t, 3), // easeOutCubic
+        lock: true, // ignore user scroll during the tween
+        onComplete: () => { autoScrolling = false; },
+      });
+    }
+
+    // Intercept the first gesture of each phase. Capture phase so we win over
+    // Lenis's own handler; preventDefault stops the native/scrub scroll so the
+    // motion is fully programmatic.
+    function onWheel(e) {
+      const bs = boundaries();
+      if (!bs) return;
+      const y = lenis.scroll ?? window.scrollY;
+      if (y < bs[0] - BOUNDARY_EPS || y > bs[bs.length - 1] + BOUNDARY_EPS) return;
+      e.preventDefault();
+      if (autoScrolling) return;
+      runAutoScroll(Math.sign(e.deltaY) || 1);
+    }
+
+    let touchStartY = null;
+    function onTouchStart(e) { touchStartY = e.touches[0].clientY; }
+    function onTouchMove(e) {
+      const bs = boundaries();
+      if (!bs) return;
+      const y = lenis.scroll ?? window.scrollY;
+      if (y < bs[0] - BOUNDARY_EPS || y > bs[bs.length - 1] + BOUNDARY_EPS) return;
+      e.preventDefault();
+      if (autoScrolling || touchStartY == null) return;
+      const dy = touchStartY - e.touches[0].clientY;
+      if (Math.abs(dy) < 4) return;
+      runAutoScroll(Math.sign(dy));
+      touchStartY = null;
+    }
+    function onKey(e) {
+      const bs = boundaries();
+      if (!bs) return;
+      const y = lenis.scroll ?? window.scrollY;
+      if (y < bs[0] - BOUNDARY_EPS || y > bs[bs.length - 1] + BOUNDARY_EPS) return;
+      const downKeys = ["ArrowDown", "PageDown", " ", "Spacebar"];
+      const upKeys = ["ArrowUp", "PageUp"];
+      if (downKeys.includes(e.key)) { e.preventDefault(); if (!autoScrolling) runAutoScroll(1); }
+      else if (upKeys.includes(e.key)) { e.preventDefault(); if (!autoScrolling) runAutoScroll(-1); }
+    }
+
+    window.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
+    window.addEventListener("keydown", onKey, { capture: true });
+
     // The scroll-0 copy lives ENTIRELY inside the scroll-0 phase of the
     // combined pin. On the 10-unit scale that phase is [0 .. S0], where
     // S0 = HANDOFF*10 (~0.89 with the current fractions). The fade-in is
@@ -801,16 +920,10 @@ document.addEventListener("DOMContentLoaded", () => {
       stagger: S0 * 0.05
     }, S0 * 0.08);
 
-    // Copy out: an elegant scrubbed dissolve in the LAST sliver of scroll-0
-    // (last ~12%), finishing exactly at the hand-off. The copy therefore
-    // survives to the final scroll-0 frame and only fades as scroll-1 begins
-    // to take over - no early disappearance, no hard cut.
-    scroll0TL.to(scroll0Copy, {
-      opacity: 0,
-      y: -24,
-      duration: S0 * 0.12,
-      stagger: S0 * 0.02
-    }, S0 * 0.88);
+    // No copy-out: the scroll-0 copy stays at full opacity through the LAST
+    // frame of scroll-0 (it is hidden in one frame at the hand-off by
+    // setPhase() swapping the whole canvas layer). This guarantees the copy is
+    // complete on the final scroll-0 frame, matching scroll-1/2/3.
 
     // Pad the timeline to the full 10-unit scale so the scrub maps the
     // authored positions 1:1 onto the whole (extended) pin range.

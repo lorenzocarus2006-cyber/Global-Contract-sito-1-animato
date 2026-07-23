@@ -2493,7 +2493,10 @@ body.menu-open .mobile-menu-toggle span {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: linear-gradient(to bottom, transparent 0%, var(--color-bg-dark) 25vh, var(--color-bg-dark) 100%);
+    /* Pure black to match the frames' own background (rgb 0,0,0) exactly, so
+       there is no visible seam/tint around the canvas. The top fades in from
+       transparent so the section above blends into it. */
+    background: linear-gradient(to bottom, transparent 0%, #000000 25vh, #000000 100%);
     z-index: var(--z-content);
   }
 
@@ -2554,14 +2557,23 @@ body.menu-open .mobile-menu-toggle span {
     will-change: transform, opacity;
   }
 
+  /* Absolute overlay with the SAME geometry as scroll-1's .reveal-object-slot
+     (left:50% width:50% of the content box, full height, centred). Taken out
+     of the flex flow so the copy on the left is unaffected. This makes
+     scroll-0's canvas occupy the exact same on-screen box as scroll-1's first
+     frame, so the model does not jump in position or scale at the 0->1
+     hand-off. Vertical centring comes from align-items:center over the full
+     height (no translateY, so main.js's gsap.set(x:0) can't wipe it). */
   .build-canvas-container {
-    flex: 0 0 50%;
-    max-height: 70vh;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
+    overflow: visible;
     opacity: 0;
     transform: translateX(80px);
     will-change: transform, opacity;
