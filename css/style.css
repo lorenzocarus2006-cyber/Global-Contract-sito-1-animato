@@ -269,23 +269,24 @@ html.lenis, html.lenis body {
   width: 90%;
   max-width: 800px;
   z-index: var(--z-header);
-  background: rgba(12, 12, 16, 0.75); /* Darker, softer, premium architectural translucent surface */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline border */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid transparent;
   border-radius: 100px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); /* Understated soft shadow */
-  padding: 0.45rem 1.4rem; /* Roomier to frame the bolder nav typography */
-  /* Specific transitions to prevent GSAP opacity animation conflicts */
-  transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s, box-shadow 0.4s, border-color 0.4s;
+  box-shadow: none;
+  padding: 0.45rem 1.4rem;
+  transition: background-color 300ms ease, border-color 300ms ease, backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease, box-shadow 300ms ease, top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0; /* Initially hidden for the preloader animation */
 }
 
 .main-header.scrolled {
   top: 1rem;
   background-color: rgba(12, 12, 16, 0.85);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .main-header .header-container {
@@ -420,7 +421,7 @@ html.lenis, html.lenis body {
   align-items: center !important;
   justify-content: center !important;
   padding: 0 1.4rem !important; /* Symmetrical padding */
-  border-radius: 100px !important;
+  border-radius: 3px !important;
   font-size: 0.8rem !important; /* Stays clearly stronger than the nav labels */
   font-weight: 600 !important;
   letter-spacing: 0.08em !important; /* Open luxury tracking */
@@ -702,7 +703,8 @@ html.lenis, html.lenis body {
               clip-path 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.mobile-menu-overlay.active {
+.mobile-menu-overlay.active,
+.mobile-menu-overlay.open {
   opacity: 1;
   visibility: visible;
   clip-path: inset(0 0 0% 0);
@@ -743,13 +745,16 @@ html.lenis, html.lenis body {
   border-bottom: none;
 }
 
-.mobile-menu-overlay.active .mobile-nav-item {
+.mobile-menu-overlay.active .mobile-nav-item,
+.mobile-menu-overlay.open .mobile-nav-item {
   opacity: 0.92;
   transform: translateY(0);
 }
 
 .mobile-menu-overlay.active .mobile-nav-item:active,
-.mobile-menu-overlay.active .mobile-nav-item:hover {
+.mobile-menu-overlay.active .mobile-nav-item:hover,
+.mobile-menu-overlay.open .mobile-nav-item:active,
+.mobile-menu-overlay.open .mobile-nav-item:hover {
   opacity: 1;
   color: var(--color-white);
 }
@@ -768,34 +773,44 @@ html.lenis, html.lenis body {
 }
 
 .mobile-menu-overlay.active .mobile-nav-item:active::after,
-.mobile-menu-overlay.active .mobile-nav-item:hover::after {
+.mobile-menu-overlay.active .mobile-nav-item:hover::after,
+.mobile-menu-overlay.open .mobile-nav-item:active::after,
+.mobile-menu-overlay.open .mobile-nav-item:hover::after {
   width: 60%;
   left: 20%;
 }
 
 .mobile-cta-item {
-  margin-top: 2.2rem;
+  margin-top: 2rem;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 1rem 2.2rem;
+  padding: 0 1.5rem;
   border: none;
   border-bottom: none;
-  border-radius: 100px;
+  border-radius: 3px !important;
   color: var(--color-white);
   background-color: var(--color-magenta-deep);
   box-shadow: 0 8px 24px rgba(176, 30, 86, 0.3);
   transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
 }
 
 .mobile-cta-item::after {
-  display: none; /* Solid pill, no underline sweep */
+  display: none; /* Solid button, no underline sweep */
 }
 
 .mobile-menu-overlay.active .mobile-cta-item:active,
-.mobile-menu-overlay.active .mobile-cta-item:hover {
+.mobile-menu-overlay.active .mobile-cta-item:hover,
+.mobile-menu-overlay.open .mobile-cta-item:active,
+.mobile-menu-overlay.open .mobile-cta-item:hover {
   color: var(--color-white) !important;
   background-color: var(--color-magenta-glow);
   box-shadow: 0 10px 30px rgba(230, 35, 106, 0.45);

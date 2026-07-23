@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   lenis.on('scroll', (e) => {
     const header = document.querySelector('.main-header');
     if (header) {
-      if (e.scroll > 50) {
+      if (e.scroll > 80) {
         header.classList.add('scrolled');
       } else {
         header.classList.remove('scrolled');
@@ -933,30 +933,74 @@ document.addEventListener("DOMContentLoaded", () => {
     scroll0TL.to({}, { duration: 0.1 }, 9.9);
   }
 
-  // Mobile menu toggle logic
+  // Mobile menu toggle & overlay logic (no lenis.stop(), 3-way close, capture-phase event protection)
   const mobileToggle = document.querySelector('.mobile-menu-toggle');
   const mobileOverlay = document.querySelector('.mobile-menu-overlay');
   const mobileLinks = document.querySelectorAll('.mobile-nav-item');
 
   if (mobileToggle && mobileOverlay) {
-    mobileToggle.addEventListener('click', () => {
-      const isActive = mobileToggle.classList.toggle('active');
-      mobileOverlay.classList.toggle('active');
-      document.body.classList.toggle('menu-open', isActive);
-      
-      if (isActive) {
-        lenis.stop(); // Stop scroll when menu is open
+    const openMenu = () => {
+      mobileToggle.classList.add('active');
+      mobileOverlay.classList.add('active');
+      mobileOverlay.classList.add('open');
+      document.body.classList.add('menu-open');
+    };
+
+    const closeMenu = () => {
+      mobileToggle.classList.remove('active');
+      mobileOverlay.classList.remove('active');
+      mobileOverlay.classList.remove('open');
+      document.body.classList.remove('menu-open');
+    };
+
+    mobileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = mobileOverlay.classList.contains('open') || mobileOverlay.classList.contains('active');
+      if (isOpen) {
+        closeMenu();
       } else {
-        lenis.start();
+        openMenu();
       }
     });
 
+    // Close when tapping overlay backdrop outside nav menu
+    mobileOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileOverlay) {
+        closeMenu();
+      }
+    });
+
+    // Close when pressing Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && (mobileOverlay.classList.contains('open') || mobileOverlay.classList.contains('active'))) {
+        closeMenu();
+      }
+    });
+
+    // Stop propagation of wheel & touchmove in capture phase when menu is open so Lenis cannot intercept
+    const blockMenuScroll = (e) => {
+      if (document.body.classList.contains('menu-open')) {
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener('wheel', blockMenuScroll, { capture: true, passive: false });
+    window.addEventListener('touchmove', blockMenuScroll, { capture: true, passive: false });
+
+    // Menu links close menu first and scroll via Lenis with lock: true (never lenis.stop())
     mobileLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        mobileToggle.classList.remove('active');
-        mobileOverlay.classList.remove('active');
-        document.body.classList.remove('menu-open');
-        lenis.start();
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        closeMenu();
+        if (href && href.startsWith('#') && href.length > 1) {
+          e.preventDefault();
+          const targetEl = document.querySelector(href);
+          if (targetEl && window.__lenis) {
+            window.__lenis.scrollTo(targetEl, {
+              lock: true,
+              onComplete: () => {}
+            });
+          }
+        }
       });
     });
   }
@@ -1525,6 +1569,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     layout(0);
+  }
+
+  // Refresh ScrollTrigger after section reordering and layout setup
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.refresh();
   }
 
 });
