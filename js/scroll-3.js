@@ -116,8 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   mm.add("(max-width: 768px)", () => {
-    drawFrame(0);
-    copyEls.forEach((el) => gsap.set(el, { opacity: 1, x: 0 }));
-    return () => {};
+    // Mobile scrubs like desktop (main.js pin drives via __scroll3Render).
+    // scroll-3 has no left/right travel, so nothing to suppress.
+    window.__scroll3Render = render;
+    render(0);
+
+    return () => {
+      if (window.__scroll3Render === render) delete window.__scroll3Render;
+      copyEls.forEach((el) => gsap.set(el, { clearProps: "opacity,transform" }));
+    };
   });
 });

@@ -84,10 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return content.offsetWidth * 0.25;
   }
 
+  const isMobile = window.matchMedia("(max-width: 768px)");
+
   function render(progress) {
     drawFrame(Math.round(progress * (FRAME_COUNT - 1)));
 
-    const x = travelDistance() * progress;
+    // On mobile the card stays CENTRED (no left/right travel); only the frames
+    // scrub. On desktop it travels right toward the page centre.
+    const x = isMobile.matches ? 0 : travelDistance() * progress;
     gsap.set(slot, { x, yPercent: -50 });
 
     const c = clamp01((progress - COPY_START) / (COPY_END - COPY_START));
@@ -135,9 +139,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   mm.add("(max-width: 768px)", () => {
-    drawFrame(0);
-    gsap.set(slot, { clearProps: "transform" });
-    copyEls.forEach((el) => gsap.set(el, { opacity: 1, x: 0 }));
-    return () => {};
+    // Mobile scrubs like desktop (main.js pin drives via __scroll2Render);
+    // render() keeps the card centred (x:0) on mobile.
+    window.__scroll2Render = render;
+    render(0);
+
+    return () => {
+      if (window.__scroll2Render === render) delete window.__scroll2Render;
+      gsap.set(slot, { clearProps: "transform" });
+      copyEls.forEach((el) => gsap.set(el, { clearProps: "opacity,transform" }));
+    };
   });
 });

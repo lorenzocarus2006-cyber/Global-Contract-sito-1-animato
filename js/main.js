@@ -706,9 +706,8 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(scroll0Copy, { opacity: 0, x: 0, y: 36 });
 
     function setPhase(phase) {
-      // Mobile shows all blocks statically (scroll-1.js/scroll-2.js mobile
-      // branches); the visibility swap is a desktop-only mechanic.
-      if (isMobileQuery.matches) return;
+      // Runs on both desktop and mobile now: the layer visibility swap is what
+      // makes each sequence appear in turn as the pin scrubs.
       if (activePhase === phase) return;
       activePhase = phase;
       // Instant swap: each sequence's frame 0 sits pixel-aligned over the
@@ -774,6 +773,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Local clamp (renderPinned runs before the per-phase clamp01 defs).
     function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
+    // The pinned, scrubbed build-stage runs on BOTH desktop and mobile: the
+    // four sequences scrub through their frames exactly the same way. The only
+    // difference is the model's left/right travel, which is suppressed on
+    // mobile (the card stays centred) — handled in scroll-1/2.js render().
     // Timeline authored on a 10-unit scale: positions map directly to
     // fractions of the pin's scroll range (scrub does the time mapping).
     const scroll0TL = gsap.timeline({
@@ -1359,6 +1362,169 @@ document.addEventListener("DOMContentLoaded", () => {
         closeModal();
       }
     });
+  }
+
+
+
+  // ============================================================
+  // MOBILE/TABLET PROJECT COVER FLOW (GSAP-driven, infinite loop)
+  // ============================================================
+  initMobileCarousel();
+
+  function initMobileCarousel() {
+    const carousel = document.getElementById('mCarousel');
+    const track = document.getElementById('mCarouselTrack');
+    const prevBtn = document.getElementById('mCarouselPrev');
+    const nextBtn = document.getElementById('mCarouselNext');
+    if (!carousel || !track || !prevBtn || !nextBtn || typeof gsap === 'undefined') return;
+
+    const viewport = carousel.querySelector('.m-carousel-viewport');
+    const slides = Array.from(track.children);
+    const count = slides.length;
+    if (count === 0) return;
+
+    // --- Cover-flow geometry (tuned to the reference composition) ---
+    const SIDE_SHIFT = 64;     // % of card width the neighbors slide outward
+    const SIDE_SCALE = 0.8;    // neighbors scaled to ~80%
+    const SIDE_ROT = 3;        // deg of inward Y-rotation (subtle, near-flat)
+    const SIDE_OPACITY = 0.28; // neighbors barely suggested
+    const SIDE_DEPTH = -140;   // px pushed back in Z (behind the focal card)
+
+    // `pos` is a continuous float: 0 = slide 0 centred, 1 = slide 1 centred.
+    // Fractional values (drag) are fully supported, so motion is physical.
+    let pos = 0;
+    const state = { pos: 0 };
+    let tween = null;
+
+    // Shortest signed circular distance between a slide index and pos.
+    function offsetFor(i, p) {
+      let d = i - p;
+      d = ((d % count) + count) % count; // 0..count
+      if (d > count / 2) d -= count;      // -count/2 .. count/2
+      return d;
+    }
+
+    // Lay out every slide from the current continuous position.
+    function layout(p) {
+      slides.forEach((slide, i) => {
+        const d = offsetFor(i, p);
+        const ad = Math.abs(d);
+        let x, scale, rotY, opacity, z, zIndex, focal;
+
+        if (ad <= 1) {
+          // Interpolate between focal (d=0) and neighbor (|d|=1) states.
+          const t = ad; // 0..1
+          const dir = d === 0 ? 0 : Math.sign(d);
+          x = dir * SIDE_SHIFT * t;
+          scale = 1 + (SIDE_SCALE - 1) * t;
+          rotY = -dir * SIDE_ROT * t;      // rotate inward toward centre
+          opacity = 1 + (SIDE_OPACITY - 1) * t;
+          z = SIDE_DEPTH * t;
+          zIndex = Math.round(100 - t * 60);
+          focal = t < 0.5;
+        } else {
+          // Beyond the two neighbors: parked further out and hidden.
+          const dir = Math.sign(d);
+          x = dir * (SIDE_SHIFT + 40);
+          scale = SIDE_SCALE - 0.06;
+          rotY = -dir * SIDE_ROT;
+          opacity = 0;
+          z = SIDE_DEPTH - 60;
+          zIndex = 0;
+          focal = false;
+        }
+
+        gsap.set(slide, {
+          xPercent: x,
+          scale: scale,
+          rotationY: rotY,
+          z: z,
+          opacity: opacity,
+          zIndex: zIndex,
+          pointerEvents: ad < 0.5 ? 'auto' : 'none',
+        });
+        slide.classList.toggle('is-focal', focal);
+      });
+    }
+
+    // Animate to a target integer position with a physical, no-fade motion.
+    function animateTo(target) {
+      if (tween) tween.kill();
+      tween = gsap.to(state, {
+        pos: target,
+        duration: 0.85,
+        ease: 'power3.inOut',
+        onUpdate: () => layout(state.pos),
+        onComplete: () => {
+          // Normalise into [0,count) without a visual jump so the loop
+          // never accumulates large numbers.
+          state.pos = ((target % count) + count) % count;
+          pos = state.pos;
+          layout(state.pos);
+        },
+      });
+      pos = target;
+    }
+
+    function next() { animateTo(Math.round(state.pos) + 1); }
+    function prev() { animateTo(Math.round(state.pos) - 1); }
+
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+
+    // --- Drag / swipe: 1:1 physical follow, then settle to nearest ---
+    let dragStartX = 0;
+    let dragStartPos = 0;
+    let dragging = false;
+    let moved = false;
+
+    function onStart(x) {
+      if (tween) tween.kill();
+      dragging = true;
+      moved = false;
+      dragStartX = x;
+      dragStartPos = state.pos;
+    }
+    function onMove(x) {
+      if (!dragging) return;
+      const dx = x - dragStartX;
+      if (Math.abs(dx) > 6) moved = true;
+      // Dragging left (negative dx) advances position forward.
+      state.pos = dragStartPos - dx / viewport.offsetWidth;
+      layout(state.pos);
+    }
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      const mo15 = state.pos - dragStartPos;
+      let target;
+      if (mo15 > 0.12) target = Math.ceil(dragStartPos + 0.001);
+      else if (mo15 < -0.12) target = Math.floor(dragStartPos - 0.001);
+      else target = Math.round(dragStartPos);
+      animateTo(target);
+    }
+
+    viewport.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+    viewport.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
+    viewport.addEventListener('touchend', onEnd);
+
+    // Tap a side card to bring it to centre; block link nav after a swipe.
+    slides.forEach((slide, i) => {
+      slide.addEventListener('click', (e) => {
+        if (moved) {
+          e.preventDefault();
+          moved = false;
+          return;
+        }
+        const d = offsetFor(i, state.pos);
+        if (Math.abs(d) >= 0.5) {
+          e.preventDefault();
+          animateTo(Math.round(state.pos) + Math.round(d));
+        }
+      });
+    });
+
+    layout(0);
   }
 
 });

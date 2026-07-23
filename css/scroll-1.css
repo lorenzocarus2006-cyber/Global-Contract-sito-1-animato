@@ -117,28 +117,38 @@
 }
 
 @media (max-width: 768px) {
-  /* Static stacked block below the scroll-0 content inside .build-stage
-     (the mobile build-stage content is a flex column). */
+  /* Mobile now scrubs like desktop: the reveal-layer is an ABSOLUTE overlay
+     covering the pinned build-stage (not a stacked static block), so the
+     layer-swap shows one sequence at a time. The card is centred (no L/R
+     travel — JS forces x:0). */
   .reveal-layer {
+    position: absolute;
+    inset: 0;
     display: flex;
-    width: 100%;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-bg-dark);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden; /* shown via gsap autoAlpha at hand-off */
+    z-index: 2;
   }
 
   .reveal-layer-content {
     width: 100%;
-    padding: 3rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 2.5rem;
+    height: 100%;
+    padding: 0 1.5rem;
+    position: relative;
   }
 
   .reveal-object-slot {
-    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 92%;
+    margin-left: -46%;      /* centre horizontally; JS sets x:0 + yPercent:-50 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .reveal-canvas-container {
@@ -154,7 +164,12 @@
     height: auto;
   }
 
+  /* Copy pinned near the bottom, over the frames (like the card copy) */
   .reveal-copy {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 8%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

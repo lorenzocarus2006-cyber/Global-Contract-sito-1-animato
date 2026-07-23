@@ -28,10 +28,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./css/style.css?v=black-3">
-  <link rel="stylesheet" href="./css/scroll-1.css?v=merged-pin-1">
-  <link rel="stylesheet" href="./css/scroll-2.css?v=1">
-  <link rel="stylesheet" href="./css/scroll-3.css?v=1">
+  <link rel="stylesheet" href="./css/style.css?v=mobile-cta-2">
+  <link rel="stylesheet" href="./css/scroll-1.css?v=mobile-anim-1">
+  <link rel="stylesheet" href="./css/scroll-2.css?v=mobile-anim-1">
+  <link rel="stylesheet" href="./css/scroll-3.css?v=mobile-anim-1">
 
   <!-- Preload Critical Sector Images -->
   <link rel="preload" href="./assets/bar_parisi.jpg" as="image">
@@ -457,14 +457,93 @@
     <!-- S5. PROJECTS SECTION -->
     <section class="details-section" id="dettagli">
       
-      <!-- Mobile/Tablet Fallback & Section Intro -->
+      <!-- Mobile/Tablet Fallback & Section Intro: single-card project carousel -->
       <div class="details-container details-mobile-fallback">
         <span class="section-tag">REALIZZAZIONI</span>
         <h2 class="details-title">Locali veri, che oggi lavorano.</h2>
-        <p class="details-text">
-          Una selezione dei progetti consegnati in Sicilia.
-        </p>
-        <a href="./projects.html" class="btn btn-outline">SCOPRI TUTTI I PROGETTI</a>
+
+        <!-- Single-card project carousel -->
+        <div class="m-carousel" id="mCarousel">
+          <div class="m-carousel-viewport">
+            <div class="m-carousel-track" id="mCarouselTrack">
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/restaurant.png" alt="Ristorante Mare Blu" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">01</span>
+                  <h3 class="m-slide-title">Mare Blu</h3>
+                  <span class="m-slide-category">RISTORANTE</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/bar_parisi.jpg" alt="Caffè del Duomo" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">02</span>
+                  <h3 class="m-slide-title">Caffè del Duomo</h3>
+                  <span class="m-slide-category">BAR</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/gelato.png" alt="Gelateria Dolcevita" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">03</span>
+                  <h3 class="m-slide-title">Dolcevita</h3>
+                  <span class="m-slide-category">GELATERIA</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/hotel.png" alt="Hotel Artemisia" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">04</span>
+                  <h3 class="m-slide-title">Hotel Artemisia</h3>
+                  <span class="m-slide-category">HOTEL</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/bakery.png" alt="Dolci Tentazioni" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">05</span>
+                  <h3 class="m-slide-title">Dolci Tentazioni</h3>
+                  <span class="m-slide-category">PASTICCERIA</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+              <a href="./projects.html" class="m-slide">
+                <img src="./assets/retail.png" alt="Enoteca Vinum" class="m-slide-img" loading="lazy">
+                <div class="m-slide-overlay"></div>
+                <div class="m-slide-content">
+                  <span class="m-slide-index">06</span>
+                  <h3 class="m-slide-title">Enoteca Vinum</h3>
+                  <span class="m-slide-category">ENOTECA</span>
+                  <span class="m-slide-rule"></span>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="m-carousel-nav">
+            <button class="m-carousel-btn" id="mCarouselPrev" aria-label="Progetto precedente">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="m-carousel-btn" id="mCarouselNext" aria-label="Progetto successivo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <a href="./projects.html" class="btn btn-outline details-mobile-discover">SCOPRI TUTTI I PROGETTI</a>
       </div>
 
       <!-- Desktop PC Floating Interactive Gallery -->
@@ -661,7 +740,63 @@
           Raccontaci la tua attività e le tue esigenze: ti ricontatteremo entro 24 ore con una proposta su misura.
         </p>
 
-        <!-- Sector Selector + Primary CTA -->
+        <!-- ============================================================
+             MOBILE-ONLY CTA (matches the reference): a single outline button
+             + a 4-feature trust row. Shown only <=768px; the desktop funnel
+             box below is hidden on mobile via CSS.
+             ============================================================ -->
+        <div class="consult-mobile">
+          <button type="button" class="consult-mobile-btn" id="consultOpenMobile">
+            <span>RICHIEDI UNA CONSULENZA GRATUITA</span>
+            <span class="consult-mobile-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </button>
+
+          <div class="consult-mobile-divider" aria-hidden="true"></div>
+
+          <div class="consult-mobile-features">
+            <div class="consult-mobile-feature">
+              <div class="consult-mobile-feature-icon">
+                <img src="./logo.png" alt="" aria-hidden="true">
+              </div>
+              <span class="consult-mobile-feature-label">ESPERIENZA<br>30+ ANNI</span>
+            </div>
+            <div class="consult-mobile-feature">
+              <div class="consult-mobile-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="3" y="4" width="18" height="14" rx="1.5" stroke-linejoin="round"/>
+                  <path d="M7 8h6M7 11h4" stroke-linecap="round"/>
+                  <path d="M15.5 12.5l3 3-1.5 3.5-3.5 1.5 1.5-3.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="consult-mobile-feature-label">PROGETTAZIONE<br>SU MISURA</span>
+            </div>
+            <div class="consult-mobile-feature">
+              <div class="consult-mobile-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="3" y="3" width="8" height="18" rx="1" stroke-linejoin="round"/>
+                  <rect x="13" y="3" width="8" height="18" rx="1" stroke-linejoin="round"/>
+                  <path d="M6 7h2M6 10h2M16 7h2M16 13v4" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="consult-mobile-feature-label">FORNITURE<br>PROFESSIONALI</span>
+            </div>
+            <div class="consult-mobile-feature">
+              <div class="consult-mobile-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <circle cx="8" cy="8" r="4"/>
+                  <path d="M11 11l8 8M16 16l2-2M18 18l2-2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="consult-mobile-feature-label">CHIAVI<br>IN MANO</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sector Selector + Primary CTA (desktop funnel) -->
         <div class="gc-cta-box">
           <div class="gc-cta-select-wrap">
             <label for="gcSectorSelect" class="gc-cta-select-label">Che tipo di locale vuoi aprire?</label>
@@ -757,14 +892,6 @@
       </div>
     </footer>
 
-  </div>
-
-  <!-- Mobile Sticky Micro-CTA (bottom bar on mobile) -->
-  <div class="gc-sticky-cta" id="gcStickyCta" aria-hidden="true">
-    <a href="#contatti" class="gc-sticky-cta-btn" id="gcStickyCtaBtn">
-      <span>Richiedi una consulenza gratuita</span>
-      <span class="gc-sticky-cta-arrow">→</span>
-    </a>
   </div>
 
   <!-- Project Details Modal Overlay -->
@@ -909,10 +1036,10 @@
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
   
   <!-- Custom JS -->
-  <script src="./js/main.js?v=copy-2"></script>
-  <script src="./js/scroll-1.js?v=copy-1"></script>
-  <script src="./js/scroll-2.js?v=copy-1"></script>
-  <script src="./js/scroll-3.js?v=black-1"></script>
+  <script src="./js/main.js?v=mobile-anim-1"></script>
+  <script src="./js/scroll-1.js?v=mobile-anim-1"></script>
+  <script src="./js/scroll-2.js?v=mobile-anim-1"></script>
+  <script src="./js/scroll-3.js?v=mobile-anim-1"></script>
 
   <!-- Consultation Form Modal Controller -->
   <script>
@@ -954,6 +1081,9 @@
       };
 
       openBtn.addEventListener('click', open);
+      // Mobile CTA button opens the same modal.
+      const openBtnMobile = document.getElementById('consultOpenMobile');
+      if (openBtnMobile) openBtnMobile.addEventListener('click', open);
       closeBtn.addEventListener('click', close);
       backdrop.addEventListener('click', close);
 
