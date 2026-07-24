@@ -4,33 +4,30 @@ Branch: `main` (local only, zero pushes, uncommitted working tree).
 
 ## Task Summary
 1. **Header Non-sticky Positioning**: Converted `.main-header` to `position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%)` in `css/style.css`. Disabled JS scroll listener in `js/main.js` that toggles `.scrolled` state with `// STEP 4: sticky header removed — do not delete the code`. Header scrolls out of view naturally with the hero.
-2. **Hero Viewport Height Fix (STEP 6 / Fix 1)**: Fixed `.hero-section` height to `height: 100vh; height: 100svh; margin-bottom: 0;`. Hero photo fills 100svh completely on mobile viewports so no part of the credibility band peeks through before scrolling.
-3. **Card Separation (STEP 6 / Fix 2)**: Removed negative vertical overlap (`margin-bottom: -18px` deleted). Set `margin-bottom: 28px` on mobile, `36px` on desktop (last card keeps `margin-bottom: 0`). Removed z-index stacking. Strengthened shadows (`box-shadow: 0 20px 44px rgba(26,26,26,0.13)`). Updated Card 2 placeholder background to `#262320` with `box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06)`. Preserved horizontal alternating offsets (`margin-right: 4%/8%` on Cards 1 & 3, `margin-left: 4%/8%` on Card 2).
-4. **Dark Closing Block Order & Real Logo (STEP 6 / Fix 3)**:
-   - Replaced SVG rhombus with real brand logo image (`./logo.png`, `width: 72px; height: auto; display: block; margin: 0 auto; alt="Global Contract"`).
-   - Top padding above logo: `56px` mobile / `72px` desktop.
-   - Vertical hairline directly below logo: `width: 1px; height: 36px; background: rgba(255,255,255,0.22); margin: 18px auto 20px;`.
-   - Tagline immediately below hairline: `"METODO. CONTINUITÀ. PRESENZA REALE."`.
-   - Marquee moved to the LAST position inside the block (below tagline) with `margin-top: 44px; margin-bottom: 0; z-index: 2;`.
-5. **Seamless Dark Block Background (STEP 6 / Fix 4)**: Set `.gc-trust-dark-block` background to `var(--color-bg-dark)` (matching `.sectors-section` below, `#060608`). Updated marquee edge fade mask to fade to `var(--color-bg-dark)`. Removed borders, outlines, and margins at the boundary.
-6. **Barely Perceptible Texture (STEP 6 / Fix 5)**: Reduced `.gc-trust-dark-texture` opacity to `rgba(255,255,255,0.015)` with radial offset `circle at 15% -20%` and 90px ring spacing, removing radial symmetry around the logo.
+2. **Hero Viewport Height & Curved Top Edge (STEP 7 / Fix 4)**: Set `.gc-trust-block` `border-top-left-radius: 50% 56px; border-top-right-radius: 50% 56px; margin-top: -56px; z-index: 2;` to create a smooth curved top transition over the hero photo. Hero photo remains full height (`100svh`) behind it; zero light band is visible at scroll position 0.
+3. **Card 2 Italy SVG Map (STEP 7 / Fix 2)**: Rendered an inline SVG map of Italy (`.gc-trust-italy-map`, `viewBox="0 0 300 360"`) inside Card 2's image slot with mainland boot outline, Sardinia, Sicily, and a scattered constellation of ~55 `#B01E56` city circles (denser in Sicily/South).
+4. **Card Hierarchy & Optical Alignment (STEP 7 / Fix 3)**:
+   - Switched `.gc-trust-num-label-flex` to `align-items: flex-start`. Added `padding-top: 0.42em; max-width: 12ch` on `.gc-trust-card-label` to optically align its first line with the top of the numeral digits.
+   - Left-aligned caption (`margin-top: 16px; max-width: 26ch`) with numeral inside `.gc-trust-card-right-group`.
+   - Updated Card 3 label to two lines: `LOCALI PROGETTATI<br>E COSTRUITI`.
+5. **Marquee Position, Scale & Mask Fix (STEP 7 / Fix 1)**:
+   - Placed marquee IMMEDIATELY below tagline with `margin-top: 36px`. Section closes right after marquee with dark block bottom padding (`48px` mobile / `64px` desktop).
+   - Increased typography scale: brand names 20px/26px (`rgba(255,255,255,0.88)`), sectors 15px/18px (`rgba(255,255,255,0.42)`), middots 18px with 36px/48px margins.
+   - Corrected CSS mask gradient syntax from center-transparent to center-opaque: `linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%)`.
 
 ## Files Touched
-- `index.html`: Rebuilt Section 2 (`.gc-trust-block`) HTML with header block, 3 separated staggered split cards, and dark closing block with real `./logo.png` image, vertical hairline, tagline, and marquee placed last below the tagline.
-- `css/style.css`: Set `.hero-section` height to `100svh`. Rebuilt `.gc-trust-block` CSS rules (separated cards with `margin-bottom: 28px/36px`, real logo `.gc-trust-logo-img`, `var(--color-bg-dark)` background match, subtle texture opacity `0.015`, and marquee positioned below tagline).
+- `index.html`: Rebuilt Section 2 (`.gc-trust-block`) HTML with inline SVG Italy map in Card 2, updated Card 3 label markup, and restructured dark block elements.
+- `css/style.css`: Added curved top edge on `.gc-trust-block` (`margin-top: -56px`, `border-top-radius: 50% 56px`), updated Card panel layout and label optical alignment, added SVG map styles, and updated dark block marquee placement, scale, and mask.
 - `js/main.js`: ScrollTrigger animations for header block, staggered cards, and dark closing block.
 
 ## New/Renamed CSS Classes & Identifiers
-- `.hero-section`: Updated height to `100svh`.
-- `.gc-trust-card`: Updated `margin-bottom` to `28px` (desktop `36px`), `box-shadow` to `0 20px 44px rgba(26, 26, 26, 0.13)`.
-- `.gc-trust-card-img-placeholder`: `#262320` background with `box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06)`.
-- `.gc-trust-dark-block`: Background set to `var(--color-bg-dark)`.
-- `.gc-trust-logo-img`: Real brand logo image (`./logo.png`).
-- `.gc-trust-dark-hairline`: Hairline below logo (`height: 36px`, `margin: 18px auto 20px`).
-- `.gc-trust-tagline`: Tagline below hairline.
-- `.gc-trust-dark-block .gc-trust-marquee-wrapper`: Marquee placed last below tagline (`margin-top: 44px`, `z-index: 2`).
+- `.gc-trust-block`: Added `border-top-left-radius: 50% 56px; border-top-right-radius: 50% 56px; margin-top: -56px; z-index: 2;`.
+- `.gc-trust-card-content-group`, `.gc-trust-card-right-group`: Flex layout containers for hairline, numeral+label, and caption.
+- `.gc-trust-italy-map`: Inline SVG map styling inside Card 2 placeholder container.
+- `.gc-trust-dark-block .gc-trust-marquee-wrapper`: Placed immediately below tagline (`margin-top: 36px`), edge fade mask `linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%)`.
+- `.gc-trust-brand-name`, `.gc-trust-brand-sector`, `.gc-trust-middot`: Scaled typography tokens.
 
 ## Explicit Merge-Risk Summary
-- **HERO HEIGHT (`.hero-section`)**: Updated to `100svh` to prevent any peeking on mobile.
+- **HERO & CREDIBILITY BAND BOUNDARY (`.gc-trust-block`)**: Negative margin `-56px` and curved top edge overlap the hero bottom. Hero stays `100svh`.
 - **NON-STICKY HEADER (`.main-header`)**: Header converted from `position: fixed` to `position: absolute`.
-- **Section 2 (`.gc-trust-block`) Rebuild & Seam Match**: Dark closing block background set to `var(--color-bg-dark)` to create a seamless transition into `.sectors-section`.
+- **Section 2 Rebuild**: Staggered cards, Italy SVG, and dark closing block with marquee positioned immediately below tagline.

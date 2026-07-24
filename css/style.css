@@ -3110,7 +3110,7 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 6 REBUILD (SEPARATED CARDS & DARK CLOSING BLOCK)
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 7 REBUILD (CURVED TOP EDGE, ITALY SVG & RESTRUCTURED MARQUEE)
    Background: #EDEAE5 (warm paper), Ink: #1A1A1A, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3120,9 +3120,10 @@ body.menu-open .mobile-menu-toggle span {
   color: #1A1A1A;
   padding-top: clamp(64px, 10vh, 120px);
   padding-bottom: 0; /* Dark closing block sits flush against section end */
-  margin-top: 0;
-  margin-bottom: 0;
-  z-index: var(--z-content);
+  border-top-left-radius: 50% 56px;
+  border-top-right-radius: 50% 56px;
+  margin-top: -56px;
+  z-index: 2;
   border: none;
   outline: none;
 }
@@ -3184,7 +3185,7 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 0;
 }
 
-/* PART 3 / FIX 2 — Three Separated Staggered Split Cards */
+/* PART 3 / FIX 3 — Three Separated Staggered Split Cards with Improved Hierarchy */
 .gc-trust-cards-wrapper {
   display: flex;
   flex-direction: column;
@@ -3240,9 +3241,9 @@ body.menu-open .mobile-menu-toggle span {
   justify-content: center;
 }
 
-.gc-trust-card-stat-group {
+.gc-trust-card-content-group {
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .gc-trust-hairline {
@@ -3255,16 +3256,23 @@ body.menu-open .mobile-menu-toggle span {
   background: rgba(26, 26, 26, 0.25);
 }
 
+.gc-trust-card-right-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .gc-trust-num-label-flex {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start; /* NOT baseline */
+  gap: 18px;
 }
 
 .gc-trust-num {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400;
-  font-size: clamp(46px, 13vw, 72px);
-  line-height: 0.95;
+  font-size: clamp(52px, 14vw, 76px);
+  line-height: 0.88;
   font-variant-numeric: lining-nums tabular-nums;
   color: #B01E56;
 }
@@ -3275,12 +3283,14 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-card-label {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  line-height: 1.35;
-  margin-left: 16px;
+  line-height: 1.4;
+  padding-top: 0.42em; /* Nudges label down to optically align first line with top of digits */
+  max-width: 12ch;
   color: #FFFFFF;
+  margin: 0;
 }
 .gc-trust-card-2 .gc-trust-card-label {
   color: #1A1A1A;
@@ -3289,10 +3299,10 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
-  max-width: 22ch;
-  margin-top: 14px;
+  max-width: 26ch;
+  margin-top: 16px;
   margin-bottom: 0;
   color: rgba(255, 255, 255, 0.55);
 }
@@ -3319,24 +3329,36 @@ body.menu-open .mobile-menu-toggle span {
   filter: grayscale(1) contrast(1.05);
 }
 
+/* FIX 2 — Card 2 Image Slot SVG Map */
 .gc-trust-card-img-placeholder {
   width: 100%;
   height: 100%;
   background-color: #262320;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12%;
+  box-sizing: border-box;
 }
 
-/* PART 4 & FIX 3/4/5 — Dark Closing Block with Curved Top Edge */
+.gc-trust-italy-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* PART 4 & FIX 1/4/5 — Dark Closing Block with Curved Top Edge & Marquee */
 .gc-trust-dark-block {
   background-color: var(--color-bg-dark); /* Exact same value as .sectors-section below */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-top: 56px;
   margin-bottom: 0;
-  padding: 56px 20px 48px; /* 56px top padding above logo on mobile */
+  padding: 56px 20px 48px; /* 48px bottom padding closes section right after marquee on mobile */
   position: relative;
-  border-top-left-radius: 50% 64px;
-  border-top-right-radius: 50% 64px;
+  border-top-left-radius: 50% 56px;
+  border-top-right-radius: 50% 56px;
   border: none;
   outline: none;
   box-shadow: none;
@@ -3394,17 +3416,17 @@ body.menu-open .mobile-menu-toggle span {
   color: #B01E56;
 }
 
-/* 4. Marquee Moved Below Tagline (FIX 3e) */
+/* 4. Marquee Moved Below Tagline (FIX 1: Placed IMMEDIATELY below tagline with margin-top 36px) */
 .gc-trust-dark-block .gc-trust-marquee-wrapper {
   position: relative;
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  padding: 8px 0;
-  margin-top: 44px;
+  padding: 4px 0;
+  margin-top: 36px;
   margin-bottom: 0;
-  mask-image: linear-gradient(90deg, var(--color-bg-dark) 0%, transparent 12%, transparent 88%, var(--color-bg-dark) 100%);
-  -webkit-mask-image: linear-gradient(90deg, var(--color-bg-dark) 0%, transparent 12%, transparent 88%, var(--color-bg-dark) 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
 
 .gc-trust-dark-block .gc-trust-marquee-track {
@@ -3432,29 +3454,29 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-dark-block .gc-trust-brand-name {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 15px;
-  letter-spacing: 0.06em;
+  font-size: 20px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .gc-trust-dark-block .gc-trust-brand-sep {
-  margin: 0 0.4rem;
-  color: rgba(255, 255, 255, 0.3);
+  margin: 0 0.45rem;
+  color: rgba(255, 255, 255, 0.32);
 }
 
 .gc-trust-dark-block .gc-trust-brand-sector {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 15px;
   text-transform: lowercase;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.42);
 }
 
 .gc-trust-dark-block .gc-trust-middot {
-  margin: 0 32px;
-  color: rgba(255, 255, 255, 0.22);
-  font-size: 16px;
+  margin: 0 36px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 18px;
 }
 
 @keyframes gcTrustMarquee {
@@ -3495,18 +3517,26 @@ body.menu-open .mobile-menu-toggle span {
   .gc-trust-card-panel {
     padding: 34px 30px;
   }
-  .gc-trust-dark-block {
-    margin-top: 72px;
-    padding-top: 72px; /* 72px top space above logo on desktop */
+  .gc-trust-card-label {
+    font-size: 13px;
   }
-  .gc-trust-dark-block .gc-trust-brand-name {
-    font-size: 18px;
-  }
-  .gc-trust-dark-block .gc-trust-brand-sector {
+  .gc-trust-card-caption {
     font-size: 14px;
   }
+  .gc-trust-dark-block {
+    margin-top: 72px;
+    padding: 72px 20px 64px; /* 64px bottom padding closes section on desktop */
+    border-top-left-radius: 50% 56px;
+    border-top-right-radius: 50% 56px;
+  }
+  .gc-trust-dark-block .gc-trust-brand-name {
+    font-size: 26px;
+  }
+  .gc-trust-dark-block .gc-trust-brand-sector {
+    font-size: 18px;
+  }
   .gc-trust-dark-block .gc-trust-middot {
-    margin: 0 44px;
+    margin: 0 48px;
   }
   .gc-trust-tagline {
     font-size: 12px;
