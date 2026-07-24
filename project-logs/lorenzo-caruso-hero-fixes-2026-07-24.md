@@ -3,46 +3,35 @@
 Branch: `main` (local only, zero pushes, uncommitted working tree).
 
 ## Task Summary
-1. **Header Non-sticky Positioning**: Converted `.main-header` to `position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%)` in `css/style.css`. Disabled JS scroll listener in `js/main.js` that toggles `.scrolled` state with `// STEP 4: sticky header removed — do not delete the code`. Header scrolls out of view naturally with the hero.
-2. **Hero Viewport Height & Dual 28px Curves (STEP 11 / Fix 1)**: Set `.gc-trust-block` `border-top-radius: 50% 28px; border-bottom-radius: 50% 28px; margin-top: -28px; margin-bottom: -28px; z-index: 6;`. Stacking context `z-index: 6` elevates `.gc-trust-block` above `.sectors-section` (`z-index: var(--z-content)` [5]) so the 28px bottom curve renders visibly over the dark background. Set `.hero-section` height to `calc(100vh + 28px); calc(100svh + 28px);` so hero photo covers the negative top pull; zero light band is visible at scroll position 0.
-3. **Card Inverted Hierarchy (STEP 12 / Fix 1 & 4)**: Quiet label on all cards (`font-weight: 600`, `font-size: 11px` mobile / `12px` desktop, `letter-spacing: 0.14em`, `color: rgba(255,255,255,0.5)` on dark panels, `rgba(26,26,26,0.5)` on light panel, `margin-bottom: 12px`). Hairline height capped at 76% of text group (`align-self: center`, opacity 0.7 on Card 3). Numeral dominates visually above caption.
-4. **Desktop 2-Row Grid Layout (STEP 12 / Fix 2 & 3)**: At `>=900px`, `.gc-trust-cards-wrapper` uses a 2-row CSS Grid:
-   - `grid-template-areas: "hero hero" "left right"; gap: 20px;`
-   - Top Card 3 (`1.000+`): `grid-area: hero; min-height: 300px; grid-template-columns: 58% 42%; panel padding: 40px 36px; numeral clamp(88px, 7vw, 124px); label 13px; caption 15px max-width 30ch`.
-   - Bottom Left Card 1 (`30`): `grid-area: left; min-height: 230px; grid-template-columns: 62% 38%; panel padding: 30px 28px; numeral clamp(56px, 4vw, 72px); label 12px; caption 14px max-width 24ch`.
-   - Bottom Right Card 2 (`40+`): `grid-area: right; min-height: 230px; grid-template-columns: 38% 62%; panel padding: 30px 28px; numeral clamp(56px, 4vw, 72px); label 12px; caption 14px max-width 24ch`.
-   - DOM order remains unchanged: Card 1 (`30`), Card 2 (`40+`), Card 3 (`1.000+`).
-5. **Ultra-Wide Viewport Rule (STEP 12 / Fix 5)**: At `>=1600px`, `.gc-trust-container` max-width rises to `1360px`, top card numeral caps at `124px`, and `.gc-trust-card-content-group` has `max-width: 620px` (left-aligned) to prevent empty dead zones.
-6. **Card 2 Generated Italy Map (STEP 8 / Fix 2)**: Generated `assets/italy_map_dark.png` via `generate_image` (Higgsfield Nano Banana / 1 credit cost). Embedded inside Card 2 image slot (`width: 100%; height: 100%; object-fit: cover; object-position: center; alt=""`).
-7. **Dark Closing Block Deletion (STEP 10 / Fix 1)**: Removed `.gc-trust-dark-block` container element and all associated rules.
-8. **Marquee Absorbed into Light Band (STEP 10 / Fix 2 & 3)**: Relocated marquee into `.gc-trust-container` directly after Card 3. Substantial typography tokens (700 weight 26px/34px `#1A1A1A`).
+1. **Header Navigation Clean-up (STEP 14 / Part 1)**: Removed `<a class="nav-phone">` element and its text/icon children from `index.html`. Removed `.nav-phone`, `.nav-phone-text`, `.nav-phone-icon` and related rules from `css/style.css`.
+2. **Hero Dark Space & Height (STEP 14 / Part 2)**: Updated `.hero-section` min-height to `100vh / 118svh`. Set `.hero-proof-headline` `padding-bottom: 22svh` so headline stays anchored relative to top while creating >16svh of uninterrupted dark photograph below the CTA before `.gc-trust-block` top curve. At scroll 0 (390x844 and 1440x900), zero light band is visible.
+3. **Card Panel Backgrounds (STEP 14 / Part 3)**: Replaced desaturated blue-grey `#17161A` with deep rich warm black `#0F0E0C` on Cards 1 & 3 panels. Image placeholder slot set to `#1C1A17`. Light panel (Card 2) remains `#F7F6F4`.
+4. **Card Order & Size Hierarchy at All Widths (STEP 14 / Part 4 & 5)**:
+   - Below 768px: `.gc-trust-cards-wrapper { display: flex; flex-direction: column; gap: 20px; }`. Card 3 (`1.000+`): `order: -1; min-height: 280px`. Card 1 (`30`): `order: 0; min-height: 200px`. Card 2 (`40+`): `order: 1; min-height: 200px`. DOM order remains 30, 40+, 1.000+.
+   - At >=768px: `.gc-trust-cards-wrapper { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "hero hero" "left right"; gap: 20px; }`. Card 3 (`1.000+`): `grid-area: hero; min-height: 320px; order: initial`. Card 1 (`30`): `grid-area: left; min-height: 240px; order: initial`. Card 2 (`40+`): `grid-area: right; min-height: 240px; order: initial`.
+5. **Text & Hairline Specifications (STEP 14 / Part 5)**:
+   - Label: Inter 700, uppercase, letter-spacing 0.13em, line-height 1.4, margin `0 0 14px 0`, `#FFFFFF` on dark cards (1 & 3), `#0F0E0C` on light card (2). Sizes: Card 3: 13px (<768px) / 15px (>=768px); Cards 1 & 2: 11px (<768px) / 12px (>=768px).
+   - Numeral: Cormorant Garamond 400, line-height 0.88, letter-spacing -0.01em, margin `0 0 16px 0`, `#B01E56` on dark cards (1 & 3), `#0F0E0C` on light card (2). Font sizes (all widths): Card 3: `clamp(76px, 20vw, 132px)`; Cards 1 & 2: `clamp(52px, 13vw, 76px)`.
+   - Caption: Inter 400, line-height 1.5, `rgba(255, 255, 255, 0.6)` on dark cards (1 & 3), `rgba(15, 14, 12, 0.6)` on light card (2). Sizes: Card 3: 15px (<768px) / 16px (>=768px), `max-width: 28ch`; Cards 1 & 2: 13px (<768px) / 14px (>=768px), `max-width: 24ch`.
+   - Hairline: Width 1px, height 76%, `align-self: center`, `margin-right: 16px`. Card 1: `#B01E56`, Card 3: `#B01E56`, Card 2: `rgba(15, 14, 12, 0.28)`.
+6. **3-Layer Warm Paper Section Background (STEP 14 / Part 6)**:
+   - Layer 6a (Base): Background color updated to `#EFEDE8`.
+   - Layer 6b (Grain): `.gc-trust-block::before` with URL-encoded fractalNoise SVG data URI, `opacity: 0.055`, `mix-blend-mode: multiply`.
+   - Layer 6c (Photographic Bleed): `.gc-trust-block::after` using pre-existing architectural photo `./assets/hotel.png` desaturated (`grayscale(1) contrast(0.95)`), `opacity: 0.22` (desktop `46%` width, `42%` height) / `opacity: 0.16` (mobile `62%` width, `30%` height) with linear gradient 200deg mask fading to transparent. No new generation required (0 credit cost).
+   - Layer 6d/6e (Stacking & Curves): `.gc-trust-container` `z-index: 1`. `.gc-trust-block` `overflow: hidden` clips both pseudo-elements within the 28px top and bottom curves.
 
 ## Files Touched
-- `css/style.css`: Updated card label hierarchy rules (weight 600, 50% opacity), capped hairline height at 76% (opacity 0.7 on Card 3), added desktop 2-row grid layout for cards (`"hero hero" "left right"`), and added 1600px wide-viewport max-width rule (`1360px`).
-- `index.html`: (Unchanged in STEP 12; DOM order remains 30, 40+, 1.000+).
-- `assets/italy_map_dark.png`: Generated dark minimal editorial map image asset of Italy with glowing magenta city points (1 credit cost).
-- `js/main.js`: ScrollTrigger animations for header block and staggered cards.
+- `index.html`: Removed `.nav-phone` link from header actions; updated stylesheet cache-busting query parameter to `?v=step14-1`.
+- `css/style.css`: Removed `.nav-phone` CSS rules; updated `.hero-section` min-height to `118svh` and `.hero-proof-headline` padding to `22svh`; rebuilt Section 2 CSS for 3-layer warm paper background (`#EFEDE8`, grain `::before`, bleed `::after`), `#0F0E0C` dark card panels, flex ordering (`order: -1` on Card 3) below 768px, grid-area layout at 768px+, full opacity `#FFFFFF` labels, and non-conditional numeral size hierarchy (`clamp(76px, 20vw, 132px)` vs `clamp(52px, 13vw, 76px)`).
+- `assets/hotel.png`: Used as pre-existing photographic bleed asset in `.gc-trust-block::after` (0 credit cost).
 
-## Values Changed (STEP 12)
-- `.gc-trust-cards-wrapper` (>=900px): `display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "hero hero" "left right"; gap: 20px;`
-- `.gc-trust-card-3` (>=900px): `grid-area: hero; min-height: 300px; grid-template-columns: 58% 42%;`
-- `.gc-trust-card-3 .gc-trust-card-panel`: `padding: 40px 36px;`
-- `.gc-trust-card-3 .gc-trust-num`: `font-size: clamp(88px, 7vw, 124px);`
-- `.gc-trust-card-3 .gc-trust-card-label`: `font-size: 13px;`
-- `.gc-trust-card-3 .gc-trust-card-caption`: `font-size: 15px; max-width: 30ch;`
-- `.gc-trust-card-1` (>=900px): `grid-area: left; min-height: 230px; grid-template-columns: 62% 38%;`
-- `.gc-trust-card-2` (>=900px): `grid-area: right; min-height: 230px; grid-template-columns: 38% 62%;`
-- `.gc-trust-card-1 .gc-trust-card-panel`, `.gc-trust-card-2 .gc-trust-card-panel`: `padding: 30px 28px;`
-- `.gc-trust-card-1 .gc-trust-num`, `.gc-trust-card-2 .gc-trust-num`: `font-size: clamp(56px, 4vw, 72px);`
-- `.gc-trust-card-1 .gc-trust-card-label`, `.gc-trust-card-2 .gc-trust-card-label`: `font-size: 12px;`
-- `.gc-trust-card-1 .gc-trust-card-caption`, `.gc-trust-card-2 .gc-trust-card-caption`: `font-size: 14px; max-width: 24ch;`
-- `.gc-trust-card-label` (all): `font-weight: 600; font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.5) [light: rgba(26,26,26,0.5)]; margin-bottom: 12px;`
-- `.gc-trust-hairline`: `height: 76%; align-self: center; background: #B01E56 (Card 3: rgba(176,30,86,0.7));`
-- `.gc-trust-container` (>=1600px): `max-width: 1360px;`
-- `.gc-trust-card-content-group` (>=1600px): `max-width: 620px;`
+## Asset Used
+- **File**: `./assets/hotel.png` (Pre-existing daylight architectural photograph).
+- **Generation Tool**: N/A (Pre-existing in repository).
+- **Credit Cost**: 0 credits.
 
 ## Explicit Merge-Risk Summary
-- **CARD DESKTOP GRID LAYOUT (`.gc-trust-cards-wrapper`)**: Replaced alternating horizontal offset percentages with 2-row CSS Grid (`"hero hero"` top, `"left right"` bottom). Card 3 (`1.000+`) is top hero, Card 1 (`30`) is left, Card 2 (`40+`) is right.
-- **HERO & CREDIBILITY BAND BOUNDARIES (`.gc-trust-block`)**: Dual 28px curves with `-28px` negative margins at both top and bottom of `.gc-trust-block`. `.gc-trust-block` has `z-index: 6` so bottom curve renders visibly over `.sectors-section` (`z-index: 5`). Hero height `calc(100svh + 28px)` completely covers top curve at scroll 0.
-- **DELETION OF DARK BLOCK CONTAINER (`.gc-trust-dark-block`)**: The entire `.gc-trust-dark-block` section wrapper, logo, vertical hairline, and dark background rules have been DELETED. Marquee is now an internal child of `.gc-trust-container`.
-- **NON-STICKY HEADER (`.main-header`)**: Header converted from `position: absolute`.
+- **REMOVAL OF HEADER PHONE LINK (`.nav-phone`)**: Removed `<a class="nav-phone">` from `index.html` and `.nav-phone` rules from `css/style.css`.
+- **HERO HEIGHT & HEADLINE PADDING (`.hero-section`)**: Updated min-height to `118svh` and headline padding-bottom to `22svh`.
+- **CREDIBILITY BAND CARD ORDER & SIZING (`.gc-trust-cards-wrapper`)**: Flex ordering `order: -1` puts Card 3 (`1.000+`) first and tallest at mobile (<768px). Grid-area (`"hero hero"` top, `"left right"` bottom) activates at 768px+. Dark panel background changed from `#17161A` to `#0F0E0C`.
+- **DELETION OF DARK BLOCK CONTAINER (`.gc-trust-dark-block`)**: The entire `.gc-trust-dark-block` section wrapper, logo, vertical hairline, and dark background rules remain DELETED from STEP 10. Marquee is an internal child of `.gc-trust-container`.

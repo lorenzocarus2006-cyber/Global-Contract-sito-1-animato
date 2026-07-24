@@ -408,31 +408,7 @@ html.lenis, html.lenis body {
   transform-origin: left;
 }
 
-/* Nav Phone Link (C4) */
-.nav-phone {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  margin-right: 1.2rem;
-  transition: color 0.3s ease;
-}
-.nav-phone:hover {
-  color: #FFFFFF;
-}
-.nav-phone-text {
-  display: inline;
-  white-space: nowrap;
-}
-.nav-phone-icon {
-  display: none;
-  width: 18px;
-  height: 18px;
-}
+
 
 .header-actions {
   display: flex;
@@ -519,23 +495,14 @@ html.lenis, html.lenis body {
    5. SINGLE VIEWPORT HERO CONTAINER
    ----------------------------------------- */
 .hero-section {
-  height: calc(100vh + 28px);
-  height: calc(100svh + 28px);
-  min-height: 590px;
+  min-height: 100vh;
+  min-height: 118svh;
   width: 100%;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  /* overflow-x: hidden here would force the browser to auto-compute
-     overflow-y: auto (CSS overflow interop rule: one axis non-visible +
-     other visible => visible axis becomes auto), turning this pinned,
-     height:100vh box into its own internal scroll-clipped container that
-     traps the panels mid-ascent. Left fully visible instead - html/body
-     already carry overflow-x: hidden, so the bled/rotated cards still get
-     clipped at the true viewport edge (with no scrollbar), but nothing in
-     the hero's own ancestor chain crops their hit area or their 3D paint. */
   overflow-x: visible;
   overflow-y: visible;
   padding-top: 80px; /* Space for the header */
@@ -575,7 +542,7 @@ html.lenis, html.lenis body {
 .hero-proof-headline {
   position: relative;
   z-index: 2;
-  padding: 0 1.5rem 1.9rem;
+  padding: 0 1.5rem 22svh;
 }
 .hero-proof-title {
   font-family: var(--font-serif-cards);
@@ -3110,13 +3077,14 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 12 REBUILD (CARD HIERARCHY, DESKTOP GRID & WIDE VIEWPORT)
-   Background: #EDEAE5 (warm paper), Ink: #1A1A1A, Accent: #B01E56
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 14 REBUILD (3-LAYER WARM PAPER BACKGROUND & CARD HIERARCHY)
+   Background Base: #EFEDE8 (warm paper), Grain Layer: feTurbulence, Bleed: ./assets/hotel.png
+   Dark Panel: #0F0E0C, Light Panel: #F7F6F4, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
   position: relative;
   width: 100%;
-  background-color: #EDEAE5;
+  background-color: #EFEDE8;
   color: #1A1A1A;
   padding-top: clamp(64px, 10vh, 120px);
   padding-bottom: 64px;
@@ -3129,8 +3097,49 @@ body.menu-open .mobile-menu-toggle span {
   z-index: 6; /* Higher than .sectors-section z-index: var(--z-content) [5] so curved bottom edge renders above it */
   border: none;
   outline: none;
+  overflow: hidden;
 }
 
+/* 6b — GRAIN LAYER */
+.gc-trust-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* 6c — PHOTOGRAPHIC BLEED, TOP RIGHT */
+.gc-trust-block::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 46%;
+  height: 42%;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url(../assets/hotel.png);
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) contrast(0.95);
+  opacity: 0.22;
+  mask-image: linear-gradient(200deg, #000 0%, #000 30%, transparent 78%);
+  -webkit-mask-image: linear-gradient(200deg, #000 0%, #000 30%, transparent 78%);
+}
+
+@media (max-width: 767px) {
+  .gc-trust-block::after {
+    width: 62%;
+    height: 30%;
+    opacity: 0.16;
+  }
+}
+
+/* 6d — Content Container Stacking above pseudo-elements */
 .gc-trust-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -3138,6 +3147,8 @@ body.menu-open .mobile-menu-toggle span {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  position: relative;
+  z-index: 1;
 }
 
 /* PART 2 — Header Block */
@@ -3188,57 +3199,59 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 0;
 }
 
-/* PART 3 — Three Separated Split Cards */
+/* PART 1, 2, 4 — Card Shell & Ordering */
 .gc-trust-cards-wrapper {
   display: flex;
   flex-direction: column;
+  gap: 20px;
   position: relative;
   width: 100%;
 }
 
 .gc-trust-card {
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 20px 44px rgba(26, 26, 26, 0.13);
   display: grid;
   position: relative;
-  margin-bottom: 28px;
-  min-height: 190px;
+  border: none;
+  margin: 0;
+}
+
+/* Below 768px: Mobile Sizing & Flex Ordering (1.000+ top, 30 middle, 40+ bottom) */
+.gc-trust-card-3 {
+  order: -1;
+  min-height: 280px;
+  grid-template-columns: 62% 38%;
+}
+.gc-trust-card-3 .gc-trust-card-panel {
+  background-color: #0F0E0C;
+  color: #FFFFFF;
 }
 
 .gc-trust-card-1 {
-  grid-template-columns: 68% 32%;
-  margin-left: 0;
-  margin-right: 4%;
+  order: 0;
+  min-height: 200px;
+  grid-template-columns: 62% 38%;
 }
 .gc-trust-card-1 .gc-trust-card-panel {
-  background-color: #17161A;
+  background-color: #0F0E0C;
   color: #FFFFFF;
 }
 
 .gc-trust-card-2 {
-  grid-template-columns: 32% 68%;
-  margin-left: 4%;
-  margin-right: 0;
+  order: 1;
+  min-height: 200px;
+  grid-template-columns: 38% 62%;
 }
 .gc-trust-card-2 .gc-trust-card-panel {
   background-color: #F7F6F4;
-  color: #1A1A1A;
+  color: #0F0E0C;
 }
 
-.gc-trust-card-3 {
-  grid-template-columns: 68% 32%;
-  margin-left: 0;
-  margin-right: 4%;
-  margin-bottom: 0; /* Last card keeps margin-bottom: 0 on mobile */
-}
-.gc-trust-card-3 .gc-trust-card-panel {
-  background-color: #17161A;
-  color: #FFFFFF;
-}
-
+/* PART 4 — Panel Internal Structure */
 .gc-trust-card-panel {
-  padding: 22px 18px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -3246,22 +3259,24 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-content-group {
   display: flex;
-  align-items: center; /* Vertically centers hairline against text group */
+  align-items: center; /* Vertically centers hairline against text column */
 }
 
-/* FIX 4 — Hairline capped at 76% height of text group, vertically centered */
+/* PART 5d — Vertical Hairline */
 .gc-trust-hairline {
   width: 1px;
   height: 76%;
   align-self: center;
-  background: #B01E56;
   margin-right: 16px;
 }
+.gc-trust-card-1 .gc-trust-hairline {
+  background: #B01E56;
+}
 .gc-trust-card-3 .gc-trust-hairline {
-  background: rgba(176, 30, 86, 0.7); /* Opacity 0.7 on top card */
+  background: #B01E56;
 }
 .gc-trust-card-2 .gc-trust-hairline {
-  background: rgba(26, 26, 26, 0.25);
+  background: rgba(15, 14, 12, 0.28);
 }
 
 .gc-trust-card-right-group {
@@ -3272,47 +3287,67 @@ body.menu-open .mobile-menu-toggle span {
   text-align: left;
 }
 
-/* FIX 1 — ROW 1: Quiet label ABOVE numeral */
+/* PART 5a — Label (Full strength white/ink, size per card) */
 .gc-trust-card-label {
   font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-weight: 700;
   text-transform: uppercase;
-  line-height: 1.35;
-  margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+  margin: 0 0 14px 0;
+  color: #FFFFFF;
 }
 .gc-trust-card-2 .gc-trust-card-label {
-  color: rgba(26, 26, 26, 0.5);
+  color: #0F0E0C;
+}
+.gc-trust-card-3 .gc-trust-card-label {
+  font-size: 13px;
+}
+.gc-trust-card-1 .gc-trust-card-label,
+.gc-trust-card-2 .gc-trust-card-label {
+  font-size: 11px;
 }
 
-/* ROW 2 — Dominant Numeral */
+/* PART 5b — Numeral (Size hierarchy at ALL widths) */
 .gc-trust-num {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400;
-  font-size: 58px;
-  line-height: 0.9;
   font-variant-numeric: lining-nums tabular-nums;
-  margin-bottom: 14px;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px 0;
   color: #B01E56;
 }
 .gc-trust-card-2 .gc-trust-num {
-  color: #1A1A1A;
+  color: #0F0E0C;
+}
+.gc-trust-card-3 .gc-trust-num {
+  font-size: clamp(76px, 20vw, 132px);
+}
+.gc-trust-card-1 .gc-trust-num,
+.gc-trust-card-2 .gc-trust-num {
+  font-size: clamp(52px, 13vw, 76px);
 }
 
-/* ROW 3 — Caption */
+/* PART 5c — Caption */
 .gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 13px;
   line-height: 1.5;
-  max-width: 24ch;
   margin: 0;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
 }
 .gc-trust-card-2 .gc-trust-card-caption {
-  color: rgba(26, 26, 26, 0.55);
+  color: rgba(15, 14, 12, 0.6);
+}
+.gc-trust-card-3 .gc-trust-card-caption {
+  font-size: 15px;
+  max-width: 28ch;
+}
+.gc-trust-card-1 .gc-trust-card-caption,
+.gc-trust-card-2 .gc-trust-card-caption {
+  font-size: 13px;
+  max-width: 24ch;
 }
 
 .gc-trust-card-media {
@@ -3337,7 +3372,7 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-card-img-placeholder {
   width: 100%;
   height: 100%;
-  background-color: #262320;
+  background-color: #1C1A17;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
@@ -3417,8 +3452,8 @@ body.menu-open .mobile-menu-toggle span {
   to { transform: translateX(-50%); }
 }
 
-/* Desktop Breakpoint (900px and above) — FIX 2 & FIX 3 */
-@media (min-width: 900px) {
+/* Tablet & Desktop Breakpoint (768px and above) — PART 0, 2, 3, 4, 5 */
+@media (min-width: 768px) {
   .gc-trust-container {
     padding: 0 32px;
   }
@@ -3429,7 +3464,7 @@ body.menu-open .mobile-menu-toggle span {
     font-size: 16px;
   }
 
-  /* Desktop 2-Row Grid: One Wide Top (Card 3), Two Side-by-Side Below (Card 1 Left, Card 2 Right) */
+  /* Grid Placement (PART 4): 1 Top (Card 3), 2 Bottom (Card 1 Left, Card 2 Right) */
   .gc-trust-cards-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3448,28 +3483,27 @@ body.menu-open .mobile-menu-toggle span {
   /* TOP CARD (1.000+) */
   .gc-trust-card-3 {
     grid-area: hero;
-    min-height: 300px;
+    min-height: 320px;
     grid-template-columns: 58% 42%;
+    order: initial;
   }
   .gc-trust-card-3 .gc-trust-card-panel {
     padding: 40px 36px;
   }
-  .gc-trust-card-3 .gc-trust-num {
-    font-size: clamp(88px, 7vw, 124px);
-  }
   .gc-trust-card-3 .gc-trust-card-label {
-    font-size: 13px;
+    font-size: 15px;
   }
   .gc-trust-card-3 .gc-trust-card-caption {
-    font-size: 15px;
-    max-width: 30ch;
+    font-size: 16px;
+    max-width: 28ch;
   }
 
   /* BOTTOM CARDS (30 and 40+) */
   .gc-trust-card-1 {
     grid-area: left;
-    min-height: 230px;
+    min-height: 240px;
     grid-template-columns: 62% 38%;
+    order: initial;
   }
   .gc-trust-card-1 .gc-trust-card-panel {
     padding: 30px 28px;
@@ -3477,17 +3511,14 @@ body.menu-open .mobile-menu-toggle span {
 
   .gc-trust-card-2 {
     grid-area: right;
-    min-height: 230px;
+    min-height: 240px;
     grid-template-columns: 38% 62%;
+    order: initial;
   }
   .gc-trust-card-2 .gc-trust-card-panel {
     padding: 30px 28px;
   }
 
-  .gc-trust-card-1 .gc-trust-num,
-  .gc-trust-card-2 .gc-trust-num {
-    font-size: clamp(56px, 4vw, 72px);
-  }
   .gc-trust-card-1 .gc-trust-card-label,
   .gc-trust-card-2 .gc-trust-card-label {
     font-size: 12px;
@@ -3515,13 +3546,10 @@ body.menu-open .mobile-menu-toggle span {
   }
 }
 
-/* FIX 5 — Wide Viewport Check (1600px and above) */
+/* PART 7 — Wide Viewports (1600px and above) */
 @media (min-width: 1600px) {
   .gc-trust-container {
     max-width: 1360px;
-  }
-  .gc-trust-card-3 .gc-trust-num {
-    font-size: 124px;
   }
   .gc-trust-card-content-group {
     max-width: 620px;
