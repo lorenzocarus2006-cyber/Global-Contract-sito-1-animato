@@ -3110,7 +3110,7 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 8 REBUILD (MOBILE-FIRST CARDS & EXTENDED DARK BLOCK)
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 10 REBUILD (LIGHT BAND WITH MARQUEE & DUAL CURVED EDGES)
    Background: #EDEAE5 (warm paper), Ink: #1A1A1A, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3119,10 +3119,13 @@ body.menu-open .mobile-menu-toggle span {
   background-color: #EDEAE5;
   color: #1A1A1A;
   padding-top: clamp(64px, 10vh, 120px);
-  padding-bottom: 0; /* Dark closing block sits flush against section end */
+  padding-bottom: 64px;
   border-top-left-radius: 50% 16px;
   border-top-right-radius: 50% 16px;
+  border-bottom-left-radius: 50% 16px;
+  border-bottom-right-radius: 50% 16px;
   margin-top: -16px;
+  margin-bottom: -16px;
   z-index: 2;
   border: none;
   outline: none;
@@ -3185,7 +3188,7 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 0;
 }
 
-/* PART 3 / FIX 5 — Three Separated Staggered Split Cards (Mobile-First Text Composition) */
+/* PART 3 — Three Separated Staggered Split Cards */
 .gc-trust-cards-wrapper {
   display: flex;
   flex-direction: column;
@@ -3333,47 +3336,18 @@ body.menu-open .mobile-menu-toggle span {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-/* PART 4 & STEP 9 — Dark Closing Block (Marquee → Vertical Hairline → Logo) */
-.gc-trust-dark-block {
-  background-color: var(--color-bg-dark); /* Exact same value as .sectors-section below */
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
+/* Horizontal Hairline above Marquee (FIX 2) */
+.gc-trust-horizontal-hairline {
+  width: 100%;
+  height: 1px;
+  background: rgba(26, 26, 26, 0.14);
   margin-top: 56px;
-  margin-bottom: 0;
-  padding-top: 56px; /* 56px top padding above marquee on mobile */
-  padding-bottom: 72px; /* 72px bottom padding below logo on mobile */
-  position: relative;
-  border-top-left-radius: 50% 16px;
-  border-top-right-radius: 50% 16px;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  overflow: hidden;
+  margin-bottom: 28px;
 }
 
-.gc-trust-dark-texture {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: repeating-radial-gradient(circle at 15% -20%, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 90px);
-}
-
-.gc-trust-dark-content {
+/* Marquee inside Light Credibility Band (FIX 2 & FIX 3) */
+.gc-trust-marquee-wrapper {
   position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-/* 1. Marquee (FIX 2: First element inside dark block, UNCHANGED styling) */
-.gc-trust-dark-block .gc-trust-marquee-wrapper {
-  position: relative;
-  z-index: 2;
   width: 100%;
   overflow: hidden;
   padding: 4px 0;
@@ -3383,85 +3357,59 @@ body.menu-open .mobile-menu-toggle span {
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
 
-.gc-trust-dark-block .gc-trust-marquee-track {
+.gc-trust-marquee-track {
   display: flex;
   width: max-content;
   animation: gcTrustMarquee 70s linear infinite;
   will-change: transform;
 }
-.gc-trust-dark-block .gc-trust-marquee-track:hover {
+.gc-trust-marquee-track:hover {
   animation-play-state: paused;
 }
 
-.gc-trust-dark-block .gc-trust-marquee-group {
+.gc-trust-marquee-group {
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
 
-.gc-trust-dark-block .gc-trust-brand-item {
+.gc-trust-brand-item {
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
 }
 
-.gc-trust-dark-block .gc-trust-brand-name {
+.gc-trust-brand-name {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 24px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(26, 26, 26, 0.85);
 }
 
-.gc-trust-dark-block .gc-trust-brand-sep {
+.gc-trust-brand-sep {
   margin: 0 0.45rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(26, 26, 26, 0.3);
 }
 
-.gc-trust-dark-block .gc-trust-brand-sector {
+.gc-trust-brand-sector {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 16px;
   text-transform: lowercase;
-  color: rgba(176, 30, 86, 0.75); /* Sector carries brand magenta accent */
+  color: rgba(176, 30, 86, 0.85);
 }
 
-.gc-trust-dark-block .gc-trust-middot {
+.gc-trust-middot {
   margin: 0 40px;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(26, 26, 26, 0.22);
   font-size: 20px;
 }
 
 @keyframes gcTrustMarquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-
-/* 2. Extended Vertical Hairline (FIX 3: Inverted gradient fading downwards towards mark) */
-.gc-trust-dark-hairline {
-  width: 1px;
-  height: 96px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.34));
-  margin: 32px auto 32px;
-}
-
-/* 3. Real GC Logo File (FIX 4: Section separator at bottom) */
-.gc-trust-logo-img {
-  width: 72px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-/* FIX 5: Optional variant for logo straddling the section boundary (DISABLED by default) */
-.gc-trust-logo--straddle {
-  position: relative;
-  bottom: -42px; /* half the logo height at desktop */
-  z-index: 5;
-  padding: 10px;
-  background: var(--color-bg-dark);
-  border-radius: 50%;
 }
 
 /* Desktop Breakpoint (900px and above) */
@@ -3525,26 +3473,19 @@ body.menu-open .mobile-menu-toggle span {
     max-width: 26ch;
     margin-top: 16px;
   }
-  .gc-trust-dark-block {
+  .gc-trust-block {
+    padding-bottom: 88px;
+  }
+  .gc-trust-horizontal-hairline {
     margin-top: 72px;
-    padding-top: 72px; /* 72px top padding above marquee on desktop */
-    padding-bottom: 96px; /* 96px bottom padding below logo on desktop */
-    border-top-left-radius: 50% 16px;
-    border-top-right-radius: 50% 16px;
   }
-  .gc-trust-dark-hairline {
-    height: 128px;
-  }
-  .gc-trust-logo-img {
-    width: 84px;
-  }
-  .gc-trust-dark-block .gc-trust-brand-name {
+  .gc-trust-brand-name {
     font-size: 30px;
   }
-  .gc-trust-dark-block .gc-trust-brand-sector {
+  .gc-trust-brand-sector {
     font-size: 19px;
   }
-  .gc-trust-dark-block .gc-trust-middot {
+  .gc-trust-middot {
     margin: 0 52px;
   }
 }
