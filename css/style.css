@@ -3108,16 +3108,15 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — LIGHT CREDIBILITY BAND (PART A)
-   Inverted light band (#F4F3F1) with 3-col Inter stats,
-   single hairline, active eyebrow, and continuous brand marquee.
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 3 LIGHT CREDIBILITY BAND
+   Translation of shadcn/Tailwind card reference to vanilla CSS
    ----------------------------------------- */
 .gc-trust-block {
   position: relative;
   width: 100%;
   background-color: #F4F3F1;
   color: #111111;
-  padding: clamp(88px, 11vh, 140px) 0;
+  padding: clamp(88px, 11vh, 128px) 0;
   z-index: var(--z-content);
   margin: 0;
   border: none;
@@ -3126,47 +3125,105 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
 }
+
+/* PART 1 — The Three Cards */
 .gc-trust-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  gap: 16px;
   width: 100%;
 }
-.gc-trust-stat-col {
+
+.gc-trust-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+  justify-content: space-between;
+  height: 240px;
+  background: #FFFFFF;
+  border: 1px solid rgba(17, 17, 17, 0.07);
+  border-radius: 8px;
+  padding: 24px;
+  box-sizing: border-box;
 }
+
+.gc-trust-card-top {
+  margin-bottom: 16px;
+}
+
+.gc-trust-card-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: rgba(17, 17, 17, 0.45);
+}
+
+.gc-trust-card-bottom {
+  display: flex;
+  flex-direction: column;
+}
+
 .gc-trust-num {
   font-family: 'Inter', sans-serif;
-  font-weight: 300;
-  font-size: clamp(56px, 7vw, 96px);
-  letter-spacing: -0.03em;
-  color: #111111;
+  font-weight: 600;
+  font-size: 60px;
+  letter-spacing: -0.02em;
   line-height: 1;
+  color: #111111;
   font-variant-numeric: lining-nums tabular-nums;
+  margin-bottom: 8px;
+  display: block;
 }
-.gc-trust-label {
+
+.gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(17, 17, 17, 0.5);
-  margin-top: 12px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgba(17, 17, 17, 0.8);
+  margin: 0;
 }
+
+/* PART 2 — Thesis Block */
+.gc-trust-thesis {
+  padding: 80px 24px;
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.gc-trust-thesis-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: clamp(32px, 3.6vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: #111111;
+  margin-bottom: 16px;
+}
+
+.gc-trust-thesis-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.5;
+  color: rgba(17, 17, 17, 0.55);
+  margin: 0;
+}
+
+/* PART 3 — Marquee */
 .gc-trust-divider {
   width: 100%;
   height: 1px;
   background: rgba(17, 17, 17, 0.12);
-  margin: 72px 0 32px 0;
+  margin: 0 0 32px 0;
 }
+
 .gc-trust-eyebrow {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
@@ -3177,55 +3234,66 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 28px;
   text-align: left;
 }
+
 .gc-trust-marquee-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
+  padding: 8px 0;
+  margin-bottom: 0;
   mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
+
 .gc-trust-marquee-track {
   display: flex;
   width: max-content;
   animation: gcTrustMarquee 70s linear infinite;
   will-change: transform;
 }
+
 .gc-trust-marquee-track:hover {
   animation-play-state: paused;
 }
+
 .gc-trust-marquee-group {
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
+
 .gc-trust-brand-item {
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
 }
+
 .gc-trust-brand-name {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 0.08em;
+  font-size: 20px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(17, 17, 17, 0.75);
+  color: rgba(17, 17, 17, 0.85);
 }
+
 .gc-trust-brand-sep {
-  margin: 0 0.35rem;
-  color: rgba(17, 17, 17, 0.4);
+  margin: 0 0.4rem;
+  color: rgba(17, 17, 17, 0.3);
 }
+
 .gc-trust-brand-sector {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 15px;
   text-transform: lowercase;
   color: rgba(17, 17, 17, 0.4);
 }
+
 .gc-trust-middot {
-  margin: 0 40px;
-  color: rgba(17, 17, 17, 0.25);
-  font-size: 14px;
+  margin: 0 44px;
+  color: rgba(17, 17, 17, 0.22);
+  font-size: 16px;
 }
 
 @keyframes gcTrustMarquee {
@@ -3233,19 +3301,20 @@ body.menu-open .mobile-menu-toggle span {
   to { transform: translateX(-50%); }
 }
 
-@media (max-width: 767px) {
-  .gc-trust-block {
-    padding: clamp(60px, 10vh, 88px) 0;
-  }
+@media (max-width: 899px) {
   .gc-trust-stats-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 12px;
+  }
+  .gc-trust-card {
+    height: auto;
+    min-height: 180px;
   }
   .gc-trust-num {
-    font-size: clamp(44px, 12vw, 72px);
+    font-size: 48px;
   }
-  .gc-trust-divider {
-    margin: 48px 0 24px 0;
+  .gc-trust-thesis {
+    padding: 56px 16px;
   }
 }
 
