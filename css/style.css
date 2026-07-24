@@ -3077,8 +3077,8 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 15 REBUILD (SIDE-BY-SIDE NUMERAL & TEXT BLOCK, ADJUSTED HIERARCHY, GRAIN & BLEED)
-   Background Base: #EFEDE8 (warm paper), Grain Layer: feTurbulence (opacity 0.07), Bleed: ./assets/building_corner_bleed.png
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 16 REBUILD (STACKED BELOW 900PX, SIDE-BY-SIDE AT 900PX+, 70/30 SPLIT BELOW 900PX)
+   Background Base: #EFEDE8 (warm paper), Grain Layer: feTurbulence (opacity 0.07)
    Dark Panel: #0F0E0C, Light Panel: #F7F6F4, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3100,7 +3100,7 @@ body.menu-open .mobile-menu-toggle span {
   overflow: hidden;
 }
 
-/* FIX 4 — GRAIN LAYER (opacity 0.07) */
+/* FIX 6 — GRAIN LAYER (opacity 0.07) */
 .gc-trust-block::before {
   content: '';
   position: absolute;
@@ -3112,31 +3112,9 @@ body.menu-open .mobile-menu-toggle span {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
-/* FIX 3 — PHOTOGRAPHIC BLEED, TOP RIGHT (Corner architectural exterior fragment) */
+/* FIX 5 — PHOTOGRAPHIC BLEED (Removed broken file reference cleanly until Approval Gate confirmation) */
 .gc-trust-block::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 38%;
-  height: 34%;
-  pointer-events: none;
-  z-index: 0;
-  background-image: url(../assets/building_corner_bleed.png);
-  background-size: cover;
-  background-position: top right;
-  filter: grayscale(1) contrast(0.9) brightness(1.05);
-  opacity: 0.30;
-  mask-image: linear-gradient(215deg, #000 0%, #000 22%, transparent 68%);
-  -webkit-mask-image: linear-gradient(215deg, #000 0%, #000 22%, transparent 68%);
-}
-
-@media (max-width: 767px) {
-  .gc-trust-block::after {
-    width: 52%;
-    height: 22%;
-    opacity: 0.18;
-  }
+  display: none;
 }
 
 /* Content Container Stacking above pseudo-elements */
@@ -3218,11 +3196,11 @@ body.menu-open .mobile-menu-toggle span {
   margin: 0;
 }
 
-/* FIX 1 — Below 768px: Mobile Sizing & Flex Ordering (1.000+ top 250px, 30 middle 215px, 40+ bottom 215px) */
+/* FIX 3 — Below 900px: Panel 70% / Image 30% for all three cards */
 .gc-trust-card-3 {
   order: -1;
-  min-height: 250px;
-  grid-template-columns: 62% 38%;
+  min-height: 260px;
+  grid-template-columns: 70% 30%;
 }
 .gc-trust-card-3 .gc-trust-card-panel {
   background-color: #0F0E0C;
@@ -3231,8 +3209,8 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-1 {
   order: 0;
-  min-height: 215px;
-  grid-template-columns: 62% 38%;
+  min-height: 220px;
+  grid-template-columns: 70% 30%;
 }
 .gc-trust-card-1 .gc-trust-card-panel {
   background-color: #0F0E0C;
@@ -3241,17 +3219,23 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-2 {
   order: 1;
-  min-height: 215px;
-  grid-template-columns: 38% 62%;
+  min-height: 220px;
+  grid-template-columns: 70% 30%;
 }
 .gc-trust-card-2 .gc-trust-card-panel {
   background-color: #F7F6F4;
   color: #0F0E0C;
+  order: 1;
+}
+.gc-trust-card-2 .gc-trust-card-media {
+  order: 2;
 }
 
-/* FIX 2 — Panel Interior Structure (Vertically centered flex row) */
+/* FIX 2 — Panel Layout (min-width: 0, overflow: visible, padding-right: 20px) */
 .gc-trust-card-panel {
   padding: 24px 20px;
+  min-width: 0;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -3259,14 +3243,15 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-content-group {
   display: flex;
-  align-items: flex-start; /* Hairline, Numeral and Text Block aligned at top */
+  align-items: stretch;
   width: 100%;
+  min-width: 0;
 }
 
-/* FIX 2 — Vertical Hairline (Height 100% of flex row, aligned to top) */
+/* Vertical Hairline */
 .gc-trust-hairline {
   width: 1px;
-  height: 100%;
+  height: auto;
   align-self: stretch;
   margin-right: 18px;
   flex: 0 0 auto;
@@ -3279,51 +3264,33 @@ body.menu-open .mobile-menu-toggle span {
   background: rgba(15, 14, 12, 0.28);
 }
 
-/* FIX 2 — Numeral (Left side of text block, flex: 0 0 auto, white-space: nowrap) */
-.gc-trust-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 400;
-  font-variant-numeric: lining-nums tabular-nums;
-  line-height: 0.88;
-  letter-spacing: -0.01em;
-  margin: 0 22px 0 0;
-  flex: 0 0 auto;
-  white-space: nowrap;
-  color: #B01E56;
-}
-.gc-trust-card-2 .gc-trust-num {
-  color: #0F0E0C;
-}
-
-/* FIX 1 — Numeral sizes at all widths */
-.gc-trust-card-3 .gc-trust-num {
-  font-size: clamp(64px, 13vw, 96px);
-}
-.gc-trust-card-1 .gc-trust-num,
-.gc-trust-card-2 .gc-trust-num {
-  font-size: clamp(54px, 11vw, 76px);
-}
-
-/* FIX 2 — Text Block (Right side of numeral) */
-.gc-trust-text-block {
-  flex: 1 1 auto;
-  min-width: 0;
+/* FIX 1 — BELOW 900px: STACKED COMPOSITION inside .gc-trust-card-text-container */
+.gc-trust-card-text-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
 }
 
-/* FIX 1 & 2 — Label (Optically aligned with top of numeral's digits: padding-top 0.14em) */
+.gc-trust-text-block {
+  display: contents;
+}
+
+/* FIX 1 — STACKED ORDER BELOW 900px: label (1) -> numeral (2) -> short rule (3) -> caption (4) */
 .gc-trust-card-label {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.13em;
   line-height: 1.4;
-  margin: 0;
-  padding-top: 0.14em;
+  margin: 0 0 10px 0;
+  padding-top: 0;
+  order: 1;
   color: #FFFFFF;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .gc-trust-card-2 .gc-trust-card-label {
   color: #0F0E0C;
@@ -3336,25 +3303,51 @@ body.menu-open .mobile-menu-toggle span {
   font-size: 11px;
 }
 
-/* FIX 2 — Short Horizontal Divider beneath label */
+.gc-trust-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px 0;
+  order: 2;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  color: #B01E56;
+}
+.gc-trust-card-2 .gc-trust-num {
+  color: #0F0E0C;
+}
+.gc-trust-card-3 .gc-trust-num {
+  font-size: clamp(64px, 13vw, 96px);
+}
+.gc-trust-card-1 .gc-trust-num,
+.gc-trust-card-2 .gc-trust-num {
+  font-size: clamp(54px, 11vw, 76px);
+}
+
 .gc-trust-card-divider {
   width: 100%;
-  max-width: 140px;
+  max-width: 120px;
   height: 1px;
-  margin: 12px 0 12px 0;
+  margin: 0 0 12px 0;
+  order: 3;
   background: rgba(255, 255, 255, 0.18);
 }
 .gc-trust-card-2 .gc-trust-card-divider {
   background: rgba(15, 14, 12, 0.18);
 }
 
-/* FIX 1 & 2 — Caption */
+/* FIX 4 — CAPTION WIDTH BELOW 900px */
 .gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   margin: 0;
-  max-width: 26ch;
+  order: 4;
+  min-width: 0;
+  width: 100%;
+  max-width: 30ch;
   color: rgba(255, 255, 255, 0.6);
 }
 .gc-trust-card-2 .gc-trust-card-caption {
@@ -3366,12 +3359,6 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-card-1 .gc-trust-card-caption,
 .gc-trust-card-2 .gc-trust-card-caption {
   font-size: 13px;
-}
-
-@media (max-width: 767px) {
-  .gc-trust-num {
-    margin-right: 16px;
-  }
 }
 
 .gc-trust-card-media {
@@ -3476,8 +3463,8 @@ body.menu-open .mobile-menu-toggle span {
   to { transform: translateX(-50%); }
 }
 
-/* Tablet & Desktop Breakpoint (768px and above) — FIX 1 & FIX 2 */
-@media (min-width: 768px) {
+/* FIX 1, 3, 4 — AT 900PX AND ABOVE: SIDE BY SIDE COMPOSITION & TWO-COLUMN GRID */
+@media (min-width: 900px) {
   .gc-trust-container {
     padding: 0 32px;
   }
@@ -3514,12 +3501,6 @@ body.menu-open .mobile-menu-toggle span {
   .gc-trust-card-3 .gc-trust-card-panel {
     padding: 40px 36px;
   }
-  .gc-trust-card-3 .gc-trust-card-label {
-    font-size: 14px;
-  }
-  .gc-trust-card-3 .gc-trust-card-caption {
-    font-size: 15px;
-  }
 
   /* BOTTOM CARDS (30 and 40+) */
   .gc-trust-card-1 {
@@ -3540,11 +3521,59 @@ body.menu-open .mobile-menu-toggle span {
   }
   .gc-trust-card-2 .gc-trust-card-panel {
     padding: 30px 28px;
+    order: 2;
+  }
+  .gc-trust-card-2 .gc-trust-card-media {
+    order: 1;
   }
 
+  /* FIX 1 — SIDE BY SIDE COMPOSITION AT 900PX+ */
+  .gc-trust-card-text-container {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .gc-trust-num {
+    order: 1;
+    margin: 0 22px 0 0;
+  }
+
+  .gc-trust-text-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .gc-trust-card-label {
+    order: initial;
+    margin: 0;
+    padding-top: 0.14em;
+  }
+
+  .gc-trust-card-3 .gc-trust-card-label {
+    font-size: 14px;
+  }
   .gc-trust-card-1 .gc-trust-card-label,
   .gc-trust-card-2 .gc-trust-card-label {
     font-size: 12px;
+  }
+
+  .gc-trust-card-divider {
+    order: initial;
+    max-width: 140px;
+    margin: 12px 0 12px 0;
+  }
+
+  .gc-trust-card-caption {
+    order: initial;
+    max-width: 26ch;
+  }
+  .gc-trust-card-3 .gc-trust-card-caption {
+    font-size: 15px;
   }
   .gc-trust-card-1 .gc-trust-card-caption,
   .gc-trust-card-2 .gc-trust-card-caption {

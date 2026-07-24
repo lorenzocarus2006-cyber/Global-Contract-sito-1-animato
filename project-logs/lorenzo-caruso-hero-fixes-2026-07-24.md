@@ -6,35 +6,33 @@ Branch: `main` (local only, zero pushes, uncommitted working tree).
 1. **Header Navigation Clean-up (STEP 14 / Part 1)**: Removed `<a class="nav-phone">` element and its text/icon children from `index.html`. Removed `.nav-phone`, `.nav-phone-text`, `.nav-phone-icon` and related rules from `css/style.css`.
 2. **Hero Dark Space & Height (STEP 14 / Part 2)**: Updated `.hero-section` min-height to `100vh / 118svh`. Set `.hero-proof-headline` `padding-bottom: 22svh` so headline stays anchored relative to top while creating >16svh of uninterrupted dark photograph below the CTA before `.gc-trust-block` top curve. At scroll 0 (390x844 and 1440x900), zero light band is visible.
 3. **Card Panel Backgrounds (STEP 14 / Part 3)**: Replaced desaturated blue-grey `#17161A` with deep rich warm black `#0F0E0C` on Cards 1 & 3 panels. Image placeholder slot set to `#1C1A17`. Light panel (Card 2) remains `#F7F6F4`.
-4. **Card Order & Size Hierarchy at All Widths (STEP 14 / Part 4 & 5 & STEP 15 / FIX 1)**:
-   - Below 768px: `.gc-trust-cards-wrapper { display: flex; flex-direction: column; gap: 20px; }`. Card 3 (`1.000+`): `order: -1; min-height: 250px`. Card 1 (`30`): `order: 0; min-height: 215px`. Card 2 (`40+`): `order: 1; min-height: 215px`. DOM order remains 30, 40+, 1.000+.
-   - At >=768px: `.gc-trust-cards-wrapper { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "hero hero" "left right"; gap: 20px; }`. Card 3 (`1.000+`): `grid-area: hero; min-height: 290px; order: initial`. Card 1 (`30`): `grid-area: left; min-height: 250px; order: initial`. Card 2 (`40+`): `grid-area: right; min-height: 250px; order: initial`.
-   - Numeral Clamps (STEP 15 / FIX 1): Card 3 (`1.000+`): `clamp(64px, 13vw, 96px)`; Cards 1 & 2 (`30` and `40+`): `clamp(54px, 11vw, 76px)`.
-   - Label Sizes (STEP 15 / FIX 1): Card 3 (`1.000+`): `12px` (<768px) / `14px` (>=768px); Cards 1 & 2: `11px` (<768px) / `12px` (>=768px).
-   - Caption Sizes (STEP 15 / FIX 1): Card 3 (`1.000+`): `14px` (<768px) / `15px` (>=768px); Cards 1 & 2: `13px` (<768px) / `14px` (>=768px).
-5. **Panel Composition — Side-by-Side Numeral and Text Block (STEP 15 / FIX 2)**:
-   - Rebuilt panel interior: `[vertical hairline (100% height)] [18px gap] [numeral (flex: 0 0 auto, white-space: nowrap)] [22px gap] [text block (flex: 1 1 auto)]`.
-   - Text block contains: label (`padding-top: 0.14em` for optical alignment), short horizontal rule (`height: 1px`, `max-width: 140px`, `rgba(255,255,255,0.18)` / `rgba(15,14,12,0.18)`), and caption (`max-width: 26ch`).
-   - Side-by-side flex row holds at ALL widths including 390px (mobile gap `16px`).
-6. **3-Layer Warm Paper Section Background & Grain (STEP 15 / FIX 3 & FIX 4)**:
-   - Base Layer `#EFEDE8`.
-   - Grain Layer `::before`: URL-encoded fractalNoise SVG data URI with `opacity: 0.07`, `mix-blend-mode: multiply`. Computed background-image resolved.
-   - Photographic Bleed `::after`: Positioned `top: 0; right: 0;` (width `38%` desktop / `52%` mobile, height `34%` desktop / `22%` mobile, `opacity: 0.30` desktop / `0.18` mobile) with diagonal gradient mask. Corner exterior facade image asset `building_corner_bleed.png` approval gate submitted (1 credit cost).
+4. **Card Order & Size Hierarchy (STEP 14 / Part 4 & 5, STEP 15 / FIX 1, STEP 16 / FIX 1 & 3)**:
+   - Below 900px: Panel 70% / Image 30% grid split on all three cards. Card 3 (`1.000+`): `order: -1; min-height: 260px`. Card 1 (`30`): `order: 0; min-height: 220px`. Card 2 (`40+`): `order: 1; min-height: 220px`.
+   - At >=900px: Two-column grid layout (`"hero hero"` top, `"left right"` bottom). Card 3 (`1.000+`): `grid-area: hero; min-height: 290px; panel 58% / image 42%`. Card 1 (`30`): `grid-area: left; min-height: 250px; panel 62% / image 38%`. Card 2 (`40+`): `grid-area: right; min-height: 250px; image 62% / panel 38%`.
+5. **Conditional Panel Composition (STEP 16 / FIX 1)**:
+   - Below 900px: **STACKED COMPOSITION** (`flex-direction: column; align-items: flex-start; gap: 0`). Order top to bottom: label (`margin-bottom: 10px`) -> numeral (`margin-bottom: 12px`) -> short rule (`width 100%, max-width 120px, margin: 0 0 12px 0`) -> caption (`margin: 0, max-width: 30ch`).
+   - At >=900px: **SIDE-BY-SIDE COMPOSITION** (`flex-direction: row; align-items: flex-start; gap: 22px`). Numeral on left (`flex: 0 0 auto; white-space: nowrap`), text block on right (`flex: 1 1 auto; min-width: 0`).
+6. **Clipping Prevention & Caption Width (STEP 16 / FIX 2 & 4)**:
+   - Panel: `min-width: 0; overflow: visible; padding-right: 20px;` so text never touches or gets clipped by image boundary.
+   - Caption: `min-width: 0; width: 100%; max-width: 30ch` below 900px (`26ch` at >=900px). Renders 29 characters on first line at 390px.
+7. **Photographic Bleed Diagnosis & Approval Gate (STEP 16 / FIX 5)**:
+   - Diagnostic: Rule targeted `assets/building_corner_bleed.png`, which was not generated in STEP 15 due to approval gate rule, resulting in HTTP 404.
+   - Fix applied: Rule set to `display: none;` on `.gc-trust-block::after`. Broken reference removed cleanly. Stopped at Approval Gate for image generation.
+8. **Grain Layer Verification (STEP 16 / FIX 6)**:
+   - Verbatim data URI resolved cleanly (`opacity: 0.07`, `mix-blend-mode: multiply`).
 
 ## Files Touched
-- `index.html`: Updated cards markup for side-by-side numeral + text block layout with horizontal dividers; removed `.nav-phone` link from header; updated stylesheet query parameter to `?v=step15-1`.
-- `css/style.css`: Rebuilt Section 2 CSS for side-by-side layout (`.gc-trust-card-content-group`, `.gc-trust-text-block`, `.gc-trust-card-divider`), adjusted font-size clamps (`clamp(64px, 13vw, 96px)` vs `clamp(54px, 11vw, 76px)`), updated card min-heights, updated grain opacity to `0.07`, and configured top-right exterior corner bleed rules.
+- `index.html`: Added `.gc-trust-card-text-container` wrapper inside `.gc-trust-card-content-group` in all three cards to support stacked composition below 900px and side-by-side at 900px+; updated stylesheet query parameter to `?v=step16-1`.
+- `css/style.css`: Rebuilt Section 2 CSS for 70/30 panel split below 900px, stacked flex column order (label -> numeral -> divider -> caption) below 900px, side-by-side flex row at 900px+, `min-width: 0; overflow: visible; padding-right: 20px` on panel, and `display: none` on missing photo bleed pseudo-element.
 
-## Asset Used / Approval Gate
-- **Status**: Pending explicit user approval.
+## Approval Gate Request (FIX 5)
 - **Proposed Asset Filename**: `building_corner_bleed.png`
 - **Target Path**: `/Users/lorenzocaruso/Desktop/GC, FINAL/assets/building_corner_bleed.png`
 - **Generation Tool**: `generate_image`
-- **Credit Cost**: 1 credit
-- **Proposed Prompt**: `"The upper corner of a contemporary commercial building photographed from below against an overcast bright white sky. Clean concrete and glass facade with strong diagonal geometry, hard linear shadows, no signage, no text, no people, no cars. Muted natural daylight, documentary architectural photography, sharp architectural focus, photographic quality, not a 3D render, not an illustration."`
+- **Exact Credit Cost**: 1 credit
+- **Proposed Prompt**: `"The upper corner of a contemporary commercial building photographed from below against a bright overcast sky, clean concrete and glass, strong diagonal geometry, no signage, no text, no people, no cars, muted natural daylight, documentary architectural photography, not a render, not an illustration."`
 
 ## Explicit Merge-Risk Summary
-- **PANEL INTERIOR STRUCTURE (`.gc-trust-text-block`, `.gc-trust-card-divider`)**: Rebuilt DOM inside `.gc-trust-card-panel` to place numeral and text block side-by-side. Added `.gc-trust-card-divider` hairline below labels.
-- **CARD HIERARCHY & CLAMPS (`.gc-trust-num`)**: Reduced clamp ranges to `clamp(64px, 13vw, 96px)` (Card 3) and `clamp(54px, 11vw, 76px)` (Cards 1 & 2). Reduced card min-heights.
-- **GRAIN OPACITY (`.gc-trust-block::before`)**: Increased grain opacity to `0.07`.
-- **TOP-RIGHT BLEED GEOMETRY (`.gc-trust-block::after`)**: Updated bleed geometry to `38%` width / `34%` height (desktop) and `52%` width / `22%` height (mobile) with `linear-gradient(215deg, ...)` mask.
+- **STACKED VS SIDE-BY-SIDE BREAKPOINT (`.gc-trust-card-text-container`)**: Below 900px, panel text stacks vertically (`label` -> `numeral` -> `short rule` -> `caption`). At 900px+, panel text is side-by-side (`numeral` left, `text block` right).
+- **PANEL GRID SPLIT BELOW 900PX (`70% / 30%`)**: Below 900px, all three card panels take 70% width and image takes 30% width. Card 2 panel is on left (70%) and image is on right (30%) below 900px; reverses to image left (62%) and panel right (38%) at 900px+.
+- **BLEED PSEUDO-ELEMENT (`.gc-trust-block::after`)**: Disabled (`display: none`) until user approves generation prompt.
