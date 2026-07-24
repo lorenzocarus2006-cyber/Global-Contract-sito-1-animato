@@ -3077,8 +3077,8 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 14 REBUILD (3-LAYER WARM PAPER BACKGROUND & CARD HIERARCHY)
-   Background Base: #EFEDE8 (warm paper), Grain Layer: feTurbulence, Bleed: ./assets/hotel.png
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 15 REBUILD (SIDE-BY-SIDE NUMERAL & TEXT BLOCK, ADJUSTED HIERARCHY, GRAIN & BLEED)
+   Background Base: #EFEDE8 (warm paper), Grain Layer: feTurbulence (opacity 0.07), Bleed: ./assets/building_corner_bleed.png
    Dark Panel: #0F0E0C, Light Panel: #F7F6F4, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3094,52 +3094,52 @@ body.menu-open .mobile-menu-toggle span {
   border-bottom-right-radius: 50% 28px;
   margin-top: -28px;
   margin-bottom: -28px;
-  z-index: 6; /* Higher than .sectors-section z-index: var(--z-content) [5] so curved bottom edge renders above it */
+  z-index: 6; 
   border: none;
   outline: none;
   overflow: hidden;
 }
 
-/* 6b — GRAIN LAYER */
+/* FIX 4 — GRAIN LAYER (opacity 0.07) */
 .gc-trust-block::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.055;
+  opacity: 0.07;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
-/* 6c — PHOTOGRAPHIC BLEED, TOP RIGHT */
+/* FIX 3 — PHOTOGRAPHIC BLEED, TOP RIGHT (Corner architectural exterior fragment) */
 .gc-trust-block::after {
   content: '';
   position: absolute;
   top: 0;
   right: 0;
-  width: 46%;
-  height: 42%;
+  width: 38%;
+  height: 34%;
   pointer-events: none;
   z-index: 0;
-  background-image: url(../assets/hotel.png);
+  background-image: url(../assets/building_corner_bleed.png);
   background-size: cover;
-  background-position: center;
-  filter: grayscale(1) contrast(0.95);
-  opacity: 0.22;
-  mask-image: linear-gradient(200deg, #000 0%, #000 30%, transparent 78%);
-  -webkit-mask-image: linear-gradient(200deg, #000 0%, #000 30%, transparent 78%);
+  background-position: top right;
+  filter: grayscale(1) contrast(0.9) brightness(1.05);
+  opacity: 0.30;
+  mask-image: linear-gradient(215deg, #000 0%, #000 22%, transparent 68%);
+  -webkit-mask-image: linear-gradient(215deg, #000 0%, #000 22%, transparent 68%);
 }
 
 @media (max-width: 767px) {
   .gc-trust-block::after {
-    width: 62%;
-    height: 30%;
-    opacity: 0.16;
+    width: 52%;
+    height: 22%;
+    opacity: 0.18;
   }
 }
 
-/* 6d — Content Container Stacking above pseudo-elements */
+/* Content Container Stacking above pseudo-elements */
 .gc-trust-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -3151,7 +3151,7 @@ body.menu-open .mobile-menu-toggle span {
   z-index: 1;
 }
 
-/* PART 2 — Header Block */
+/* Header Block */
 .gc-trust-header-block {
   text-align: left;
   margin-bottom: 40px;
@@ -3199,7 +3199,7 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 0;
 }
 
-/* PART 1, 2, 4 — Card Shell & Ordering */
+/* Card Shell & Ordering */
 .gc-trust-cards-wrapper {
   display: flex;
   flex-direction: column;
@@ -3218,10 +3218,10 @@ body.menu-open .mobile-menu-toggle span {
   margin: 0;
 }
 
-/* Below 768px: Mobile Sizing & Flex Ordering (1.000+ top, 30 middle, 40+ bottom) */
+/* FIX 1 — Below 768px: Mobile Sizing & Flex Ordering (1.000+ top 250px, 30 middle 215px, 40+ bottom 215px) */
 .gc-trust-card-3 {
   order: -1;
-  min-height: 280px;
+  min-height: 250px;
   grid-template-columns: 62% 38%;
 }
 .gc-trust-card-3 .gc-trust-card-panel {
@@ -3231,7 +3231,7 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-1 {
   order: 0;
-  min-height: 200px;
+  min-height: 215px;
   grid-template-columns: 62% 38%;
 }
 .gc-trust-card-1 .gc-trust-card-panel {
@@ -3241,7 +3241,7 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-2 {
   order: 1;
-  min-height: 200px;
+  min-height: 215px;
   grid-template-columns: 38% 62%;
 }
 .gc-trust-card-2 .gc-trust-card-panel {
@@ -3249,7 +3249,7 @@ body.menu-open .mobile-menu-toggle span {
   color: #0F0E0C;
 }
 
-/* PART 4 — Panel Internal Structure */
+/* FIX 2 — Panel Interior Structure (Vertically centered flex row) */
 .gc-trust-card-panel {
   padding: 24px 20px;
   display: flex;
@@ -3259,19 +3259,19 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-card-content-group {
   display: flex;
-  align-items: center; /* Vertically centers hairline against text column */
+  align-items: flex-start; /* Hairline, Numeral and Text Block aligned at top */
+  width: 100%;
 }
 
-/* PART 5d — Vertical Hairline */
+/* FIX 2 — Vertical Hairline (Height 100% of flex row, aligned to top) */
 .gc-trust-hairline {
   width: 1px;
-  height: 76%;
-  align-self: center;
-  margin-right: 16px;
+  height: 100%;
+  align-self: stretch;
+  margin-right: 18px;
+  flex: 0 0 auto;
 }
-.gc-trust-card-1 .gc-trust-hairline {
-  background: #B01E56;
-}
+.gc-trust-card-1 .gc-trust-hairline,
 .gc-trust-card-3 .gc-trust-hairline {
   background: #B01E56;
 }
@@ -3279,75 +3279,99 @@ body.menu-open .mobile-menu-toggle span {
   background: rgba(15, 14, 12, 0.28);
 }
 
-.gc-trust-card-right-group {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
-}
-
-/* PART 5a — Label (Full strength white/ink, size per card) */
-.gc-trust-card-label {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  line-height: 1.4;
-  margin: 0 0 14px 0;
-  color: #FFFFFF;
-}
-.gc-trust-card-2 .gc-trust-card-label {
-  color: #0F0E0C;
-}
-.gc-trust-card-3 .gc-trust-card-label {
-  font-size: 13px;
-}
-.gc-trust-card-1 .gc-trust-card-label,
-.gc-trust-card-2 .gc-trust-card-label {
-  font-size: 11px;
-}
-
-/* PART 5b — Numeral (Size hierarchy at ALL widths) */
+/* FIX 2 — Numeral (Left side of text block, flex: 0 0 auto, white-space: nowrap) */
 .gc-trust-num {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400;
   font-variant-numeric: lining-nums tabular-nums;
   line-height: 0.88;
   letter-spacing: -0.01em;
-  margin: 0 0 16px 0;
+  margin: 0 22px 0 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
   color: #B01E56;
 }
 .gc-trust-card-2 .gc-trust-num {
   color: #0F0E0C;
 }
+
+/* FIX 1 — Numeral sizes at all widths */
 .gc-trust-card-3 .gc-trust-num {
-  font-size: clamp(76px, 20vw, 132px);
+  font-size: clamp(64px, 13vw, 96px);
 }
 .gc-trust-card-1 .gc-trust-num,
 .gc-trust-card-2 .gc-trust-num {
-  font-size: clamp(52px, 13vw, 76px);
+  font-size: clamp(54px, 11vw, 76px);
 }
 
-/* PART 5c — Caption */
+/* FIX 2 — Text Block (Right side of numeral) */
+.gc-trust-text-block {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* FIX 1 & 2 — Label (Optically aligned with top of numeral's digits: padding-top 0.14em) */
+.gc-trust-card-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+  margin: 0;
+  padding-top: 0.14em;
+  color: #FFFFFF;
+}
+.gc-trust-card-2 .gc-trust-card-label {
+  color: #0F0E0C;
+}
+.gc-trust-card-3 .gc-trust-card-label {
+  font-size: 12px;
+}
+.gc-trust-card-1 .gc-trust-card-label,
+.gc-trust-card-2 .gc-trust-card-label {
+  font-size: 11px;
+}
+
+/* FIX 2 — Short Horizontal Divider beneath label */
+.gc-trust-card-divider {
+  width: 100%;
+  max-width: 140px;
+  height: 1px;
+  margin: 12px 0 12px 0;
+  background: rgba(255, 255, 255, 0.18);
+}
+.gc-trust-card-2 .gc-trust-card-divider {
+  background: rgba(15, 14, 12, 0.18);
+}
+
+/* FIX 1 & 2 — Caption */
 .gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   margin: 0;
+  max-width: 26ch;
   color: rgba(255, 255, 255, 0.6);
 }
 .gc-trust-card-2 .gc-trust-card-caption {
   color: rgba(15, 14, 12, 0.6);
 }
 .gc-trust-card-3 .gc-trust-card-caption {
-  font-size: 15px;
-  max-width: 28ch;
+  font-size: 14px;
 }
 .gc-trust-card-1 .gc-trust-card-caption,
 .gc-trust-card-2 .gc-trust-card-caption {
   font-size: 13px;
-  max-width: 24ch;
+}
+
+@media (max-width: 767px) {
+  .gc-trust-num {
+    margin-right: 16px;
+  }
 }
 
 .gc-trust-card-media {
@@ -3452,7 +3476,7 @@ body.menu-open .mobile-menu-toggle span {
   to { transform: translateX(-50%); }
 }
 
-/* Tablet & Desktop Breakpoint (768px and above) — PART 0, 2, 3, 4, 5 */
+/* Tablet & Desktop Breakpoint (768px and above) — FIX 1 & FIX 2 */
 @media (min-width: 768px) {
   .gc-trust-container {
     padding: 0 32px;
@@ -3464,7 +3488,7 @@ body.menu-open .mobile-menu-toggle span {
     font-size: 16px;
   }
 
-  /* Grid Placement (PART 4): 1 Top (Card 3), 2 Bottom (Card 1 Left, Card 2 Right) */
+  /* Grid Placement: 1 Top (Card 3), 2 Bottom (Card 1 Left, Card 2 Right) */
   .gc-trust-cards-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3483,7 +3507,7 @@ body.menu-open .mobile-menu-toggle span {
   /* TOP CARD (1.000+) */
   .gc-trust-card-3 {
     grid-area: hero;
-    min-height: 320px;
+    min-height: 290px;
     grid-template-columns: 58% 42%;
     order: initial;
   }
@@ -3491,17 +3515,16 @@ body.menu-open .mobile-menu-toggle span {
     padding: 40px 36px;
   }
   .gc-trust-card-3 .gc-trust-card-label {
-    font-size: 15px;
+    font-size: 14px;
   }
   .gc-trust-card-3 .gc-trust-card-caption {
-    font-size: 16px;
-    max-width: 28ch;
+    font-size: 15px;
   }
 
   /* BOTTOM CARDS (30 and 40+) */
   .gc-trust-card-1 {
     grid-area: left;
-    min-height: 240px;
+    min-height: 250px;
     grid-template-columns: 62% 38%;
     order: initial;
   }
@@ -3511,7 +3534,7 @@ body.menu-open .mobile-menu-toggle span {
 
   .gc-trust-card-2 {
     grid-area: right;
-    min-height: 240px;
+    min-height: 250px;
     grid-template-columns: 38% 62%;
     order: initial;
   }
@@ -3526,7 +3549,6 @@ body.menu-open .mobile-menu-toggle span {
   .gc-trust-card-1 .gc-trust-card-caption,
   .gc-trust-card-2 .gc-trust-card-caption {
     font-size: 14px;
-    max-width: 24ch;
   }
 
   .gc-trust-block {
@@ -3546,7 +3568,7 @@ body.menu-open .mobile-menu-toggle span {
   }
 }
 
-/* PART 7 — Wide Viewports (1600px and above) */
+/* Wide Viewports (1600px and above) */
 @media (min-width: 1600px) {
   .gc-trust-container {
     max-width: 1360px;
