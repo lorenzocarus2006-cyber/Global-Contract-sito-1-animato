@@ -15,24 +15,25 @@ Branch: `main` (local only, zero pushes, uncommitted working tree).
 6. **Clipping Prevention & Caption Width (STEP 16 / FIX 2 & 4)**:
    - Panel: `min-width: 0; overflow: visible; padding-right: 20px;` so text never touches or gets clipped by image boundary.
    - Caption: `min-width: 0; width: 100%; max-width: 30ch` below 900px (`26ch` at >=900px). Renders 29 characters on first line at 390px.
-7. **Photographic Bleed Diagnosis & Approval Gate (STEP 16 / FIX 5)**:
-   - Diagnostic: Rule targeted `assets/building_corner_bleed.png`, which was not generated in STEP 15 due to approval gate rule, resulting in HTTP 404.
-   - Fix applied: Rule set to `display: none;` on `.gc-trust-block::after`. Broken reference removed cleanly. Stopped at Approval Gate for image generation.
+7. **Photographic Bleed Asset Generation & Rule Enablement (STEP 16 / FIX 3 & 5)**:
+   - Generated `building_corner_bleed.png` using prompt `"The upper corner of a contemporary commercial building photographed from below against a bright overcast sky, clean concrete and glass, strong diagonal geometry..."` after user explicit "yes" approval.
+   - Enabled `.gc-trust-block::after` rule in `css/style.css` targeting `../assets/building_corner_bleed.png` (`top: 0; right: 0;` width `38%` desktop / `52%` mobile, height `34%` desktop / `22%` mobile, `opacity: 0.30` desktop / `0.18` mobile) with diagonal gradient mask.
 8. **Grain Layer Verification (STEP 16 / FIX 6)**:
    - Verbatim data URI resolved cleanly (`opacity: 0.07`, `mix-blend-mode: multiply`).
 
 ## Files Touched
 - `index.html`: Added `.gc-trust-card-text-container` wrapper inside `.gc-trust-card-content-group` in all three cards to support stacked composition below 900px and side-by-side at 900px+; updated stylesheet query parameter to `?v=step16-1`.
-- `css/style.css`: Rebuilt Section 2 CSS for 70/30 panel split below 900px, stacked flex column order (label -> numeral -> divider -> caption) below 900px, side-by-side flex row at 900px+, `min-width: 0; overflow: visible; padding-right: 20px` on panel, and `display: none` on missing photo bleed pseudo-element.
+- `css/style.css`: Rebuilt Section 2 CSS for 70/30 panel split below 900px, stacked flex column order (label -> numeral -> divider -> caption) below 900px, side-by-side flex row at 900px+, `min-width: 0; overflow: visible; padding-right: 20px` on panel, and enabled photo bleed pseudo-element referencing `assets/building_corner_bleed.png`.
+- `assets/building_corner_bleed.png`: Generated exterior architectural building facade photograph (1 credit cost).
 
-## Approval Gate Request (FIX 5)
-- **Proposed Asset Filename**: `building_corner_bleed.png`
+## Asset Generated
+- **Filename**: `building_corner_bleed.png`
 - **Target Path**: `/Users/lorenzocaruso/Desktop/GC, FINAL/assets/building_corner_bleed.png`
 - **Generation Tool**: `generate_image`
-- **Exact Credit Cost**: 1 credit
-- **Proposed Prompt**: `"The upper corner of a contemporary commercial building photographed from below against a bright overcast sky, clean concrete and glass, strong diagonal geometry, no signage, no text, no people, no cars, muted natural daylight, documentary architectural photography, not a render, not an illustration."`
+- **Credit Cost**: 1 credit
+- **Status**: Generated and enabled in `css/style.css`.
 
 ## Explicit Merge-Risk Summary
 - **STACKED VS SIDE-BY-SIDE BREAKPOINT (`.gc-trust-card-text-container`)**: Below 900px, panel text stacks vertically (`label` -> `numeral` -> `short rule` -> `caption`). At 900px+, panel text is side-by-side (`numeral` left, `text block` right).
 - **PANEL GRID SPLIT BELOW 900PX (`70% / 30%`)**: Below 900px, all three card panels take 70% width and image takes 30% width. Card 2 panel is on left (70%) and image is on right (30%) below 900px; reverses to image left (62%) and panel right (38%) at 900px+.
-- **BLEED PSEUDO-ELEMENT (`.gc-trust-block::after`)**: Disabled (`display: none`) until user approves generation prompt.
+- **BLEED PSEUDO-ELEMENT (`.gc-trust-block::after`)**: Enabled and displaying generated `assets/building_corner_bleed.png` in top-right corner.
