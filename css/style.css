@@ -519,8 +519,8 @@ html.lenis, html.lenis body {
    5. SINGLE VIEWPORT HERO CONTAINER
    ----------------------------------------- */
 .hero-section {
-  height: 100vh;
-  height: 100svh;
+  height: calc(100vh + 16px);
+  height: calc(100svh + 16px);
   min-height: 590px;
   width: 100%;
   margin-bottom: 0;
@@ -3110,7 +3110,7 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 7 REBUILD (CURVED TOP EDGE, ITALY SVG & RESTRUCTURED MARQUEE)
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 8 REBUILD (MOBILE-FIRST CARDS & EXTENDED DARK BLOCK)
    Background: #EDEAE5 (warm paper), Ink: #1A1A1A, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3120,9 +3120,9 @@ body.menu-open .mobile-menu-toggle span {
   color: #1A1A1A;
   padding-top: clamp(64px, 10vh, 120px);
   padding-bottom: 0; /* Dark closing block sits flush against section end */
-  border-top-left-radius: 50% 56px;
-  border-top-right-radius: 50% 56px;
-  margin-top: -56px;
+  border-top-left-radius: 50% 16px;
+  border-top-right-radius: 50% 16px;
+  margin-top: -16px;
   z-index: 2;
   border: none;
   outline: none;
@@ -3185,7 +3185,7 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 0;
 }
 
-/* PART 3 / FIX 3 — Three Separated Staggered Split Cards with Improved Hierarchy */
+/* PART 3 / FIX 5 — Three Separated Staggered Split Cards (Mobile-First Text Composition) */
 .gc-trust-cards-wrapper {
   display: flex;
   flex-direction: column;
@@ -3235,7 +3235,7 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 .gc-trust-card-panel {
-  padding: 26px 22px;
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -3250,7 +3250,7 @@ body.menu-open .mobile-menu-toggle span {
   width: 1px;
   align-self: stretch;
   background: #B01E56;
-  margin-right: 18px;
+  margin-right: 16px;
 }
 .gc-trust-card-2 .gc-trust-hairline {
   background: rgba(26, 26, 26, 0.25);
@@ -3260,50 +3260,47 @@ body.menu-open .mobile-menu-toggle span {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
-.gc-trust-num-label-flex {
-  display: flex;
-  align-items: flex-start; /* NOT baseline */
-  gap: 18px;
+/* ROW 1 — Label ABOVE numeral on mobile */
+.gc-trust-card-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.gc-trust-card-2 .gc-trust-card-label {
+  color: rgba(26, 26, 26, 0.9);
 }
 
+/* ROW 2 — Numeral */
 .gc-trust-num {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400;
-  font-size: clamp(52px, 14vw, 76px);
-  line-height: 0.88;
+  font-size: 58px;
+  line-height: 0.9;
   font-variant-numeric: lining-nums tabular-nums;
+  margin-bottom: 14px;
   color: #B01E56;
 }
 .gc-trust-card-2 .gc-trust-num {
   color: #1A1A1A;
 }
 
-.gc-trust-card-label {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  line-height: 1.4;
-  padding-top: 0.42em; /* Nudges label down to optically align first line with top of digits */
-  max-width: 12ch;
-  color: #FFFFFF;
-  margin: 0;
-}
-.gc-trust-card-2 .gc-trust-card-label {
-  color: #1A1A1A;
-}
-
+/* ROW 3 — Caption */
 .gc-trust-card-caption {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 13px;
   line-height: 1.5;
-  max-width: 26ch;
-  margin-top: 16px;
-  margin-bottom: 0;
+  max-width: 24ch;
+  margin: 0;
   color: rgba(255, 255, 255, 0.55);
 }
 .gc-trust-card-2 .gc-trust-card-caption {
@@ -3329,36 +3326,25 @@ body.menu-open .mobile-menu-toggle span {
   filter: grayscale(1) contrast(1.05);
 }
 
-/* FIX 2 — Card 2 Image Slot SVG Map */
 .gc-trust-card-img-placeholder {
   width: 100%;
   height: 100%;
   background-color: #262320;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12%;
-  box-sizing: border-box;
 }
 
-.gc-trust-italy-map {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* PART 4 & FIX 1/4/5 — Dark Closing Block with Curved Top Edge & Marquee */
+/* PART 4 & FIX 3/4 — Dark Closing Block with Curved Top Edge & Marquee */
 .gc-trust-dark-block {
   background-color: var(--color-bg-dark); /* Exact same value as .sectors-section below */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-top: 56px;
   margin-bottom: 0;
-  padding: 56px 20px 48px; /* 48px bottom padding closes section right after marquee on mobile */
+  padding-top: 64px;
+  padding-bottom: 56px; /* 56px bottom padding closes section right after marquee on mobile */
   position: relative;
-  border-top-left-radius: 50% 56px;
-  border-top-right-radius: 50% 56px;
+  border-top-left-radius: 50% 16px;
+  border-top-right-radius: 50% 16px;
   border: none;
   outline: none;
   box-shadow: none;
@@ -3392,38 +3378,22 @@ body.menu-open .mobile-menu-toggle span {
   margin: 0 auto;
 }
 
-/* 2. Vertical Hairline (FIX 3c) */
+/* 2. Extended Vertical Hairline (FIX 3) */
 .gc-trust-dark-hairline {
   width: 1px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.22);
-  margin: 18px auto 20px;
+  height: 88px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08));
+  margin: 28px auto 28px;
 }
 
-/* 3. Tagline (FIX 3d) */
-.gc-trust-tagline {
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin: 0;
-}
-.gc-trust-tagline-white {
-  color: rgba(255, 255, 255, 0.85);
-}
-.gc-trust-tagline-magenta {
-  color: #B01E56;
-}
-
-/* 4. Marquee Moved Below Tagline (FIX 1: Placed IMMEDIATELY below tagline with margin-top 36px) */
+/* 3. Marquee (FIX 4: Larger typography & magenta sector accent) */
 .gc-trust-dark-block .gc-trust-marquee-wrapper {
   position: relative;
   z-index: 2;
   width: 100%;
   overflow: hidden;
   padding: 4px 0;
-  margin-top: 36px;
+  margin-top: 0;
   margin-bottom: 0;
   mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
@@ -3454,29 +3424,29 @@ body.menu-open .mobile-menu-toggle span {
 .gc-trust-dark-block .gc-trust-brand-name {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 20px;
-  letter-spacing: 0.05em;
+  font-size: 24px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .gc-trust-dark-block .gc-trust-brand-sep {
   margin: 0 0.45rem;
-  color: rgba(255, 255, 255, 0.32);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .gc-trust-dark-block .gc-trust-brand-sector {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 15px;
+  font-size: 16px;
   text-transform: lowercase;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(176, 30, 86, 0.75); /* Sector carries brand magenta accent */
 }
 
 .gc-trust-dark-block .gc-trust-middot {
-  margin: 0 36px;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 18px;
+  margin: 0 40px;
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 20px;
 }
 
 @keyframes gcTrustMarquee {
@@ -3517,29 +3487,52 @@ body.menu-open .mobile-menu-toggle span {
   .gc-trust-card-panel {
     padding: 34px 30px;
   }
+  /* Desktop side-by-side layout for numeral and label */
+  .gc-trust-card-right-group {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: flex-start;
+    column-gap: 18px;
+  }
   .gc-trust-card-label {
+    grid-column: 2;
+    grid-row: 1;
     font-size: 13px;
+    padding-top: 0.42em;
+    max-width: 12ch;
+    margin-bottom: 0;
+  }
+  .gc-trust-num {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: clamp(64px, 5vw, 76px);
+    margin-bottom: 0;
   }
   .gc-trust-card-caption {
+    grid-column: 1 / -1;
+    grid-row: 2;
     font-size: 14px;
+    max-width: 26ch;
+    margin-top: 16px;
   }
   .gc-trust-dark-block {
     margin-top: 72px;
-    padding: 72px 20px 64px; /* 64px bottom padding closes section on desktop */
-    border-top-left-radius: 50% 56px;
-    border-top-right-radius: 50% 56px;
+    padding-top: 84px;
+    padding-bottom: 72px; /* 72px bottom padding closes section on desktop */
+    border-top-left-radius: 50% 16px;
+    border-top-right-radius: 50% 16px;
+  }
+  .gc-trust-dark-hairline {
+    height: 120px;
   }
   .gc-trust-dark-block .gc-trust-brand-name {
-    font-size: 26px;
+    font-size: 30px;
   }
   .gc-trust-dark-block .gc-trust-brand-sector {
-    font-size: 18px;
+    font-size: 19px;
   }
   .gc-trust-dark-block .gc-trust-middot {
-    margin: 0 48px;
-  }
-  .gc-trust-tagline {
-    font-size: 12px;
+    margin: 0 52px;
   }
 }
 
