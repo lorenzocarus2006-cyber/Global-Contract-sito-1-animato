@@ -198,18 +198,12 @@
         </div>
       </div>
 
-      <!-- PART 4 & FIX 3/4: Dark Closing Block (Logo -> Extended Hairline -> Marquee) -->
+      <!-- PART 4 & STEP 9: Dark Closing Block (Marquee -> Inverted Hairline -> Logo) -->
       <div class="gc-trust-dark-block">
         <div class="gc-trust-dark-texture" aria-hidden="true"></div>
         <div class="gc-trust-dark-content">
           
-          <!-- 1. Real GC Logo File -->
-          <img src="./logo.png" alt="Global Contract" class="gc-trust-logo-img">
-
-          <!-- 2. Extended Vertical Hairline (FIX 3) -->
-          <div class="gc-trust-dark-hairline" aria-hidden="true"></div>
-
-          <!-- 3. Brand Marquee (FIX 4) -->
+          <!-- 1. Brand Marquee (FIX 1 / FIX 2: First element inside dark block) -->
           <div class="gc-trust-marquee-wrapper" aria-label="Alcuni dei marchi che hanno scelto Global Contract">
             <div class="gc-trust-marquee-track">
               <div class="gc-trust-marquee-group">
@@ -357,6 +351,13 @@
               </div>
             </div>
           </div>
+
+          <!-- 2. Vertical Hairline (FIX 3: Runs from below marquee down to logo) -->
+          <div class="gc-trust-dark-hairline" aria-hidden="true"></div>
+
+          <!-- 3. Real GC Logo File (FIX 4: Closes section at bottom) -->
+          <!-- Alternative: add class gc-trust-logo--straddle to have the mark sit across the section boundary -->
+          <img src="./logo.png" alt="Global Contract" class="gc-trust-logo-img">
 
         </div>
       </div>
