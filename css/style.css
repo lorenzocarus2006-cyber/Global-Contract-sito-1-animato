@@ -519,8 +519,8 @@ html.lenis, html.lenis body {
    5. SINGLE VIEWPORT HERO CONTAINER
    ----------------------------------------- */
 .hero-section {
-  height: calc(100vh + 16px);
-  height: calc(100svh + 16px);
+  height: calc(100vh + 28px);
+  height: calc(100svh + 28px);
   min-height: 590px;
   width: 100%;
   margin-bottom: 0;
@@ -3110,7 +3110,7 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) — STEP 10 REBUILD (LIGHT BAND WITH MARQUEE & DUAL CURVED EDGES)
+   S2. TRUST BLOCK (.gc-trust-*) — STEP 11 REBUILD (DUAL 28PX CURVED EDGES & SUBSTANTIAL MARQUEE)
    Background: #EDEAE5 (warm paper), Ink: #1A1A1A, Accent: #B01E56
    ----------------------------------------- */
 .gc-trust-block {
@@ -3120,13 +3120,13 @@ body.menu-open .mobile-menu-toggle span {
   color: #1A1A1A;
   padding-top: clamp(64px, 10vh, 120px);
   padding-bottom: 64px;
-  border-top-left-radius: 50% 16px;
-  border-top-right-radius: 50% 16px;
-  border-bottom-left-radius: 50% 16px;
-  border-bottom-right-radius: 50% 16px;
-  margin-top: -16px;
-  margin-bottom: -16px;
-  z-index: 2;
+  border-top-left-radius: 50% 28px;
+  border-top-right-radius: 50% 28px;
+  border-bottom-left-radius: 50% 28px;
+  border-bottom-right-radius: 50% 28px;
+  margin-top: -28px;
+  margin-bottom: -28px;
+  z-index: 6; /* Higher than .sectors-section z-index: var(--z-content) [5] so curved bottom edge renders above it */
   border: none;
   outline: none;
 }
@@ -3345,12 +3345,12 @@ body.menu-open .mobile-menu-toggle span {
   margin-bottom: 28px;
 }
 
-/* Marquee inside Light Credibility Band (FIX 2 & FIX 3) */
+/* Marquee inside Light Credibility Band (FIX 2 & FIX 3 / STEP 11 FIX 2) */
 .gc-trust-marquee-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 4px 0;
+  padding: 6px 0;
   margin-top: 0;
   margin-bottom: 0;
   mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
@@ -3381,29 +3381,29 @@ body.menu-open .mobile-menu-toggle span {
 
 .gc-trust-brand-name {
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 24px;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: rgba(26, 26, 26, 0.85);
+  color: #1A1A1A;
 }
 
 .gc-trust-brand-sep {
-  margin: 0 0.45rem;
-  color: rgba(26, 26, 26, 0.3);
+  margin: 0 0.5rem;
+  color: rgba(26, 26, 26, 0.28);
 }
 
 .gc-trust-brand-sector {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 16px;
+  font-size: 15px;
   text-transform: lowercase;
-  color: rgba(176, 30, 86, 0.85);
+  color: rgba(176, 30, 86, 0.8);
 }
 
 .gc-trust-middot {
-  margin: 0 40px;
-  color: rgba(26, 26, 26, 0.22);
+  margin: 0 44px;
+  color: rgba(26, 26, 26, 0.2);
   font-size: 20px;
 }
 
@@ -3480,23 +3480,23 @@ body.menu-open .mobile-menu-toggle span {
     margin-top: 72px;
   }
   .gc-trust-brand-name {
-    font-size: 30px;
+    font-size: 34px;
   }
   .gc-trust-brand-sector {
-    font-size: 19px;
+    font-size: 18px;
   }
   .gc-trust-middot {
-    margin: 0 52px;
+    margin: 0 56px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gc-trust-dark-block .gc-trust-marquee-wrapper {
+  .gc-trust-marquee-wrapper {
     overflow-x: auto;
     mask-image: none;
     -webkit-mask-image: none;
   }
-  .gc-trust-dark-block .gc-trust-marquee-track {
+  .gc-trust-marquee-track {
     animation: none;
   }
 }
