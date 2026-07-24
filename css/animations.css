@@ -1,0 +1,531 @@
+/* =====================================================
+   KREA GLOBAL CONTRACT — Hero Sequence & Canvas Styles
+===================================================== */
+
+/* --- Grain overlay (fixed, pointer-events-none, no GPU repaint on scroll) --- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* =====================================================
+   HERO CANVAS SCROLL SEQUENCE
+===================================================== */
+
+/* ── Wrapper: altezza 400vh — il canvas è sticky all'interno ── */
+.hero-seq {
+  position: relative;
+  height: 400vh;
+  background: #0D0B09; /* Dark background to blend with frames */
+  overflow-x: clip;   /* clip (non hidden!) — non crea scroll-context, non rompe sticky */
+}
+
+/* ── Sticky container che ospita il canvas ── */
+.hero-seq__sticky {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ── Canvas: cover adattivo, GPU-composited ── */
+.hero-seq__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: contents;
+}
+
+/* ── Veli scuri: sopra (nav) e sotto ── */
+.hero-seq__velo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-seq__velo--top {
+  top: 0;
+  height: 280px;
+  background: linear-gradient(
+    to bottom,
+    rgba(13, 11, 9, 0.9) 0%,
+    rgba(13, 11, 9, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.hero-seq__velo--btm {
+  bottom: 0;
+  height: 220px;
+  background: linear-gradient(
+    to top,
+    rgba(13, 11, 9, 0.85) 0%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────
+   BEAT OVERLAYS
+   Absolute overlays centered over the sticky canvas
+───────────────────────────────────────────────────── */
+.hero-beat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;                /* GSAP controlla opacity */
+  will-change: opacity, transform;
+}
+
+/* ── Inner layout: center / left / right ── */
+.hero-beat__inner {
+  width: 100%;
+  padding: 0 var(--pad-x);
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+.hero-beat__inner--center {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hero-beat__inner--left {
+  text-align: left;
+  padding-left: 6vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero-beat__inner--right {
+  text-align: right;
+  padding-right: 6vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5rem;
+}
+
+/* ── Eyebrow ── */
+.hero-beat__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-bg); /* light color on dark canvas */
+  text-shadow: 0 1px 8px rgba(0,0,0,1);
+}
+
+/* ── Titoli ── */
+.hero-beat__title {
+  font-family: var(--font-serif);
+  font-weight: 700; /* Bold weight */
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  text-shadow: 
+    0 2px 32px rgba(0,0,0,0.75), 
+    0 0 80px rgba(0,0,0,0.5);
+}
+
+.hero-beat__title em {
+  font-style: italic;
+  color: #FFFFFF;
+}
+
+.hero-beat__title--xl {
+  font-size: clamp(3rem, 7vw, 5.5rem);
+}
+
+.hero-beat__title--lg {
+  font-size: clamp(2.6rem, 6.5vw, 5rem);
+}
+
+.hero-beat__title--md {
+  font-size: clamp(2rem, 5.2vw, 4rem);
+}
+
+/* ── Sottotitolo ── */
+.hero-beat__sub {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  font-weight: 500; /* Medium-bold for premium legibility */
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  max-width: 52ch;
+  text-shadow: 0 1px 16px rgba(0,0,0,0.9);
+}
+
+/* ── Beat B: statistiche ── */
+.hero-beat__stats {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 0.5rem;
+}
+
+.hero-beat__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hero-beat__stat-num {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #FFFFFF;
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.3);
+}
+
+.hero-beat__stat-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Beat C: card servizi ── */
+.hero-beat__cards {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
+}
+
+.hero-beat__card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(13, 11, 9, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;              /* stagger via GSAP */
+  will-change: opacity, transform;
+}
+
+.hero-beat__card svg {
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.hero-beat__card span {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: #FFFFFF;
+}
+
+/* ── Beat D: CTA pill ── */
+.hero-beat__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 16px 36px;
+  border-radius: 999px;
+  background: var(--color-violet); /* Purple Accent */
+  color: #FFFFFF;
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s;
+  box-shadow: 0 0 24px rgba(74, 44, 107, 0.5); /* Violet shadow */
+  text-decoration: none;
+  will-change: transform;
+}
+
+.hero-beat__cta:hover {
+  transform: scale(1.04) translateY(-2px);
+  background-color: var(--color-violet-l);
+  box-shadow: 0 0 36px rgba(74, 44, 107, 0.7);
+}
+
+.hero-beat__cta:active {
+  transform: scale(0.98);
+}
+
+.hero-beat__cta svg {
+  transition: transform 0.25s;
+}
+
+.hero-beat__cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* ─────────────────────────────────────────────────────
+   SCROLL HINT
+───────────────────────────────────────────────────── */
+.hero-seq__scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.hero-seq__scroll-hint span {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.hero-seq__scroll-arrow {
+  color: rgba(255, 255, 255, 0.8);
+  animation: scrollArrowBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollArrowBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%       { transform: translateY(6px); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────
+   RESPONSIVE HERO OVERLAYS
+───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-beat__inner--left  { padding-left:  var(--pad-x); }
+  .hero-beat__inner--right { padding-right: var(--pad-x); align-items: flex-start; text-align: left; }
+
+  .hero-beat__cards {
+    grid-template-columns: 1fr 1fr;
+    justify-content: flex-start;
+  }
+
+  .hero-beat__stats { gap: 1.5rem; }
+
+  .hero-beat__title--xl { font-size: clamp(2.4rem, 9vw, 3.5rem); }
+  .hero-beat__title--lg { font-size: clamp(2rem, 8vw, 3rem); }
+  .hero-beat__title--md { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+
+  .hero-beat__cta { padding: 14px 28px; font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .hero-beat__cards { grid-template-columns: 1fr; }
+  .hero-beat__stats { flex-direction: column; gap: 0.75rem; }
+}
+
+/* =====================================================
+   SERVICES CANVAS SCROLL SEQUENCE
+===================================================== */
+
+.services-seq {
+  position: relative;
+  height: 400vh;
+  background: var(--color-bg);
+  overflow-x: clip;
+}
+
+.services-seq__sticky {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.services-seq__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: contents;
+}
+
+/* Veli degradé per blend seamless con sfondo pagina (#FAFAF8) */
+.services-seq__velo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.services-seq__velo--top {
+  top: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, var(--color-bg) 0%, transparent 100%);
+}
+
+.services-seq__velo--btm {
+  bottom: 0;
+  height: 200px;
+  background: linear-gradient(to top, var(--color-bg) 0%, transparent 100%);
+}
+
+/* Beat overlays */
+.svc-beat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.svc-beat__inner {
+  width: 100%;
+  padding: 0 var(--pad-x);
+  max-width: var(--container);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.svc-beat__inner--center {
+  text-align: center;
+  align-items: center;
+}
+
+.svc-beat__inner--left {
+  text-align: left;
+  padding-left: 6vw;
+  align-items: flex-start;
+}
+
+.svc-beat__inner--right {
+  text-align: right;
+  padding-right: 6vw;
+  align-items: flex-end;
+}
+
+.svc-beat__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-violet);
+  text-shadow: 0 1px 8px rgba(255,255,255,0.8);
+}
+
+.svc-beat__title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  text-shadow: 0 2px 24px rgba(255,255,255,0.9), 0 0 60px rgba(255,255,255,0.6);
+}
+
+.svc-beat__sub {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  font-weight: 500;
+  color: var(--color-text-m);
+  line-height: 1.7;
+  max-width: 48ch;
+  text-shadow: 0 1px 12px rgba(255,255,255,0.9);
+}
+
+/* CTA beat D */
+.svc-beat__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 16px 36px;
+  border-radius: 999px;
+  background: var(--color-violet);
+  color: #FFFFFF;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s, background-color 0.25s;
+  box-shadow: 0 4px 24px rgba(74, 44, 107, 0.35);
+  text-decoration: none;
+  margin-top: 0.5rem;
+}
+
+.svc-beat__cta:hover {
+  transform: scale(1.04) translateY(-2px);
+  background-color: var(--color-violet-l);
+  box-shadow: 0 8px 36px rgba(74, 44, 107, 0.5);
+}
+
+/* Scroll hint */
+.services-seq__scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  will-change: opacity, transform;
+  color: var(--color-text-m);
+}
+
+.services-seq__scroll-hint span {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .svc-beat__inner--right {
+    padding-right: var(--pad-x);
+    align-items: flex-start;
+    text-align: left;
+  }
+  .svc-beat__inner--left {
+    padding-left: var(--pad-x);
+  }
+}

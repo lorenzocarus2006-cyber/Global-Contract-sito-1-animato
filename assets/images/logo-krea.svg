@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 50" width="220" height="50">
+  <defs>
+    <style>
+      .logo-icon { fill: #4A2C6B; }
+      .logo-text-krea { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-weight: 700; fill: #1A1A1A; letter-spacing: 0.08em; }
+      .logo-text-sub { font-family: 'DM Sans', sans-serif; font-size: 8px; font-weight: 600; fill: #4A2C6B; letter-spacing: 0.22em; }
+    </style>
+  </defs>
+  <!-- Icon: Geometric minimal K shape -->
+  <g transform="translate(10, 8)">
+    <path class="logo-icon" d="M0,4 L4,4 L4,30 L0,30 Z" />
+    <path class="logo-icon" d="M4,17 L18,4 L23,4 L9,17 Z" />
+    <path class="logo-icon" d="M7,15 L23,30 L18,30 L4,17 Z" />
+  </g>
+  <!-- Text Wordmark -->
+  <text x="44" y="27" class="logo-text-krea">KREA</text>
+  <text x="44" y="38" class="logo-text-sub">GLOBAL CONTRACT</text>
+</svg>

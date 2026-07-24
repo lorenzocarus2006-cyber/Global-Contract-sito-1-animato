@@ -1,5 +1,10 @@
 node_modules/
 .DS_Store
+Thumbs.db
+*.log
+.env
+.agent/
+.agents/
 .claude/
 *.pyc
 __pycache__/
@@ -21,6 +26,4 @@ assets/animations/scroll-*/**
 # Archived old animation frames (~344MB) - local-only backup, never commit.
 assets/animations/scroll vecchi/
 
-# Claude Code local env (not part of the site)
-.agents/
 skills-lock.json
