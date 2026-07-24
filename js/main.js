@@ -1574,20 +1574,61 @@ document.addEventListener("DOMContentLoaded", () => {
     layout(0);
   }
 
-  // S2. Trust Block statistics entrance animation (STEP 4: fade and rise in DOM order)
-  if (document.querySelector('.gc-trust-card, .gc-trust-card-anchor') && typeof ScrollTrigger !== 'undefined') {
-    gsap.from('.gc-trust-card, .gc-trust-card-anchor', {
-      scrollTrigger: {
-        trigger: '.gc-trust-block',
-        start: 'top 75%',
-        toggleActions: 'play none none none'
-      },
-      opacity: 0,
-      y: 16,
-      duration: 0.6,
-      stagger: 0.08,
-      ease: 'power2.out'
-    });
+  // S2. Trust Block animations (STEP 5: ScrollTrigger for Header Block, Cards, and Dark Closing Block)
+  if (document.querySelector('.gc-trust-block') && typeof ScrollTrigger !== 'undefined') {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReducedMotion) {
+      // 1. Header block
+      const headerBlock = document.querySelector('.gc-trust-header-block');
+      if (headerBlock) {
+        gsap.from(headerBlock.children, {
+          scrollTrigger: {
+            trigger: headerBlock,
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+          },
+          opacity: 0,
+          y: 20,
+          stagger: 0.08,
+          duration: 0.7,
+          ease: 'power2.out'
+        });
+      }
+
+      // 2. Cards (each triggers independently at start "top 82%")
+      const cards = document.querySelectorAll('.gc-trust-card');
+      cards.forEach((card, index) => {
+        const xOffset = (index % 2 === 0) ? -24 : 24; // Cards 1 & 3: x -24 -> 0, Card 2: x 24 -> 0
+        gsap.from(card, {
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 82%',
+            toggleActions: 'play none none none'
+          },
+          opacity: 0,
+          y: 32,
+          x: xOffset,
+          duration: 0.8,
+          ease: 'power3.out'
+        });
+      });
+
+      // 3. Dark closing block
+      const darkBlock = document.querySelector('.gc-trust-dark-block');
+      if (darkBlock) {
+        gsap.from(darkBlock, {
+          scrollTrigger: {
+            trigger: darkBlock,
+            start: 'top 90%',
+            toggleActions: 'play none none none'
+          },
+          opacity: 0,
+          duration: 0.6,
+          ease: 'power2.out'
+        });
+      }
+    }
   }
 
   // Refresh ScrollTrigger after section reordering and layout setup

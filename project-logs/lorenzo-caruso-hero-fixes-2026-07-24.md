@@ -3,33 +3,38 @@
 Branch: `main` (local only, zero pushes, uncommitted working tree).
 
 ## Task Summary
-1. **Part 1 — Non-sticky Header**: Converted `.main-header` from `position: fixed` to `position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%)` in `css/style.css`. Disabled JS scroll listener in `js/main.js` that toggles `.scrolled` state with `// STEP 4: sticky header removed — do not delete the code`. Header now resides over the hero and scrolls out of view naturally.
-2. **Part 2 — Credibility Band Shell**: Section background set to `#EDEAE5` (warm paper tone), ink `#111111`, vertical padding `clamp(56px, 9vh, 112px)`, container max-width 1200px (padding 20px mobile / 24px desktop), hard cut against adjacent dark sections.
-3. **Part 3 & 4 — Asymmetric Statistic Cards**:
-   - Mobile (<900px): `grid-template-columns: 1fr 1fr` (Card A & Card B side by side), Card C spanning both columns below (`grid-column: 1 / -1`).
-   - Desktop (>=900px): `grid-template-columns: repeat(4, 1fr)` (Card A span 1, Card B span 1, Card C span 2 on a single row).
-   - Light Cards (A & B): `#FFFFFF` fill, `rgba(17,17,17,0.08)` border, 10px radius, padding 18px 16px (24px desktop), min-height 132px (240px desktop). Micro-labels `DAL 1995` and `TERRITORIO` in Inter 500 10px (11px desktop) uppercase (`rgba(17,17,17,0.45)`). Numerals `30` and `40+` in Cormorant Garamond 500 `lining-nums tabular-nums` (#111111).
-   - Anchor Card C: `#111111` fill, 10px radius, padding 22px 20px (32px desktop), min-height 190px (240px desktop), relative positioning with overflow hidden. Inset hairline detail (`border: 1px solid rgba(255,255,255,0.14)`, 6px radius). Micro-label `REALIZZAZIONI`. Numeral `1.000` in Cormorant Garamond 500 clamp(64px, 18vw, 110px) set in brand magenta `#B01E56` (the ONLY magenta accent in this section).
-4. **Part 5 — GC Rhombus Watermark Mark**: Rotated 45° square SVG mark (`width: 150px/210px`, `stroke: rgba(255,255,255,0.16)`, `bottom: -34px; right: -28px`) inside Card C, partially cropped.
-5. **Part 6 — Thesis Block**: Centred thesis "Non arrediamo spazi. Progettiamo attività." (Cormorant Garamond 500 clamp(28px, 7vw, 46px)) + support "Ogni locale nasce da un metodo collaudato in trent’anni di cantiere." (Inter 400 15px/17px).
-6. **Part 7 — Hairline, Eyebrow & Marquee**: Hairline (24px gap), eyebrow `HANNO SCELTO GLOBAL CONTRACT` (Inter 500 10px/11px uppercase), brand marquee with 16px/20px brand names and 13px/15px sector labels.
-7. **Part 8 — Entrance Animation**: Updated GSAP ScrollTrigger selector in `js/main.js` to target `.gc-trust-card, .gc-trust-card-anchor` in DOM order.
+1. **Header Non-sticky Positioning**: Converted `.main-header` to `position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%)` in `css/style.css`. Disabled JS scroll listener in `js/main.js` that toggles `.scrolled` state with `// STEP 4: sticky header removed — do not delete the code`. Header scrolls out of view naturally with the hero.
+2. **Section Shell (STEP 5 Rebuild)**: Rebuilt `.gc-trust-block` section into a warm paper background (`#EDEAE5`), `#1A1A1A` primary ink, `#B01E56` brand magenta accent, vertical top padding `clamp(64px, 10vh, 120px)`, bottom padding 0 (sits flush against dark closing block), container max-width 1200px (padding 20px mobile / 32px desktop).
+3. **Header Block**: Top-left aligned header block containing eyebrow `HANNO SCELTO GLOBAL CONTRACT` (Inter 600 11px uppercase `#B01E56`), short rule (32px width x 2px height `#B01E56`), Cormorant Garamond 500 headline `"Numeri che<br>costruiscono <span class="gc-trust-italic-accent">fiducia.</span>"` (italic `#B01E56`), and Inter 400 subline `"Trent’anni di metodo, migliaia di locali e una presenza capillare in tutta Italia."`.
+4. **Three Staggered Split Cards**:
+   - Card 1 (Dark panel left `62%`, image right `38%`): `#17161A` panel background, `bar_parisi.jpg` image with `grayscale(1) contrast(1.05)`. Numeral `30` in `#B01E56` next to magenta hairline, label `ANNI DI CANTIERI` (white), caption `Esperienza concreta, progetti che durano nel tempo.`. Offset: `margin-right: 8%` (4% mobile).
+   - Card 2 (Image left `38%`, light panel right `62%`): Image placeholder `#2A2825` with HTML comment, `#F7F6F4` panel background. Numeral `40+` in `#1A1A1A` next to dark hairline (`rgba(26,26,26,0.25)`), label `CITTÀ IN ITALIA` (#1A1A1A), caption `Una rete capillare al servizio dei tuoi progetti.`. Offset: `margin-left: 8%` (4% mobile).
+   - Card 3 (Dark panel left `62%`, image right `38%`): `#17161A` panel background, `restaurant.png` image in color. Numeral `1.000+` in `#B01E56` next to magenta hairline, label `LOCALI PROGETTATI E COSTRUITI` (white), caption `Dall’idea alla realtà, sempre chiavi in mano.`. Offset: `margin-right: 8%` (4% mobile).
+   - Card overlap: `margin-bottom: -18px`, `border-radius: 14px`, `box-shadow: 0 18px 40px rgba(26,26,26,0.10)`. Numerals set in Cormorant Garamond 400 `lining-nums tabular-nums`.
+5. **Dark Closing Block with Curved Top Edge**:
+   - Full-bleed `#121113` background (`width: 100vw; margin-left: calc(50% - 50vw)`).
+   - Elliptical curved top edge (`border-top-left-radius: 50% 64px; border-top-right-radius: 50% 64px`).
+   - Subtle repeating radial gradient texture (`rgba(255,255,255,0.03)`).
+   - Sequence: GC rhombus mark SVG (64x64, filled `#B01E56` with white `GC` text) -> Relocated Brand Marquee -> Vertical Hairline (40px height) -> Centred Tagline `"METODO. CONTINUITÀ. PRESENZA REALE."`.
+6. **Relocated Brand Marquee**: Positioned inside dark block between GC mark and vertical hairline. Restyled for dark background: Inter 500 15px/18px brand names (`rgba(255,255,255,0.8)`), Inter 400 12px/14px sector labels (`rgba(255,255,255,0.35)`), edge fade mask fading to `#121113`.
+7. **Scroll Animation (GSAP)**:
+   - Header block: `opacity: 0 -> 1`, `y: 20 -> 0`, stagger `0.08`, duration `0.7s`.
+   - Cards: Each triggers independently at `top 82%`, `opacity: 0 -> 1`, `y: 32 -> 0`, Cards 1 & 3 `x: -24 -> 0`, Card 2 `x: 24 -> 0`.
+   - Dark closing block: `opacity: 0 -> 1`, duration `0.6s`.
+   - Reduced-motion fallback supported.
 
 ## Files Touched
-- `index.html`: Updated Section 2 (`.gc-trust-block`) HTML for STEP 4 asymmetric layout with Card A (`DAL 1995`), Card B (`TERRITORIO`), Card C (`REALIZZAZIONI` with inline rhombus SVG watermark), thesis block, hairline, eyebrow, and marquee.
-- `css/style.css`: Updated `.main-header` to `position: absolute`, cleared `.main-header.scrolled` background. Rebuilt `.gc-trust-block` CSS rules (`#EDEAE5` warm paper tone, asymmetric grid layout, `#FFFFFF` light cards A/B, `#111111` anchor card C with inset hairline and `#B01E56` magenta numeral, Cormorant Garamond 500 `lining-nums tabular-nums`, inline rhombus SVG watermark, thesis block, and upgraded marquee font sizes).
-- `js/main.js`: Disabled header scroll listener (`// STEP 4: sticky header removed — do not delete the code`). Updated S2 ScrollTrigger entrance animation selector to `.gc-trust-card, .gc-trust-card-anchor`.
+- `index.html`: Rebuilt Section 2 (`.gc-trust-block`) HTML with header block, 3 staggered split cards with panel/media layout, and dark closing block with GC mark, relocated marquee, hairline, and tagline.
+- `css/style.css`: Updated `.main-header` to `position: absolute`. Rebuilt `.gc-trust-block` CSS rules (`#EDEAE5` warm paper tone, staggered split cards with alternating offsets & vertical overlap, Cormorant Garamond `lining-nums tabular-nums`, `#121113` full-bleed dark closing block with elliptical curved top edge, and dark marquee theme).
+- `js/main.js`: Disabled header scroll listener. Updated Section 2 ScrollTrigger animations for header block, staggered cards (alternating `x` offsets), and dark closing block.
 
 ## New/Renamed CSS Classes & Identifiers
-- `.gc-trust-card`: Light card container (`background: #FFFFFF`, `border-radius: 10px`, `border: 1px solid rgba(17,17,17,0.08)`).
-- `.gc-trust-card-anchor`: Dark anchor card C container (`background: #111111`, `border-radius: 10px`, `grid-column: 1 / -1` on mobile / `span 2` on desktop).
-- `.gc-trust-card-mark`: Inline SVG watermark mark inside Card C (`position: absolute; bottom: -34px; right: -28px`).
-- `.gc-trust-card-label`: Micro-label typography (`Inter 500 10px/11px`, letter-spacing `0.16em`, uppercase).
-- `.gc-trust-card-bottom`: Flex row baseline alignment container for numeral and caption.
-- `.gc-trust-num`: Numeral typography (`Cormorant Garamond 500`, `lining-nums tabular-nums`).
-- `.gc-trust-card-caption`: Caption typography (`Inter 400 13px/14px`, `rgba(17,17,17,0.6)` on A/B, `rgba(255,255,255,0.7)` on C).
-- `.gc-trust-thesis`, `.gc-trust-thesis-title`, `.gc-trust-thesis-sub`: Editorial thesis block elements.
+- `.gc-trust-header-block`, `.gc-trust-rule`, `.gc-trust-title`, `.gc-trust-italic-accent`, `.gc-trust-subline`: Header block elements.
+- `.gc-trust-cards-wrapper`, `.gc-trust-card`, `.gc-trust-card-1`, `.gc-trust-card-2`, `.gc-trust-card-3`: Staggered split card containers.
+- `.gc-trust-card-panel`, `.gc-trust-card-stat-group`, `.gc-trust-hairline`, `.gc-trust-num-label-flex`, `.gc-trust-num`, `.gc-trust-card-label`, `.gc-trust-card-caption`: Card panel layout and typography elements.
+- `.gc-trust-card-media`, `.gc-trust-card-img`, `.gc-trust-card-img-placeholder`: Card media and image placeholder elements.
+- `.gc-trust-dark-block`, `.gc-trust-dark-texture`, `.gc-trust-dark-content`, `.gc-trust-mark-wrap`, `.gc-trust-gc-mark`, `.gc-trust-dark-hairline`, `.gc-trust-tagline`, `.gc-trust-tagline-white`, `.gc-trust-tagline-magenta`: Dark closing block elements.
 
 ## Explicit Merge-Risk Summary
-- **NON-STICKY HEADER (`.main-header`)**: Header converted from `position: fixed` to `position: absolute`. It no longer remains pinned to the top of the viewport when scrolling down. **HIGH MERGE RISK**: Any parallel work or other page relying on sticky header behavior will be affected; changes are isolated to `index.html` header positioning and `js/main.js` scroll listener comment.
-- **Section 2 (`.gc-trust-block`) Markup & Styles**: Completely rebuilt into an asymmetric `#EDEAE5` band with 2 light cards + 1 dark anchor card C + thesis + marquee. Any parallel branch targeting Section 2 must align with `.gc-trust-card` and `.gc-trust-card-anchor`.
+- **NON-STICKY HEADER (`.main-header`)**: Header converted from `position: fixed` to `position: absolute`. It no longer remains pinned when scrolling.
+- **Section 2 (`.gc-trust-block`) Complete Rebuild**: Completely redesigned to match the reference mockup (header block + 3 staggered split cards + full-bleed curved dark closing block). Any parallel work on Section 2 must align with `.gc-trust-card-*` and `.gc-trust-dark-block`.
