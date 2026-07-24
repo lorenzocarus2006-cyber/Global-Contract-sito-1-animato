@@ -123,6 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Header & Mobile Sticky CTA state on scroll
   lenis.on('scroll', (e) => {
+    // STEP 4: sticky header removed — do not delete the code
+    /*
     const header = document.querySelector('.main-header');
     if (header) {
       if (e.scroll > 80) {
@@ -131,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         header.classList.remove('scrolled');
       }
     }
+    */
 
     const stickyCta = document.getElementById('gcStickyCta');
     const consultSection = document.getElementById('contatti');
@@ -1571,9 +1574,9 @@ document.addEventListener("DOMContentLoaded", () => {
     layout(0);
   }
 
-  // S2. Trust Block statistics entrance animation (A10: fade and rise, no count-up)
-  if (document.querySelector('.gc-trust-stat-col') && typeof ScrollTrigger !== 'undefined') {
-    gsap.from('.gc-trust-stat-col', {
+  // S2. Trust Block statistics entrance animation (STEP 4: fade and rise in DOM order)
+  if (document.querySelector('.gc-trust-card, .gc-trust-card-anchor') && typeof ScrollTrigger !== 'undefined') {
+    gsap.from('.gc-trust-card, .gc-trust-card-anchor', {
       scrollTrigger: {
         trigger: '.gc-trust-block',
         start: 'top 75%',
