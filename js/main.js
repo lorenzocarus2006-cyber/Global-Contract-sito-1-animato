@@ -1571,6 +1571,22 @@ document.addEventListener("DOMContentLoaded", () => {
     layout(0);
   }
 
+  // S2. Trust Block statistics entrance animation (A10: fade and rise, no count-up)
+  if (document.querySelector('.gc-trust-stat-col') && typeof ScrollTrigger !== 'undefined') {
+    gsap.from('.gc-trust-stat-col', {
+      scrollTrigger: {
+        trigger: '.gc-trust-block',
+        start: 'top 75%',
+        toggleActions: 'play none none none'
+      },
+      opacity: 0,
+      y: 16,
+      duration: 0.6,
+      stagger: 0.08,
+      ease: 'power2.out'
+    });
+  }
+
   // Refresh ScrollTrigger after section reordering and layout setup
   if (typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.refresh();

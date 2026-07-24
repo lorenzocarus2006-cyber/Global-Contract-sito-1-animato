@@ -360,11 +360,11 @@ html.lenis, html.lenis body {
   transition: opacity 0.4s ease;
 }
 
-/* Nav Menu */
+/* Nav Menu (C3: Inter 500 13px uppercase, 28px gap) */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2.2rem; /* Clean, refined spacing */
+  gap: 28px;
 }
 
 .nav-mobile-wordmark {
@@ -373,19 +373,20 @@ html.lenis, html.lenis body {
 
 .nav-item {
   font-family: var(--font-sans);
-  font-size: 0.95rem; /* Bolder optical presence */
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   letter-spacing: 0.06em;
-  color: var(--color-offwhite) !important; /* Premium offwhite text color */
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8) !important;
   text-decoration: none;
   position: relative;
-  padding: 0.2rem 0; /* Sleeker vertical height */
+  padding: 0.2rem 0;
   transition: opacity 0.3s ease, color 0.3s ease;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .nav-item:hover, .nav-item.active {
-  color: var(--color-white) !important;
+  color: #FFFFFF !important;
   opacity: 1;
 }
 
@@ -395,8 +396,8 @@ html.lenis, html.lenis body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1.5px; /* Slightly more defined hairline indicator */
-  background-color: var(--color-magenta-glow); /* Brand magenta accent */
+  height: 1.5px;
+  background-color: var(--color-magenta-glow);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -405,6 +406,32 @@ html.lenis, html.lenis body {
 .nav-item:hover::after, .nav-item.active::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* Nav Phone Link (C4) */
+.nav-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  margin-right: 1.2rem;
+  transition: color 0.3s ease;
+}
+.nav-phone:hover {
+  color: #FFFFFF;
+}
+.nav-phone-text {
+  display: inline;
+  white-space: nowrap;
+}
+.nav-phone-icon {
+  display: none;
+  width: 18px;
+  height: 18px;
 }
 
 .header-actions {
@@ -3081,101 +3108,124 @@ body.menu-open .mobile-menu-toggle span {
 }
 
 /* -----------------------------------------
-   S2. TRUST BLOCK (.gc-trust-*) - Hybrid Plaque
-   Compact dark block (#0D0D0D) combining 3 serif stats, a thin scrolling
-   marquee of real reference names, and a discreet caption.
+   S2. TRUST BLOCK (.gc-trust-*) — LIGHT CREDIBILITY BAND (PART A)
+   Inverted light band (#F4F3F1) with 3-col Inter stats,
+   single hairline, active eyebrow, and continuous brand marquee.
    ----------------------------------------- */
 .gc-trust-block {
   position: relative;
   width: 100%;
-  background: #0D0D0D;
-  padding: 3rem 1.25rem 2.25rem;
+  background-color: #F4F3F1;
+  color: #111111;
+  padding: clamp(88px, 11vh, 140px) 0;
   z-index: var(--z-content);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 0;
+  border: none;
+  outline: none;
 }
 .gc-trust-container {
-  max-width: 1080px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
-.gc-trust-numbers {
+.gc-trust-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
-  max-width: 850px;
-  margin-bottom: 2rem;
-  text-align: center;
-  align-items: baseline;
 }
-.gc-trust-stat {
+.gc-trust-stat-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  text-align: left;
 }
-.gc-trust-figure {
-  font-family: var(--font-serif-cards);
-  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
-  font-weight: 500;
-  color: var(--color-white);
+.gc-trust-num {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: clamp(56px, 7vw, 96px);
+  letter-spacing: -0.03em;
+  color: #111111;
   line-height: 1;
-  margin-bottom: 0.35rem;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .gc-trust-label {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(17, 17, 17, 0.5);
+  margin-top: 12px;
 }
-.gc-trust-marquee {
+.gc-trust-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(17, 17, 17, 0.12);
+  margin: 72px 0 32px 0;
+}
+.gc-trust-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.5);
+  margin-bottom: 28px;
+  text-align: left;
+}
+.gc-trust-marquee-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 0.85rem 0;
-  margin-bottom: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.015);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
 .gc-trust-marquee-track {
   display: flex;
   width: max-content;
-  animation: gcTrustMarquee 32s linear infinite;
+  animation: gcTrustMarquee 70s linear infinite;
   will-change: transform;
+}
+.gc-trust-marquee-track:hover {
+  animation-play-state: paused;
 }
 .gc-trust-marquee-group {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  padding-right: 1.5rem;
 }
-.gc-trust-client {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+.gc-trust-brand-item {
+  display: inline-flex;
+  align-items: baseline;
   white-space: nowrap;
-  padding: 0 0.4rem;
 }
-.gc-trust-dot {
-  margin: 0 1.2rem;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.85rem;
+.gc-trust-brand-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.75);
 }
-.gc-trust-caption {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+.gc-trust-brand-sep {
+  margin: 0 0.35rem;
+  color: rgba(17, 17, 17, 0.4);
+}
+.gc-trust-brand-sector {
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.4);
-  text-align: center;
-  margin: 0;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  text-transform: lowercase;
+  color: rgba(17, 17, 17, 0.4);
+}
+.gc-trust-middot {
+  margin: 0 40px;
+  color: rgba(17, 17, 17, 0.25);
+  font-size: 14px;
 }
 
 @keyframes gcTrustMarquee {
@@ -3183,27 +3233,30 @@ body.menu-open .mobile-menu-toggle span {
   to { transform: translateX(-50%); }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .gc-trust-block {
-    padding: 2.25rem 1rem 1.75rem;
+    padding: clamp(60px, 10vh, 88px) 0;
   }
-  .gc-trust-numbers {
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+  .gc-trust-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
-  .gc-trust-figure {
-    font-size: 1.85rem;
+  .gc-trust-num {
+    font-size: clamp(44px, 12vw, 72px);
   }
-  .gc-trust-label {
-    font-size: 0.58rem;
-    letter-spacing: 0.1em;
+  .gc-trust-divider {
+    margin: 48px 0 24px 0;
   }
-  .gc-trust-client {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-trust-marquee-wrapper {
+    overflow-x: auto;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
-  .gc-trust-caption {
-    font-size: 0.68rem;
+  .gc-trust-marquee-track {
+    animation: none;
   }
 }
 
